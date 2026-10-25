@@ -24,6 +24,13 @@ export default function Tb3MerchSales({ report = false }: { report?: boolean }) 
   const [nextOffset, setNextOffset] = useState<number | null>(null);
   const [refresh, setRefresh] = useState(0);
   const [source, setSource] = useState('');
+  const [payments, setPayments] = useState<{
+    verifiedPaidOrderCount: number;
+    grossCollectedCents: number;
+    hasMore: boolean;
+    note: string;
+  } | null>(null);
+  const [paymentsMessage, setPaymentsMessage] = useState('');
 
   function prepareLoad() {
     setLoading(true);
@@ -54,6 +61,25 @@ export default function Tb3MerchSales({ report = false }: { report?: boolean }) 
     return () => controller.abort();
   }, [visible, offset, refresh]);
 
+  useEffect(() => {
+    if (!visible || !report) return;
+    const controller = new AbortController();
+    fetch('/api/tb3/merch/payments', {cache: 'no-store', signal: controller.signal})
+      .then(async response => {
+        if (!response.ok) throw Error('Verified payment report is not available yet.');
+        return response.json();
+      })
+      .then(value => { if (!controller.signal.aborted) {
+        setPayments(value);
+        setPaymentsMessage('');
+      }})
+      .catch(() => { if (!controller.signal.aborted) {
+        setPayments(null);
+        setPaymentsMessage('Verified payment report is not available yet.');
+      }});
+    return () => controller.abort();
+  }, [visible, report, refresh]);
+
   return <section className="ep-panel" aria-label="TB3 merchandise orders">
     <div className="ep-panel-head">
       <h2 className="ep-panel-title">TB3 Printful orders</h2>
@@ -66,7 +92,14 @@ export default function Tb3MerchSales({ report = false }: { report?: boolean }) 
       <button type="button" className="ep-pulse-cta" disabled={loading}
         onClick={() => { prepareLoad(); setRefresh(value => value + 1); }}>Refresh orders</button>
       <p>Fulfillment status and tracking from Printful. Retail totals do not confirm payment, revenue, profits, refunds, or payouts.</p>
-      {report && <p>Verified payment, fees, refunds, taxes, and net payout reconciliation are not available in this report. Do not use these totals as booked revenue.</p>}
+      {report && <>
+        {payments ? <div role="status">
+          <p>Verified paid checkouts (most recent 100 sessions): {payments.verifiedPaidOrderCount}</p>
+          <p>Gross collected: ${(payments.grossCollectedCents / 100).toFixed(2)} USD</p>
+          <p>{payments.note}</p>
+          {payments.hasMore && <p>Older checkout sessions are not included.</p>}
+        </div> : <p role="status">{paymentsMessage || 'Loading verified payment report...'}</p>}
+      </>}
       {loading && <p role="status">Loading private orders...</p>}
       {error && <p role="alert">{error}</p>}
       {!loading && !error && <>
