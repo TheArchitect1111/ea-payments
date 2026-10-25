@@ -47,3 +47,27 @@ export function selectMerchantConnection(
     connection.tenantId === tenantId && connection.provider === provider
   ) ?? null;
 }
+
+/** Customer-facing methods are not merchant processors. */
+export const CUSTOMER_PAYMENT_METHODS = [
+  'card', 'paypal_wallet', 'venmo', 'cash_app_pay', 'ach_bank',
+] as const;
+export type CustomerPaymentMethod = typeof CUSTOMER_PAYMENT_METHODS[number];
+
+export const SUPPORTED_METHODS: Readonly<Record<PaymentProvider, readonly CustomerPaymentMethod[]>> = {
+  paypal: ['card', 'paypal_wallet', 'venmo'],
+  stripe: ['card', 'cash_app_pay', 'ach_bank'],
+};
+
+/** Provider capability availability is account, country and checkout dependent. */
+export function canOfferCustomerMethod(
+  connection: MerchantConnection | null,
+  tenantId: string,
+  method: CustomerPaymentMethod,
+  verifiedEnabledMethods: readonly CustomerPaymentMethod[],
+): boolean {
+  return !!connection &&
+    merchantCanTakePayments(connection, tenantId) &&
+    SUPPORTED_METHODS[connection.provider].includes(method) &&
+    verifiedEnabledMethods.includes(method);
+}
