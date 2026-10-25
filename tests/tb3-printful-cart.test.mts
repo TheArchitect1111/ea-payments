@@ -51,3 +51,11 @@ test('rejects unknown variants, price injection and invalid quantities', () => {
     }))
   ]) assert.throws(() => resolveTb3Cart(value));
 });
+
+
+test('TB3 checkout fails closed without Printful fulfillment credentials', () => {
+  const checkout = readFileSync(new URL('../app/api/tb3/merch/checkout/route.ts', import.meta.url), 'utf8');
+  const webhook = readFileSync(new URL('../app/api/webhooks/stripe-tb3-merch/route.ts', import.meta.url), 'utf8');
+  assert.match(checkout, /const enabled = \(\) =>[\s\S]*?!!process\.env\.PRINTFUL_API_KEY\?\.trim\(\)/);
+  assert.match(webhook, /export async function POST[\s\S]*?!process\.env\.PRINTFUL_API_KEY\?\.trim\(\)/);
+});
