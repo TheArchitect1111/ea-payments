@@ -23,6 +23,7 @@ export default function Tb3MerchSales({ report = false }: { report?: boolean }) 
   const [offset, setOffset] = useState(0);
   const [nextOffset, setNextOffset] = useState<number | null>(null);
   const [refresh, setRefresh] = useState(0);
+  const [source, setSource] = useState('');
 
   function prepareLoad() {
     setLoading(true);
@@ -41,6 +42,7 @@ export default function Tb3MerchSales({ report = false }: { report?: boolean }) 
       const data = await response.json();
       if (!controller.signal.aborted) {
         setOrders(data.orders || []);
+        setSource(data.source === 'printful' ? 'Printful fulfillment records' : 'Unverified order source');
         setNextOffset(data.nextOffset ?? null);
       }
     }).catch(error => {
@@ -63,12 +65,12 @@ export default function Tb3MerchSales({ report = false }: { report?: boolean }) 
     {visible && <div>
       <button type="button" className="ep-pulse-cta" disabled={loading}
         onClick={() => { prepareLoad(); setRefresh(value => value + 1); }}>Refresh orders</button>
-      <p>Fulfillment status and tracking from Printful. Retail totals do not confirm payment or payouts.</p>
-      {report && <p>Payment reconciliation will be available after checkout is connected.</p>}
+      <p>Fulfillment status and tracking from Printful. Retail totals do not confirm payment, revenue, profits, refunds, or payouts.</p>
+      {report && <p>Verified payment, fees, refunds, taxes, and net payout reconciliation are not available in this report. Do not use these totals as booked revenue.</p>}
       {loading && <p role="status">Loading private orders...</p>}
       {error && <p role="alert">{error}</p>}
       {!loading && !error && <>
-        <p>Orders on this page: {orders.length}</p>
+        <p>{source}. Orders on this page: {orders.length}</p>
         <div className="overflow-x-auto">
           <table className="ep-data-table">
             <thead><tr>
