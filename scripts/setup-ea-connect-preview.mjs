@@ -22,7 +22,8 @@ const who=run(['whoami']).trim();
 if(!who)throw new Error('Vercel CLI is not authenticated');
 const rows=[
  ['EA_MERCHANT_DB_URL','https://dwygvwnjjaennksddniu.supabase.co'],
- ['EA_STRIPE_CONNECT_ONBOARDING_ENABLED','false']
+ ['EA_STRIPE_CONNECT_ONBOARDING_ENABLED','false'],
+ ['EA_STRIPE_CONNECT_USE_EXISTING_TEST_KEY','true']
 ];
 for(const [key,value] of rows){
  try{
