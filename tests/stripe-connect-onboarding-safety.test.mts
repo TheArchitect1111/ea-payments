@@ -40,3 +40,8 @@ test('existing Stripe test key fallback is isolated to preview and requires expl
 test('existing mapping cannot onboard non-Standard account',()=>{
   assert.ok(adapter.includes("account.type !== 'standard'"));
 });
+
+test('onboarding configuration rejects live Stripe credentials before attempting provider requests',()=>{
+  assert.ok(api.includes("EA_STRIPE_CONNECT_SECRET_KEY?.startsWith('sk_test_')"));
+  assert.ok(api.includes("STRIPE_TEST_SECRET_KEY?.startsWith('sk_test_')"));
+});
