@@ -16,7 +16,7 @@ Status: **NOT LIVE; do not activate payment collection**.
 3. Perform Stripe Tax registrations/liability and accurate shipping/tax checks, including address and quoted-vs-actual shipment costs; resolve margins and refunds.
 4. Test signed webhooks (including retries, duplicates, missing signature, unpaid sessions), fulfillment drafts, Stripe payment reconciliation, and manual Printful approval. Verify print assets and product availability in Printful.
 5. Test desktop/mobile, public merch landing links from Instagram, TB3 portal access, refund handling, and tracking of real payment vs Printful retail totals.
-6. Test in preview, pass build/CI, then deliberately enable `TB3_MERCH_CHECKOUT_ENABLED=true` and `TB3_MERCH_FULFILLMENT_LEDGER_READY=true` **only after explicit owner approval**. Until then both must remain unset.
+6. Test in preview, pass build/CI, then deliberately enable `TB3_MERCH_CHECKOUT_ENABLED=true` and `TB3_MERCH_DRAFT_FULFILLMENT_APPROVED=true` **only after explicit owner approval**. Until then both must remain unset.
 7. Run a controlled low-value test order, confirm Stripe payment, inspect corresponding Printful draft, manually approve production, and capture delivery tracking. Avoid production activation if any stage fails.
 
 ## Safety boundary
