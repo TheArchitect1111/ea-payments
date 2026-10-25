@@ -36,9 +36,9 @@ export async function startStripeOnboarding(input: {
   const stripe = platformStripe();
   let accountId = await store.get(tenantId);
   if (!accountId) {
-    // Express onboarding: owner enters bank and verification information on Stripe.
+    // Standard onboarding: merchant owns Stripe dashboard and bank relationship.
     const created = await stripe.accounts.create({
-      type: 'express',
+      type: 'standard',
       country: 'US',
       email: ownerEmail,
       capabilities: { transfers: { requested: true }, card_payments: { requested: true } },
@@ -76,11 +76,13 @@ export async function getStripeMerchantStatus(
   const payoutsEnabled = account.payouts_enabled ?? false;
   const pending = (account.requirements?.currently_due?.length ?? 0) > 0
     || (account.requirements?.past_due?.length ?? 0) > 0;
+  const restricted = account.requirements?.disabled_reason != null;
   return {
     tenantId, provider: 'stripe',
-    status: chargesEnabled && payoutsEnabled && !pending && account.details_submitted
-      ? 'ready'
-      : pending ? 'verification_required' : 'pending_provider',
+    status: restricted ? 'restricted'
+      : chargesEnabled && payoutsEnabled && !pending && account.details_submitted
+        ? 'ready'
+        : pending ? 'verification_required' : 'pending_provider',
     providerMerchantReference: accountId,
     // A live API read is a verification, never infer readiness from a return redirect.
     verifiedAt: new Date().toISOString(),
