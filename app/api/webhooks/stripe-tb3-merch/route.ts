@@ -98,7 +98,7 @@ async function fulfill(session: Stripe.Checkout.Session) {
 
 export async function POST(req: NextRequest) {
   if (process.env.TB3_MERCH_CHECKOUT_ENABLED !== 'true' ||
-      process.env.TB3_MERCH_FULFILLMENT_LEDGER_READY !== 'true' ||
+      process.env.TB3_MERCH_DRAFT_FULFILLMENT_APPROVED !== 'true' ||
       !process.env.TB3_STRIPE_SECRET_KEY ||
       !process.env.TB3_STRIPE_WEBHOOK_SECRET)
     return NextResponse.json({error: 'TB3 payment handling unavailable.'}, {status: 503});
