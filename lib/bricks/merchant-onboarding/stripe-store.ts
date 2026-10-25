@@ -1,36 +1,44 @@
 import 'server-only';
-
+import { Client } from 'pg';
 import type { ConnectedAccountStore } from './stripe-connect';
 
-type AccountRow = { tenant_id: string; stripe_account_id: string };
-async function merchantRest(path: string, init: RequestInit & {prefer?: string} = {}): Promise<AccountRow[]> {
-  const url = process.env.EA_MERCHANT_DB_URL?.trim().replace(/\/$/, '');
-  const key = process.env.EA_MERCHANT_DB_SERVICE_KEY?.trim();
-  if (!url || !key || !/^https:\/\//.test(url)) throw new Error('Dedicated merchant database not configured');
-  const headers = new Headers(init.headers);
-  headers.set('apikey',key);
-  headers.set('Authorization','Bearer '+key);
-  headers.set('Content-Type','application/json');
-  headers.set('Cache-Control','no-store');
-  if(init.prefer) headers.set('Prefer',init.prefer);
-  const result = await fetch(url+'/rest/v1/'+path,{...init,headers,cache:'no-store'});
-  if(!result.ok) throw new Error('Merchant registry unavailable');
-  return await result.json() as AccountRow[];
+type AccountRow = { stripe_account_id: string };
+function getMerchantConfig() {
+  const raw = process.env.EA_MERCHANT_DATABASE_URL;
+  if (!raw) throw new Error('Restricted merchant database not configured');
+  const url = new URL(raw);
+  if (url.protocol !== 'postgresql:' && url.protocol !== 'postgres:') throw new Error('Invalid merchant database protocol');
+  if (url.username !== 'ea_merchant_api' && !url.username.startsWith('ea_merchant_api.')) throw new Error('Merchant DB must use restricted account');
+  if (!url.hostname.endsWith('.supabase.com')) throw new Error('Unexpected merchant database hostname');
+  if (url.searchParams.get('sslmode') === 'disable') throw new Error('Merchant DB TLS is required');
+  return raw;
 }
-/** Server-only atomic tenant merchant mapping; requires private table and service key. */
+async function withMerchantDb<T>(fn:(client:Client)=>Promise<T>):Promise<T> {
+  const client=new Client({connectionString:getMerchantConfig(),ssl:{rejectUnauthorized:true},connectionTimeoutMillis:5000,query_timeout:8000,statement_timeout:8000});
+  await client.connect();
+  try { return await fn(client); } finally { await client.end(); }
+}
+/** Restricted database account; no REST service_role key or shared database fallback. */
 export const stripeMerchantStore: ConnectedAccountStore = {
   async get(tenantId) {
-    const q = new URLSearchParams({tenant_id:'eq.'+tenantId,select:'stripe_account_id',limit:'1'});
-    const rows = await merchantRest('ea_merchant_connections?'+q.toString());
-    return rows[0]?.stripe_account_id ?? null;
+    return withMerchantDb(async client => {
+      const found=await client.query<AccountRow>(
+        'SELECT stripe_account_id FROM public.ea_merchant_connections WHERE tenant_id=$1 LIMIT 1',
+        [tenantId]);
+      return found.rows[0]?.stripe_account_id ?? null;
+    });
   },
   async putIfAbsent(tenantId,stripeAccountId) {
-    const rows = await merchantRest('ea_merchant_connections', {
-      method:'POST', prefer:'resolution=ignore-duplicates,return=representation',
-      body:JSON.stringify({tenant_id:tenantId,stripe_account_id:stripeAccountId}),
+    return withMerchantDb(async client => {
+      const found=await client.query<AccountRow>(
+        'INSERT INTO public.ea_merchant_connections (tenant_id,stripe_account_id) VALUES ($1,$2) ON CONFLICT (tenant_id) DO NOTHING RETURNING stripe_account_id',
+        [tenantId,stripeAccountId]);
+      if (found.rows[0]) return found.rows[0].stripe_account_id;
+      const existing=await client.query<AccountRow>(
+        'SELECT stripe_account_id FROM public.ea_merchant_connections WHERE tenant_id=$1 LIMIT 1',
+        [tenantId]);
+      if (!existing.rows[0]) throw new Error('Merchant registry write unconfirmed');
+      return existing.rows[0].stripe_account_id;
     });
-    const saved = rows[0]?.stripe_account_id ?? await this.get(tenantId);
-    if (!saved) throw new Error('Merchant registry write unconfirmed');
-    return saved;
   },
 };
