@@ -76,8 +76,8 @@ export async function getStripeMerchantStatus(
   };
   if (!accountId) return empty;
   const account = await platformStripe().accounts.retrieve(accountId);
-  if (account.metadata?.ea_tenant_id !== tenantId)
-    throw new Error('Connected account tenant mismatch');
+  if (account.metadata?.ea_tenant_id !== tenantId || account.type !== 'standard')
+    throw new Error('Connected account tenant or type mismatch');
   const chargesEnabled = account.charges_enabled ?? false;
   const payoutsEnabled = account.payouts_enabled ?? false;
   const pending = (account.requirements?.currently_due?.length ?? 0) > 0
