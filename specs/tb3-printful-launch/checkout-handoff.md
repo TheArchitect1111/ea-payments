@@ -19,6 +19,9 @@ Status: **NOT LIVE; do not activate payment collection**.
 6. Test in preview, pass build/CI, then deliberately enable `TB3_MERCH_CHECKOUT_ENABLED=true` and `TB3_MERCH_DRAFT_FULFILLMENT_APPROVED=true` **only after explicit owner approval**. Until then both must remain unset.
 7. Run a controlled low-value test order, confirm Stripe payment, inspect corresponding Printful draft, manually approve production, and capture delivery tracking. Avoid production activation if any stage fails.
 
+## Gallery decision
+- Owner-approved final gallery: Drive (video), Defense (video), Scoreboard (photo). Putback is omitted. Deprecated Dunk and Jumbotron clips are removed from the gallery.
+
 ## Safety boundary
 - Existing /api/checkout/tarris-bouie is the unrelated $500 EA deposit.
 - The shared Stripe webhook and Amanda payments are untouched.
