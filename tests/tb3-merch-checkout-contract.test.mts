@@ -10,7 +10,7 @@ const existingDeposit = read('app/api/checkout/tarris-bouie/route.ts');
 test('TB3 checkout is isolated from EA payments and fail-closed', () => {
   assert.match(checkout, /TB3_STRIPE_SECRET_KEY/);
   assert.match(checkout, /TB3_STRIPE_WEBHOOK_SECRET/);
-  assert.match(checkout, /TB3_MERCH_FULFILLMENT_LEDGER_READY/);
+  assert.match(checkout, /TB3_MERCH_DRAFT_FULFILLMENT_APPROVED/);
   assert.doesNotMatch(checkout, /process\.env\.STRIPE_SECRET_KEY/);
   assert.match(checkout, /if \(!enabled\(\)\)/);
 });
