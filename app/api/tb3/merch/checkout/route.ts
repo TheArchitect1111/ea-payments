@@ -31,6 +31,12 @@ const schema = z.object({
 
 type ShippingRate = { id: string; name: string; rate: string; currency: string };
 
+export async function GET() {
+  return NextResponse.json({available: enabled()}, {
+    headers: {'Cache-Control': 'no-store'},
+  });
+}
+
 export async function POST(req: NextRequest) {
   const reply = (payload: unknown, status = 200) =>
     NextResponse.json(payload, {status, headers: {'Cache-Control': 'no-store'}});
