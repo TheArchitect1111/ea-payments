@@ -25,8 +25,7 @@ const configured = () => process.env.EA_STRIPE_CONNECT_ONBOARDING_ENABLED === 't
        (process.env.STRIPE_TEST_SECRET_KEY?.startsWith('sk_test_') ?? false)))
   && (!!process.env.EA_STRIPE_CONNECT_PORTAL_ORIGIN ||
       (process.env.VERCEL_ENV === 'preview' && !!process.env.VERCEL_URL))
-  && !!process.env.EA_MERCHANT_DB_URL
-  && !!process.env.EA_MERCHANT_DB_SERVICE_KEY;
+  && !!process.env.EA_MERCHANT_DATABASE_URL;
 
 export async function GET(_req: NextRequest,{params}:{params:Promise<{slug:string}>}) {
   const {slug} = await params;
