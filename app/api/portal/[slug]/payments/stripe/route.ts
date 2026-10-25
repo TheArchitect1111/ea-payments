@@ -19,7 +19,10 @@ async function authorize(slug: string) {
   return session;
 }
 const configured = () => process.env.EA_STRIPE_CONNECT_ONBOARDING_ENABLED === 'true'
-  && !!process.env.EA_STRIPE_CONNECT_SECRET_KEY
+  && (Boolean(process.env.EA_STRIPE_CONNECT_SECRET_KEY) ||
+      (process.env.VERCEL_ENV === 'preview' &&
+       process.env.EA_STRIPE_CONNECT_USE_EXISTING_TEST_KEY === 'true' &&
+       Boolean(process.env.STRIPE_TEST_SECRET_KEY)))
   && !!process.env.EA_STRIPE_CONNECT_PORTAL_ORIGIN
   && !!process.env.EA_MERCHANT_DB_URL
   && !!process.env.EA_MERCHANT_DB_SERVICE_KEY;
