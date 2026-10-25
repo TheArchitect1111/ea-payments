@@ -32,3 +32,19 @@ test('EA agreement deposit remains separate from merchandise', () => {
   assert.match(existingDeposit, /Tarris Bouie Project Deposit/);
   assert.match(existingDeposit, /unit_amount: 50000/);
 });
+
+const webhook = read('app/api/webhooks/stripe-tb3-merch/route.ts');
+test('TB3 webhook verifies signature and paid status independently', () => {
+  assert.match(webhook, /constructEvent\(/);
+  assert.match(webhook, /payment_status !== 'paid'/);
+  assert.match(webhook, /stripe\.checkout\.sessions\.retrieve/);
+  assert.match(webhook, /TB3_STRIPE_WEBHOOK_SECRET/);
+  assert.doesNotMatch(webhook, /getStripe\(/);
+});
+test('Printful drafts use stable unique identity and are never auto-confirmed', () => {
+  assert.match(webhook, /createHash\('sha256'\)/);
+  assert.match(webhook, /\/orders\?confirm=false/);
+  assert.match(webhook, /sync_variant_id/);
+  assert.match(webhook, /order\.external_id !== id/);
+  assert.doesNotMatch(webhook, /\/orders\/.*\/confirm/);
+});
