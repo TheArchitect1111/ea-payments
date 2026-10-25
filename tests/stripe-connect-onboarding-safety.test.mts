@@ -29,3 +29,10 @@ test('merchant store never falls back to shared People or Simplifi databases',()
   assert.ok(store.includes('EA_MERCHANT_DB_SERVICE_KEY'));
   assert.doesNotMatch(store,/SUPABASE_URL|SUPABASE_SERVICE_ROLE_KEY|simplifi-os/);
 });
+
+test('existing Stripe test key fallback is isolated to preview and requires explicit opt-in',()=>{
+  assert.ok(adapter.includes("process.env.VERCEL_ENV === 'preview'"));
+  assert.ok(adapter.includes("EA_STRIPE_CONNECT_USE_EXISTING_TEST_KEY === 'true'"));
+  assert.ok(adapter.includes("key.startsWith('sk_test_')"));
+  assert.ok(api.includes("EA_STRIPE_CONNECT_USE_EXISTING_TEST_KEY === 'true'"));
+});
