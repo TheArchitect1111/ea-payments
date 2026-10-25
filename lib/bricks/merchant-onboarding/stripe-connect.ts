@@ -1,0 +1,89 @@
+import 'server-only';
+import Stripe from 'stripe';
+import type { MerchantConnection } from './contract';
+
+/**
+ * Stripe Connect host-side adapter. Caller MUST independently authorize the
+ * authenticated portal owner and retrieve a tenant-scoped durable account ID.
+ * This adapter does not create a merchant account implicitly on GET.
+ */
+export type ConnectedAccountStore = {
+  get(tenantId: string): Promise<string | null>;
+  putIfAbsent(tenantId: string, stripeAccountId: string): Promise<string>;
+};
+
+function platformStripe() {
+  const key = process.env.EA_STRIPE_CONNECT_SECRET_KEY;
+  if (!key) throw new Error('Stripe Connect platform is not configured');
+  return new Stripe(key);
+}
+
+export async function startStripeOnboarding(input: {
+  tenantId: string;
+  ownerEmail: string;
+  returnUrl: string;
+  refreshUrl: string;
+  store: ConnectedAccountStore;
+}): Promise<{ accountId: string; url: string }> {
+  const { tenantId, ownerEmail, returnUrl, refreshUrl, store } = input;
+  if (!/^[a-z0-9][a-z0-9-_]{1,100}$/i.test(tenantId)) throw new Error('Invalid tenant');
+  if (!ownerEmail.includes('@')) throw new Error('Invalid owner');
+  for (const value of [returnUrl, refreshUrl]) {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || url.origin !== process.env.EA_STRIPE_CONNECT_PORTAL_ORIGIN)
+      throw new Error('Untrusted return URL');
+  }
+  const stripe = platformStripe();
+  let accountId = await store.get(tenantId);
+  if (!accountId) {
+    // Express onboarding: owner enters bank and verification information on Stripe.
+    const created = await stripe.accounts.create({
+      type: 'express',
+      country: 'US',
+      email: ownerEmail,
+      capabilities: { transfers: { requested: true }, card_payments: { requested: true } },
+      metadata: { ea_tenant_id: tenantId },
+    }, { idempotencyKey: 'ea-connect-create-' + tenantId });
+    // Atomic insert prevents reassignment in concurrent requests.
+    accountId = await store.putIfAbsent(tenantId, created.id);
+    if (accountId !== created.id) throw new Error('Concurrent account mapping changed; retry onboarding');
+  }
+  const account = await stripe.accounts.retrieve(accountId);
+  if (account.metadata?.ea_tenant_id !== tenantId)
+    throw new Error('Connected account tenant mismatch');
+  const link = await stripe.accountLinks.create({
+    account: accountId, type: 'account_onboarding',
+    refresh_url: refreshUrl, return_url: returnUrl,
+  });
+  return { accountId, url: link.url };
+}
+
+export async function getStripeMerchantStatus(
+  tenantId: string,
+  store: Pick<ConnectedAccountStore, 'get'>,
+): Promise<MerchantConnection> {
+  const accountId = await store.get(tenantId);
+  const empty: MerchantConnection = {
+    tenantId, provider: 'stripe', status: 'not_connected',
+    providerMerchantReference: null, verifiedAt: null,
+    chargesEnabled: false, payoutsEnabled: false,
+  };
+  if (!accountId) return empty;
+  const account = await platformStripe().accounts.retrieve(accountId);
+  if (account.metadata?.ea_tenant_id !== tenantId)
+    throw new Error('Connected account tenant mismatch');
+  const chargesEnabled = account.charges_enabled ?? false;
+  const payoutsEnabled = account.payouts_enabled ?? false;
+  const pending = (account.requirements?.currently_due?.length ?? 0) > 0
+    || (account.requirements?.past_due?.length ?? 0) > 0;
+  return {
+    tenantId, provider: 'stripe',
+    status: chargesEnabled && payoutsEnabled && !pending && account.details_submitted
+      ? 'ready'
+      : pending ? 'verification_required' : 'pending_provider',
+    providerMerchantReference: accountId,
+    // A live API read is a verification, never infer readiness from a return redirect.
+    verifiedAt: new Date().toISOString(),
+    chargesEnabled, payoutsEnabled,
+  };
+}
