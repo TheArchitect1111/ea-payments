@@ -30,9 +30,13 @@ export async function startStripeOnboarding(input: {
   const { tenantId, ownerEmail, returnUrl, refreshUrl, store } = input;
   if (!/^[a-z0-9][a-z0-9-_]{1,100}$/i.test(tenantId)) throw new Error('Invalid tenant');
   if (!ownerEmail.includes('@')) throw new Error('Invalid owner');
+  const trustedOrigin = process.env.EA_STRIPE_CONNECT_PORTAL_ORIGIN ||
+    (process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL
+      ? 'https://' + process.env.VERCEL_URL : undefined);
+  if (!trustedOrigin) throw new Error('Trusted portal origin not configured');
   for (const value of [returnUrl, refreshUrl]) {
     const url = new URL(value);
-    if (url.protocol !== 'https:' || url.origin !== process.env.EA_STRIPE_CONNECT_PORTAL_ORIGIN)
+    if (url.protocol !== 'https:' || url.origin !== trustedOrigin)
       throw new Error('Untrusted return URL');
   }
   const stripe = platformStripe();
