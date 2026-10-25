@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-// TB3-only verified collection: four distinct videos and one static scoreboard photograph.
+// TB3-only verified collection: two approved videos and one static scoreboard photograph.
 export type Tb3FilmAsset = {
   id: string;
   title: string;
@@ -13,8 +13,6 @@ export type Tb3FilmAsset = {
   type: "video" | "photo";
 };
 export const tb3FilmAssets: Tb3FilmAsset[] = [
-  { id: "TB3-FILM-001", title: "FILM 01 - DUNK", filename: "TB3-FILM-001-DUNK-HD.mp4", poster: "/videos/tb3-film/TB3-FILM-001-poster.webp", category: "Athlete", subcategory: "Film", type: "video" },
-  { id: "TB3-FILM-002", title: "FILM 02 - JUMBOTRON 18/8/3", filename: "TB3-FILM-002-JUMBOTRON-18-8-3-HD.mp4", poster: "/videos/tb3-film/TB3-FILM-005-SCOREBOARD-PROOF.jpg", category: "Athlete", subcategory: "Film", type: "video" },
   { id: "TB3-FILM-003", title: "FILM 03 - DRIVE", filename: "TB3-FILM-003-DRIVE-FINISH-HD.mp4", poster: "/videos/tb3-film/TB3-FILM-003-poster.webp", category: "Athlete", subcategory: "Film", type: "video" },
   { id: "TB3-FILM-004", title: "FILM 04 - DEFENSE", filename: "TB3-FILM-004-DEFENSE-BATTLE-HD.mp4", poster: "/videos/tb3-film/TB3-FILM-004-poster.webp", category: "Athlete", subcategory: "Film", type: "video" },
   { id: "TB3-FILM-005", title: "SCOREBOARD PROOF - 18/8/3/1", filename: "TB3-FILM-005-SCOREBOARD-PROOF.jpg", poster: "/videos/tb3-film/TB3-FILM-005-poster.webp", category: "Athlete", subcategory: "Film", type: "photo" },
