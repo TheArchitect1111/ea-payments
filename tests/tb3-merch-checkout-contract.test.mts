@@ -48,3 +48,19 @@ test('Printful drafts use stable unique identity and are never auto-confirmed', 
   assert.match(webhook, /order\.external_id !== id/);
   assert.doesNotMatch(webhook, /\/orders\/.*\/confirm/);
 });
+
+const payments = read('app/api/tb3/merch/payments/route.ts');
+const sales = read('app/portal/components/Tb3MerchSales.tsx');
+test('TB3 Stripe report requires staff authorization and private credentials', () => {
+  assert.match(payments, /authorize\(req, true\)/);
+  assert.match(payments, /TB3_STRIPE_SECRET_KEY/);
+  assert.match(payments, /payment_status === 'paid'/);
+  assert.match(payments, /metadata\?\.type === 'tb3_merch'/);
+  assert.match(payments, /hasMore: response.has_more/);
+  assert.doesNotMatch(payments, /process\.env\.STRIPE_SECRET_KEY/);
+});
+test('Portal differentiates Printful fulfillment totals from verified gross', () => {
+  assert.match(sales, /api\/tb3\/merch\/payments/);
+  assert.match(sales, /Gross collected:/);
+  assert.match(sales, /Retail totals do not confirm payment/);
+});
