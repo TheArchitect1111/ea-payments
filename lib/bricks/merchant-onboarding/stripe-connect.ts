@@ -55,8 +55,8 @@ export async function startStripeOnboarding(input: {
     if (accountId !== created.id) throw new Error('Concurrent account mapping changed; retry onboarding');
   }
   const account = await stripe.accounts.retrieve(accountId);
-  if (account.metadata?.ea_tenant_id !== tenantId)
-    throw new Error('Connected account tenant mismatch');
+  if (account.metadata?.ea_tenant_id !== tenantId || account.type !== 'standard')
+    throw new Error('Connected account tenant or type mismatch');
   const link = await stripe.accountLinks.create({
     account: accountId, type: 'account_onboarding',
     refresh_url: refreshUrl, return_url: returnUrl,
