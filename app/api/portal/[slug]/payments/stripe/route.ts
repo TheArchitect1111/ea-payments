@@ -21,8 +21,8 @@ async function authorize(slug: string) {
 const configured = () => process.env.EA_STRIPE_CONNECT_ONBOARDING_ENABLED === 'true'
   && !!process.env.EA_STRIPE_CONNECT_SECRET_KEY
   && !!process.env.EA_STRIPE_CONNECT_PORTAL_ORIGIN
-  && !!process.env.SUPABASE_URL
-  && !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+  && !!process.env.EA_MERCHANT_DB_URL
+  && !!process.env.EA_MERCHANT_DB_SERVICE_KEY;
 
 export async function GET(_req: NextRequest,{params}:{params:Promise<{slug:string}>}) {
   const {slug} = await params;
