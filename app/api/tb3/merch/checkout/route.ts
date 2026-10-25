@@ -71,12 +71,35 @@ export async function POST(req: NextRequest) {
       return reply({error: 'Shipping could not be calculated.'}, 503);
 
     const stripe = new Stripe(process.env.TB3_STRIPE_SECRET_KEY!);
-    // The address is fixed by the customer form and must be the same
-    // address used for Printful; do not enable Stripe address editing here.
+    // Prepopulate the same verified destination for Stripe Tax and Printful.
+    // No changes to the delivery address during Stripe Checkout.
+    const customer = await stripe.customers.create({
+      email: input.email,
+      name: input.recipient.name,
+      address: {
+        line1: input.recipient.address1,
+        line2: input.recipient.address2,
+        city: input.recipient.city,
+        state: input.recipient.state_code,
+        country: input.recipient.country_code,
+        postal_code: input.recipient.zip,
+      },
+      shipping: {
+        name: input.recipient.name,
+        address: {
+          line1: input.recipient.address1,
+          line2: input.recipient.address2,
+          city: input.recipient.city,
+          state: input.recipient.state_code,
+          country: input.recipient.country_code,
+          postal_code: input.recipient.zip,
+        },
+      },
+    });
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
-      customer_email: input.email,
+      customer: customer.id,
       line_items: lines.map(line => ({
         quantity: line.quantity,
         price_data: {
