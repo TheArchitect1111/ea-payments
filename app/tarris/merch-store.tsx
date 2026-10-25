@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import catalog from '../../public/tb3/merch/manifest.json';
 
 type Product = (typeof catalog)[number];
@@ -37,6 +37,39 @@ function ProductCard({ product, index, add }: {
 export function Tb3MerchStore() {
   const [cart, setCart] = useState<Line[]>([]);
   const [message, setMessage] = useState('');
+  const [checkoutAvailable, setCheckoutAvailable] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [email, setEmail] = useState('');
+  const [recipient, setRecipient] = useState({
+    name: '', address1: '', address2: '', city: '',
+    state_code: '', country_code: 'US' as const, zip: '',
+  });
+  useEffect(() => {
+    fetch('/api/tb3/merch/checkout', {cache: 'no-store'})
+      .then(res => res.ok ? res.json() : {available: false})
+      .then(data => setCheckoutAvailable(data.available === true))
+      .catch(() => setCheckoutAvailable(false));
+  }, []);
+  async function beginCheckout() {
+    if (!count || processing) return;
+    setProcessing(true);
+    setMessage('Checking secure shipping and payment...');
+    try {
+      const response = await fetch('/api/tb3/merch/checkout', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({cart, email, recipient}),
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.url ||
+          new URL(payload.url).hostname !== 'checkout.stripe.com')
+        throw new Error(payload.error || 'Checkout unavailable.');
+      window.location.assign(payload.url);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Checkout unavailable.');
+      setProcessing(false);
+    }
+  }
   const lines = cart.map(line => {
     const product = catalog.find(p => p.variants.some(v => v.id === line.variantId))!;
     const variant = product.variants.find(v => v.id === line.variantId)!;
@@ -82,6 +115,41 @@ export function Tb3MerchStore() {
       {count > 0 && <p className="mt-4 font-bold">
         Subtotal: ${(subtotal / 100).toFixed(2)} USD
       </p>}
+      {count > 0 && (checkoutAvailable
+        ? <form className="mt-5 grid max-w-lg gap-3" onSubmit={event => {
+            event.preventDefault();
+            void beginCheckout();
+          }}>
+            <p className="text-sm">Enter your U.S. delivery address for a live shipping quote and secure checkout. Final tax appears at checkout.</p>
+            <label className="text-xs">Email
+              <input required type="email" autoComplete="email" className="mt-1 block w-full border p-3"
+                value={email} onChange={event => setEmail(event.target.value)} />
+            </label>
+            {([
+              ['name','Full name','name'],
+              ['address1','Street address','address-line1'],
+              ['address2','Apartment / suite','address-line2'],
+              ['city','City','address-level2'],
+              ['state_code','State (two letters)','address-level1'],
+              ['zip','ZIP code','postal-code'],
+            ] as const).map(([field,title,completion]) =>
+              <label key={field} className="text-xs">{title}
+                <input required={field !== 'address2'} className="mt-1 block w-full border p-3"
+                  autoComplete={completion} value={recipient[field]}
+                  maxLength={field === 'state_code' ? 2 : 150}
+                  onChange={event => setRecipient(current => ({
+                    ...current, [field]: field === 'state_code'
+                      ? event.target.value.toUpperCase() : event.target.value,
+                  }))} />
+              </label>)}
+            <button disabled={processing} type="submit"
+              className="min-h-11 bg-[#A51C30] p-3 font-bold text-white disabled:opacity-50">
+              {processing ? 'Preparing checkout...' : 'Secure checkout'}
+            </button>
+          </form>
+        : <p className="mt-5 text-sm" role="status">
+            Online checkout is being connected. Products can be viewed, but orders are not yet being accepted.
+          </p>)}
     </section>
   </>;
 }
