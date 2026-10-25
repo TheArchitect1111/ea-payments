@@ -11,7 +11,13 @@ function getMerchantConfig() {
   if (url.username !== 'ea_merchant_api' && !url.username.startsWith('ea_merchant_api.')) throw new Error('Merchant DB must use restricted account');
   if (!url.hostname.endsWith('.supabase.com')) throw new Error('Unexpected merchant database hostname');
   if (url.searchParams.get('sslmode') === 'disable') throw new Error('Merchant DB TLS is required');
-  return raw;
+  // pg connection-string sslmode settings can silently replace explicit TLS verification.
+  // Force our server-side rejectUnauthorized configuration to take precedence.
+  url.searchParams.delete('sslmode');
+  url.searchParams.delete('sslrootcert');
+  url.searchParams.delete('sslcert');
+  url.searchParams.delete('sslkey');
+  return url.toString();
 }
 async function withMerchantDb<T>(fn:(client:Client)=>Promise<T>):Promise<T> {
   const client=new Client({connectionString:getMerchantConfig(),ssl:{rejectUnauthorized:true},connectionTimeoutMillis:5000,query_timeout:8000,statement_timeout:8000});
