@@ -13,8 +13,10 @@ export type ConnectedAccountStore = {
 };
 
 function platformStripe() {
-  const key = process.env.EA_STRIPE_CONNECT_SECRET_KEY;
-  if (!key) throw new Error('Stripe Connect platform is not configured');
+  const key = process.env.EA_STRIPE_CONNECT_SECRET_KEY ||
+    (process.env.VERCEL_ENV === 'preview' && process.env.EA_STRIPE_CONNECT_USE_EXISTING_TEST_KEY === 'true'
+      ? process.env.STRIPE_TEST_SECRET_KEY : undefined);
+  if (!key || !key.startsWith('sk_test_')) throw new Error('Stripe Connect sandbox is not configured');
   return new Stripe(key);
 }
 
