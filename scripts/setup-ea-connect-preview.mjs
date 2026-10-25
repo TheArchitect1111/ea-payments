@@ -31,8 +31,12 @@ for(const [key,value] of rows){
   run(['env','add',key,'preview',branch],value+'\n');
   console.log('Added '+key+' to isolated preview branch');
  }catch(error){
-  console.error('Could not add '+key+'. Check whether it already exists in Vercel. '+error.message);
-  process.exitCode=1;
+  if(/already exists|already been added|duplicate/i.test(error.message)) {
+   console.log('Existing '+key+' left unchanged');
+  } else {
+   console.error('Could not add '+key+'. '+error.message);
+   process.exitCode=1;
+  }
  }
 }
 console.log('Live payment activation remains disabled. Secret credentials were not read or written.');
