@@ -120,6 +120,7 @@ export async function POST(req: NextRequest) {
         destination: JSON.stringify(input.recipient),
         variant_quantities: JSON.stringify(lines.map(x => [x.variantId, x.quantity])),
         fulfillment: 'pending_verified_webhook',
+        printful_shipping: shipping.id,
       },
       success_url: 'https://tb3.online/tarris?merch_checkout=success#merch',
       cancel_url: 'https://tb3.online/tarris?merch_checkout=cancelled#merch',
