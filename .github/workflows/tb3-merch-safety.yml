@@ -6,7 +6,7 @@ on:
       - 'app/portal/components/Tb3MerchSales.tsx'
       - 'app/api/tb3/merch/**'
       - 'app/api/webhooks/stripe-tb3-merch/**'
-      - 'lib/tb3/merch-cart.ts'
+      - 'lib/tb3/**'
       - 'tests/tb3-**'
       - 'playwright.tb3.config.ts'
       - 'tests/merchant-onboarding-contract.test.mts'
