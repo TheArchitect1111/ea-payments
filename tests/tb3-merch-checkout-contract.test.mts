@@ -56,12 +56,18 @@ test('TB3 paid checkout must reconcile with trusted catalog before Printful draf
   assert.match(webhook, /TB3 Stripe payment does not match server catalog totals/);
 });
 
-test('Printful drafts use stable unique identity and are never auto-confirmed', () => {
+test('Printful drafts use stable identity and confirm only when authorized and within cost ceiling', () => {
   assert.match(webhook, /createHash\('sha256'\)/);
   assert.match(webhook, /\/orders\?confirm=false/);
   assert.match(webhook, /sync_variant_id/);
   assert.match(webhook, /order\.external_id !== id/);
-  assert.doesNotMatch(webhook, /\/orders\/.*\/confirm/);
+  assert.match(webhook, /TB3_MERCH_AUTO_FULFILLMENT_APPROVED/);
+  assert.match(webhook, /TB3_PRINTFUL_FUNDING_VERIFIED/);
+  assert.match(webhook, /TB3_MERCH_MAX_PRINTFUL_COST_CENTS/);
+  assert.match(webhook, /costCents > cap/);
+  assert.match(webhook, /costCents >= expectedSubtotalCents/);
+  assert.match(webhook, /process.env.VERCEL_ENV === 'production'/);
+  assert.match(webhook, /'\/orders\/' \+ order.id \+ '\/confirm'/);
 });
 
 const payments = read('app/api/tb3/merch/payments/route.ts');
