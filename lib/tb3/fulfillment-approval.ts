@@ -16,7 +16,7 @@ export function canConfirmTb3PrintfulOrder(x: FulfillmentApproval): boolean {
       typeof x.cost !== 'string' && typeof x.cost !== 'number') return false;
   const raw = typeof x.cost === 'number' ? String(x.cost) : x.cost;
   // Reject exponent notation, negatives and fractions of a cent.
-  if (!/^(?:0|[1-9]\\d*)(?:\\.\\d{1,2})?$/.test(raw)) return false;
+  if (!/^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/.test(raw)) return false;
   const [dollars, fraction = ''] = raw.split('.');
   const costCents = Number(dollars) * 100 + Number(fraction.padEnd(2,'0'));
   return Number.isSafeInteger(costCents) && costCents > 0 &&
