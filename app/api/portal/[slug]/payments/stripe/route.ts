@@ -1,6 +1,5 @@
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { requireTb3MerchantSession } from '@/lib/tb3/merchant-access';
 import { getStripeMerchantStatus, startStripeOnboarding } from '@/lib/bricks/merchant-onboarding/stripe-connect';
 import { stripeMerchantStore } from '@/lib/bricks/merchant-onboarding/stripe-store';
 
@@ -11,12 +10,8 @@ const respond = (payload: unknown, status = 200) =>
 
 async function authorize(slug: string) {
   if (!/^[a-z0-9][a-z0-9_-]{1,100}$/i.test(slug)) return null;
-  const jar = await cookies();
-  const sessionToken = jar.get(EA_PORTAL_COOKIE)?.value;
-  const session = sessionToken ? await verifySession(sessionToken) : null;
-  if (!session || session.slug !== slug || !['owner','admin'].includes(session.role ?? '')
-      || !session.email) return null;
-  return session;
+  if (slug !== 'tarris') return null;
+  return requireTb3MerchantSession();
 }
 const configured = () => process.env.EA_STRIPE_CONNECT_ONBOARDING_ENABLED === 'true'
   && ((process.env.EA_STRIPE_CONNECT_SECRET_KEY?.startsWith(
