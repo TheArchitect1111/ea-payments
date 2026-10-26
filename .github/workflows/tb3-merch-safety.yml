@@ -44,7 +44,7 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: npx playwright install chromium --with-deps
+      - run: npx playwright install chromium --only-shell
       - name: Real Chromium storefront and mobile cart tests, no payment
         run: npx playwright test --config=playwright.tb3.config.ts
       - uses: actions/upload-artifact@v4
