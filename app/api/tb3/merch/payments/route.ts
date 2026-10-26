@@ -20,6 +20,19 @@ export async function GET(req: NextRequest) {
       session.metadata?.type === 'tb3_merch' && session.metadata?.tenant_id === 'tarris' &&
       session.mode === 'payment' && session.payment_status === 'paid' &&
       session.currency === 'usd' && typeof session.amount_total === 'number');
+    const paymentDetails = await Promise.all(paid.map(async session => {
+      if (typeof session.payment_intent !== 'string') return null;
+      const intent = await stripe.paymentIntents.retrieve(session.payment_intent,
+        {expand: ['latest_charge.balance_transaction']}, {stripeAccount: accountId});
+      const charge = intent.latest_charge;
+      if (!charge || typeof charge === 'string' || charge.refunded ||
+          (charge.amount_refunded ?? 0) > 0 || charge.disputed) return null;
+      const balance = charge.balance_transaction;
+      if (!balance || typeof balance === 'string' || balance.currency !== 'usd') return null;
+      return {reference: session.id, stripeFeeCents: balance.fee,
+        stripeNetCents: balance.net, chargeStatus: charge.status};
+    }));
+    const fullyReconciled = !response.has_more && paymentDetails.every(x => x !== null);
     return json({
       currency: 'USD',
       source: 'tb3-stripe',
@@ -27,7 +40,10 @@ export async function GET(req: NextRequest) {
       hasMore: response.has_more,
       grossCollectedCents: paid.reduce((sum, session) => sum + session.amount_total!, 0),
       verifiedPaidOrderCount: paid.length,
-      note: 'Gross paid checkout amounts only. This is NOT net sales, income or profit: refunds, disputes, taxes, Stripe fees, Printful costs, and older pages are not reconciled.',
+      feeDetailsComplete: fullyReconciled,
+      recentStripeFeeCents: paymentDetails.reduce((n, x) => n + (x?.stripeFeeCents ?? 0), 0),
+      recentStripeNetCents: fullyReconciled ? paymentDetails.reduce((n,x) => n + x!.stripeNetCents, 0) : null,
+      note: 'Stripe net is not a cash balance or fulfillment profit. Payout timing, Printful charges, taxes, disputes, refunds, and older pages must be reconciled before reserve allocations or loan repayment.',
       orders: paid.map(session => ({
         reference: session.id,
         paidTotalCents: session.amount_total,
