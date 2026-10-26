@@ -1,0 +1,32 @@
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import { cookies } from 'next/headers';
+import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { MerchantPaymentSetup } from '@/lib/bricks/merchant-onboarding/MerchantPaymentSetup';
+
+export const dynamic = 'force-dynamic';
+export const metadata = { title: 'TB3 HQ | Payment Setup', robots: 'noindex, nofollow' };
+
+// TB3 HQ's layout verifies private workspace access. Payment administration
+// additionally requires a tenant-bound owner/admin merchant session.
+export default async function Tb3HqPaymentSetup() {
+  const token = (await cookies()).get(EA_PORTAL_COOKIE)?.value;
+  const session = token ? await verifySession(token) : null;
+  if (!session || session.slug !== 'tarris' || !['owner', 'admin'].includes(session.role ?? '')) notFound();
+  return (
+    <main className="min-h-screen bg-[#0A0A0A] px-5 py-10 text-[#F7F5F2]">
+      <div className="mx-auto max-w-2xl">
+        <Link href="/tarris/future" className="text-sm text-[#E2A8B2] underline">← Back to TB3 HQ</Link>
+        <p className="mt-8 text-xs font-bold tracking-[0.24em] text-[#E2A8B2]">TARRIS BOUIE · PRIVATE HQ</p>
+        <h1 className="mt-3 text-3xl font-black">Merchandise payment setup</h1>
+        <p className="my-5 text-sm text-white/70">
+          The authorized merchant can connect a Stripe account here. Checkout and fulfillment remain
+          disabled until the business verification and launch gates pass.
+        </p>
+        <div className="rounded-2xl bg-white p-2 text-black">
+          <MerchantPaymentSetup tenantLabel="TB3" tenantSlug="tarris" initialProvider="stripe" />
+        </div>
+      </div>
+    </main>
+  );
+}
