@@ -26,7 +26,7 @@ function ProductCard({ product, add }: {
           <option key={v.id} value={v.id}>{v.size}</option>)}
       </select>
     </label>
-    <a href={`/tarris#merch-${product.id}`} className="mt-2 block text-xs underline" aria-label={`Direct shopping link for ${product.name}`}>Product link for sharing</a>
+    <a href={`/tarris?utm_source=instagram&utm_medium=social&utm_campaign=tb3_merch#merch-${product.id}`} className="mt-2 block text-xs underline" aria-label={`Direct shopping link for ${product.name}`}>Product link for sharing</a>
     <button type="button" onClick={() => add(variantId)}
       className="mt-3 min-h-11 w-full bg-[#A51C30] px-3 py-2 text-xs font-bold text-white">
       Add to Cart
@@ -55,10 +55,12 @@ export function Tb3MerchStore() {
     setProcessing(true);
     setMessage('Checking secure shipping and payment...');
     try {
+      const attribution = new URL(window.location.href).searchParams.get('utm_source') === 'instagram'
+        ? 'instagram' : 'direct';
       const response = await fetch('/api/tb3/merch/checkout', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({cart, email, recipient}),
+        body: JSON.stringify({cart, email, recipient, attribution}),
       });
       const payload = await response.json();
       if (!response.ok || !payload.url ||
