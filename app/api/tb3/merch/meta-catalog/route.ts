@@ -2,6 +2,7 @@ import {NextResponse} from 'next/server';
 import {buildTb3MetaFeed} from '@/lib/tb3/meta-feed';
 import {getStripeMerchantStatus} from '@/lib/bricks/merchant-onboarding/stripe-connect';
 import {stripeMerchantStore} from '@/lib/bricks/merchant-onboarding/stripe-store';
+import {auditTb3PrintfulCatalog} from '@/lib/tb3/printful-catalog-audit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -24,7 +25,9 @@ async function ready() {
   if (!configurationOk) return false;
   try {
     const merchant = await getStripeMerchantStatus('tarris', stripeMerchantStore);
-    return merchant.status === 'ready' && merchant.chargesEnabled && merchant.payoutsEnabled;
+    if (merchant.status !== 'ready' || !merchant.chargesEnabled || !merchant.payoutsEnabled) return false;
+    const liveCatalog = await auditTb3PrintfulCatalog();
+    return liveCatalog.verified;
   } catch { return false; }
 }
 export async function GET() {
