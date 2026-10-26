@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { resolveTb3Cart } from '@/lib/tb3/merch-cart';
 import { PrintfulError, tb3Printful } from '@/lib/tb3/printful-client';
+import { stripeMerchantStore } from '@/lib/bricks/merchant-onboarding/stripe-store';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,7 +31,7 @@ async function lookup(id: string) {
 
 // Stripe retries failed webhooks. Printful's store-unique external ID
 // is the durable order identity; never use update_existing=true.
-async function fulfill(session: Stripe.Checkout.Session) {
+async function fulfill(session: Stripe.Checkout.Session, connectedAccountId: string) {
   if (session.metadata?.type !== 'tb3_merch') return;
   if (session.mode !== 'payment' || session.payment_status !== 'paid' ||
       session.currency !== 'usd' || !session.amount_total ||
@@ -53,8 +54,8 @@ async function fulfill(session: Stripe.Checkout.Session) {
       typeof rawRecipient.zip !== 'string')
     throw new Error('TB3 address data unavailable.');
 
-  const stripe = new Stripe(process.env.TB3_STRIPE_SECRET_KEY!);
-  const customer = await stripe.customers.retrieve(session.customer as string);
+  const stripe = new Stripe(process.env.EA_STRIPE_CONNECT_SECRET_KEY!);
+  const customer = await stripe.customers.retrieve(session.customer as string, {stripeAccount: connectedAccountId});
   if (customer.deleted || !customer.email ||
       !customer.shipping?.address ||
       customer.shipping.address.line1 !== rawRecipient.address1 ||
@@ -99,8 +100,9 @@ async function fulfill(session: Stripe.Checkout.Session) {
 export async function POST(req: NextRequest) {
   if (process.env.TB3_MERCH_CHECKOUT_ENABLED !== 'true' ||
       process.env.TB3_MERCH_DRAFT_FULFILLMENT_APPROVED !== 'true' ||
-      !process.env.TB3_STRIPE_SECRET_KEY ||
-      !process.env.TB3_STRIPE_WEBHOOK_SECRET ||
+      !process.env.EA_STRIPE_CONNECT_SECRET_KEY?.startsWith('sk_live_') ||
+      !process.env.EA_STRIPE_CONNECT_WEBHOOK_SECRET ||
+      !process.env.EA_MERCHANT_DATABASE_URL ||
       !process.env.PRINTFUL_API_KEY?.trim())
     return NextResponse.json({error: 'TB3 payment handling unavailable.'}, {status: 503});
 
@@ -108,18 +110,25 @@ export async function POST(req: NextRequest) {
   if (!signature) return NextResponse.json({error: 'Missing signature.'}, {status: 400});
   let event: Stripe.Event;
   try {
-    const stripe = new Stripe(process.env.TB3_STRIPE_SECRET_KEY);
+    const stripe = new Stripe(process.env.EA_STRIPE_CONNECT_SECRET_KEY);
     const raw = await req.text();
     if (raw.length > 2_000_000)
       return NextResponse.json({error: 'Payload too large.'}, {status: 413});
     event = stripe.webhooks.constructEvent(raw, signature,
-      process.env.TB3_STRIPE_WEBHOOK_SECRET);
+      process.env.EA_STRIPE_CONNECT_WEBHOOK_SECRET);
     if (event.type === 'checkout.session.completed' ||
         event.type === 'checkout.session.async_payment_succeeded') {
       const incoming = event.data.object as Stripe.Checkout.Session;
       if (incoming.metadata?.type === 'tb3_merch') {
-        const current = await stripe.checkout.sessions.retrieve(incoming.id);
-        await fulfill(current);
+        // Stripe Connect webhook must identify the actual connected account.
+        // Reject platform events and any attempt to cross tenant boundaries.
+        const expected = await stripeMerchantStore.get('tarris');
+        if (!expected || event.account !== expected ||
+            incoming.metadata.tenant_id !== 'tarris')
+          throw new Error('TB3 connected account mismatch');
+        const current = await stripe.checkout.sessions.retrieve(incoming.id,
+          undefined, {stripeAccount: expected});
+        await fulfill(current, expected);
       }
     }
     return NextResponse.json({received: true});
