@@ -89,6 +89,13 @@ test('TB3 Stripe report requires staff authorization and private credentials', (
   assert.match(payments, /hasMore: response.has_more/);
   assert.doesNotMatch(payments, /process\.env\.STRIPE_SECRET_KEY/);
 });
+test('TB3 products expose stable public deep links for Instagram referrals', () => {
+  const storefront = read('app/tarris/merch-store.tsx');
+  assert.match(storefront, /id={`merch-\$\{index \+ 1\}`}/);
+  assert.match(storefront, /href={`\/tarris#merch-\$\{index \+ 1\}`}/);
+  assert.match(storefront, /Product link for sharing/);
+});
+
 test('TB3 private report shares the same storefront merchandise manifest', () => {
   const storefront = read('app/tarris/merch-store.tsx');
   assert.match(storefront, /public\/tb3\/merch\/manifest\.json/);
