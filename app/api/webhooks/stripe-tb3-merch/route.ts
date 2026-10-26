@@ -100,9 +100,31 @@ async function fulfill(session: Stripe.Checkout.Session, connectedAccountId: str
     throw new Error('Printful order identity mismatch.');
   if (order.status !== 'draft') return; // already confirmed, never charge twice
 
-  // Intentionally do not auto-confirm while Printful wallet ownership and
-  // item costs have not been reconciled. Drafts do not incur fulfillment charges.
-  console.info('[tb3-merch] verified paid order staged as Printful draft', {
+  // Explicit owner authorization is required before a Printful confirmation,
+  // which charges the configured store billing method. No approval means draft.
+  const approved = process.env.TB3_MERCH_AUTO_FULFILLMENT_APPROVED === 'true'
+    && process.env.TB3_PRINTFUL_FUNDING_VERIFIED === 'true'
+    && process.env.VERCEL_ENV === 'production';
+  if (!approved) {
+    console.info('[tb3-merch] verified paid order staged as Printful draft', {
+      orderId: order.id, paymentSession: session.id,
+    });
+    return;
+  }
+  const cap = Number(process.env.TB3_MERCH_MAX_PRINTFUL_COST_CENTS);
+  const total = Number(order.costs?.total);
+  const costCents = Math.round(total * 100);
+  if (!Number.isSafeInteger(cap) || cap <= 0 ||
+      order.costs?.currency !== 'USD' ||
+      order.costs.total === null || order.costs.total === undefined ||
+      !Number.isFinite(total) || !Number.isSafeInteger(costCents) ||
+      costCents <= 0 || costCents > cap ||
+      costCents >= expectedSubtotalCents)
+    throw new Error('Printful cost authorization or price ceiling failed.');
+  await tb3Printful<PrintfulOrder>('/orders/' + order.id + '/confirm', {
+    method: 'POST',
+  });
+  console.info('[tb3-merch] authorized Printful confirmation submitted', {
     orderId: order.id, paymentSession: session.id,
   });
 }
