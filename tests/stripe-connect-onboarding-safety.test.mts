@@ -34,7 +34,7 @@ test('merchant store never falls back to shared People or Simplifi databases',()
 test('existing Stripe test key fallback is isolated to preview and requires explicit opt-in',()=>{
   assert.ok(adapter.includes("process.env.VERCEL_ENV === 'preview'"));
   assert.ok(adapter.includes("EA_STRIPE_CONNECT_USE_EXISTING_TEST_KEY === 'true'"));
-  assert.ok(adapter.includes("key.startsWith('sk_test_')"));
+  assert.ok(adapter.includes("process.env.VERCEL_ENV === 'production' ? 'sk_live_' : 'sk_test_'"));
   assert.ok(api.includes("EA_STRIPE_CONNECT_USE_EXISTING_TEST_KEY === 'true'"));
 });
 
@@ -42,7 +42,8 @@ test('existing mapping cannot onboard non-Standard account',()=>{
   assert.ok(adapter.includes("account.type !== 'standard'"));
 });
 
-test('onboarding configuration rejects live Stripe credentials before attempting provider requests',()=>{
-  assert.ok(api.includes("EA_STRIPE_CONNECT_SECRET_KEY?.startsWith('sk_test_')"));
+test('onboarding configuration matches live credentials to production and test credentials to preview',()=>{
+  assert.ok(api.includes("process.env.VERCEL_ENV === 'production' ? 'sk_live_' : 'sk_test_'"));
   assert.ok(api.includes("STRIPE_TEST_SECRET_KEY?.startsWith('sk_test_')"));
+  assert.ok(adapter.includes('Stripe Connect key does not match deployment environment'));
 });
