@@ -177,3 +177,14 @@ test('Portal differentiates Printful fulfillment totals from verified gross', ()
   assert.match(sales, /Gross collected:/);
   assert.match(sales, /Retail totals and fulfillment costs alone do not establish settled revenue/);
 });
+
+test('TB3 live launch-readiness diagnostic is private, read-only and never certifies a purchase', () => {
+  const readiness=read('app/api/tb3/merch/readiness/route.ts');
+  assert.match(readiness,/authorize\(req,true\)/);
+  assert.match(readiness,/getStripeMerchantStatus/);
+  assert.match(readiness,/auditTb3PrintfulCatalog/);
+  assert.match(readiness,/liveOrderCertified:false/);
+  assert.match(readiness,/readyForLaunch:false/);
+  assert.doesNotMatch(readiness,/method:\s*'POST'/);
+  assert.doesNotMatch(readiness,/\/orders\//);
+});
