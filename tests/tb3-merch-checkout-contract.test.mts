@@ -91,8 +91,8 @@ test('TB3 Stripe report requires staff authorization and private credentials', (
 });
 test('TB3 products expose stable public deep links for Instagram referrals', () => {
   const storefront = read('app/tarris/merch-store.tsx');
-  assert.match(storefront, /id={`merch-\$\{index \+ 1\}`}/);
-  assert.match(storefront, /href={`\/tarris#merch-\$\{index \+ 1\}`}/);
+  assert.match(storefront, /id={`merch-\$\{product.id\}`}/);
+  assert.match(storefront, /href={`\/tarris#merch-\$\{product.id\}`}/);
   assert.match(storefront, /Product link for sharing/);
 });
 
