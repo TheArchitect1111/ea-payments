@@ -2,7 +2,7 @@ import 'server-only';
 import catalog from '../../public/tb3/merch/manifest.json';
 import {tb3Printful} from './printful-client';
 
-type SyncProduct = {id:number;name:string};
+type SyncProduct = {id:number;name:string;is_ignored?:boolean;synced?:number;variants?:number};
 type SyncVariant = {id:number;variant_id:number;is_ignored?:boolean;availability_status?:string;files?:unknown[]};
 type SyncDetail = {sync_variants?:SyncVariant[]};
 
@@ -15,10 +15,12 @@ export async function auditTb3PrintfulCatalog() {
     if(page.length<100)break;
     if(offset===900)throw new Error('Printful catalog pagination limit reached.');
   }
-  const available=new Set(synced.map(product=>product.id));
+  const available=new Map(synced.map(product=>[product.id,product]));
   const products: {id:string;productId:number;status:string;missingVariants:number[]}[]=[];
   for(const item of catalog) {
-    if(!available.has(item.printfulProductId)) {
+    const storeProduct=available.get(item.printfulProductId);
+    if(!storeProduct || storeProduct.is_ignored===true ||
+       (typeof storeProduct.synced==='number' && storeProduct.synced<item.variants.length)) {
       products.push({id:item.id,productId:item.printfulProductId,status:'missing',
         missingVariants:item.variants.map(v=>v.id)});
       continue;
@@ -32,7 +34,7 @@ export async function auditTb3PrintfulCatalog() {
         actual.is_ignored===true || actual.availability_status==='discontinued' ||
         actual.availability_status==='out_of_stock' ||
         actual.availability_status==='temporary_out_of_stock' ||
-        (Array.isArray(actual.files) && actual.files.length===0);
+        !Array.isArray(actual.files) || actual.files.length===0;
     }).map(v=>v.id);
     products.push({id:item.id,productId:item.printfulProductId,
       status:missingVariants.length?'variant-mismatch':'matched',missingVariants});
