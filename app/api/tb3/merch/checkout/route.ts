@@ -25,6 +25,7 @@ const enabled = () => process.env.VERCEL_ENV === 'production'
 
 const schema = z.object({
   cart: z.unknown(),
+  attribution: z.enum(['instagram', 'direct']).optional(),
   email: z.string().email().max(254),
   recipient: z.object({
     name: z.string().trim().min(2).max(100),
@@ -130,6 +131,7 @@ export async function POST(req: NextRequest) {
       automatic_tax: {enabled: true},
       metadata: {
         type: 'tb3_merch',
+        attribution_source: input.attribution || 'direct',
         tenant_id: 'tarris',
         destination: JSON.stringify(input.recipient),
         variant_quantities: JSON.stringify(lines.map(x => [x.variantId, x.quantity])),
