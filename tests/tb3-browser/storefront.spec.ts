@@ -47,3 +47,14 @@ test('checkout remains fail-closed in test environment even after a product is a
   await expect(page.getByRole('button',{name:'Secure checkout'})).toHaveCount(0);
   await expect(page.getByText(/Online checkout is being connected/)).toBeVisible();
 });
+
+test('Meta Instagram catalog remains unpublished until real seller and Printful clearance', async ({request}) => {
+  const result = await request.get('/api/tb3/merch/meta-catalog');
+  expect(result.status()).toBe(503);
+  const body=await result.json();
+  expect(body.error).toMatch(/not yet eligible for public sales/);
+});
+test('private Printful catalog audit cannot be read by anonymous visitors', async ({request}) => {
+  const result=await request.get('/api/tb3/printful/catalog-audit');
+  expect([401,403]).toContain(result.status());
+});
