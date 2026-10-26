@@ -10,6 +10,9 @@ const existingDeposit = read('app/api/checkout/tarris-bouie/route.ts');
 test('TB3 cannot collect customer payment while Printful funding is unverified', () => {
   assert.match(checkout, /TB3_MERCH_AUTO_FULFILLMENT_APPROVED === 'true'/);
   assert.match(checkout, /TB3_PRINTFUL_FUNDING_VERIFIED === 'true'/);
+  assert.match(checkout, /TB3_PRINTFUL_CATALOG_VERIFIED === 'true'/);
+  assert.match(checkout, /auditTb3PrintfulCatalog\(\)/);
+  assert.match(checkout, /if \(!liveCatalog\.verified\)/);
   assert.match(checkout, /Number\.isSafeInteger\(Number\(process\.env\.TB3_MERCH_MAX_PRINTFUL_COST_CENTS\)\)/);
 });
 
