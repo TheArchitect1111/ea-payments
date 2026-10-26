@@ -100,6 +100,14 @@ export default function Tb3MerchSales({ report = false }: { report?: boolean }) 
           {payments.hasMore && <p>Older checkout sessions are not included.</p>}
         </div> : <p role="status">{paymentsMessage || 'Loading verified payment report...'}</p>}
       </>}
+      {report && <aside className="mt-5 rounded-lg border border-black/15 p-4" aria-label="TB3 fulfillment reserve plan">
+        <h3 className="text-lg font-bold">Fulfillment reserve · funding plan</h3>
+        <p className="mt-2">Target operating reserve: <strong>$500.00</strong></p>
+        <p>Parent loan: <strong>Not yet recorded or verified</strong></p>
+        <p>TB3-owned reserve: <strong>Not yet reconciled</strong></p>
+        <p>Amount available for repayment: <strong>Not yet determined</strong></p>
+        <p className="mt-3 text-sm">The $500 is a proposed working-capital target, not a verified balance or required Printful fee. Only reconciled net cash after manufacturing, shipping, Stripe fees, taxes, refunds and commitments can fund reserve growth or loan repayment. This panel does not automatically transfer or allocate money.</p>
+      </aside>}
       {loading && <p role="status">Loading private orders...</p>}
       {error && <p role="alert">{error}</p>}
       {!loading && !error && <>
