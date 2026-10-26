@@ -45,6 +45,16 @@ async function fulfill(session: Stripe.Checkout.Session, connectedAccountId: str
   const lines = resolveTb3Cart(rawLines.map(x => ({
     variantId: x[0] as number, quantity: x[1] as number,
   })));
+  // Reconcile the provider-verified Stripe subtotal with the server catalog.
+  // Reject metadata tampering or mismatched payment amounts before creating
+  // any Printful draft, even if Stripe reports that the session was paid.
+  const expectedSubtotalCents = lines.reduce(
+    (total, line) => total + line.unitAmount * line.quantity, 0);
+  if (!Number.isSafeInteger(expectedSubtotalCents) ||
+      session.amount_subtotal !== expectedSubtotalCents ||
+      session.amount_total < expectedSubtotalCents)
+    throw new Error('TB3 Stripe payment does not match server catalog totals.');
+
   const rawRecipient = JSON.parse(session.metadata.destination || 'null') as Record<string, unknown>;
   if (!rawRecipient || rawRecipient.country_code !== 'US' ||
       typeof rawRecipient.name !== 'string' ||
