@@ -29,12 +29,13 @@ test('TB3 checkout re-resolves the server-side catalog and Printful shipping', (
   assert.match(checkout, /resolveTb3Cart\(input\.cart\)/);
   assert.match(checkout, /tb3Printful<ShippingRate\[]>\('\/shipping\/rates'/);
   assert.match(checkout, /automatic_tax: \{enabled: true\}/);
+  assert.match(checkout, /attribution_source: input.attribution/);
   assert.match(checkout, /stripe\.customers\.create/);
 });
 
 test('TB3 store sends only cart, email, and recipient to a dedicated route', () => {
   assert.match(store, /fetch\('\/api\/tb3\/merch\/checkout'/);
-  assert.match(store, /JSON\.stringify\(\{cart, email, recipient\}\)/);
+  assert.match(store, /JSON\.stringify\(\{cart, email, recipient, attribution\}\)/);
   assert.match(store, /checkoutAvailable/);
 });
 
@@ -92,7 +93,7 @@ test('TB3 Stripe report requires staff authorization and private credentials', (
 test('TB3 products expose stable public deep links for Instagram referrals', () => {
   const storefront = read('app/tarris/merch-store.tsx');
   assert.match(storefront, /id={`merch-\$\{product.id\}`}/);
-  assert.match(storefront, /href={`\/tarris#merch-\$\{product.id\}`}/);
+  assert.match(storefront, /utm_source=instagram/);
   assert.match(storefront, /Product link for sharing/);
 });
 
@@ -158,6 +159,8 @@ test('Stripe fee reporting is tenant scoped and does not claim reserve cash', ()
   assert.match(payments, /feeDetailsComplete: fullyReconciled/);
   assert.match(payments, /recentStripeNetCents/);
   assert.match(sales, /Reconciliation incomplete/);
+  assert.match(payments, /attributedInstagramOrders/);
+  assert.match(sales, /Instagram-attributed paid orders/);
 });
 
 test('Portal differentiates Printful fulfillment totals from verified gross', () => {
