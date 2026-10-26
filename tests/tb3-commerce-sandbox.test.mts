@@ -2,6 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {resolveTb3Cart} from '../lib/tb3/merch-cart';
 import catalog from '../public/tb3/merch/manifest.json';
+import {canConfirmTb3PrintfulOrder} from '../lib/tb3/fulfillment-approval';
 
 // No provider network, no credentials, no real money, no Printful order.
 // This is an executable sandbox model of the TB3 commerce lifecycle.
@@ -26,10 +27,15 @@ function sandboxPurchase(s: Scenario) {
     return {events: [...events, 'no_paid_event'], draftCount: 0,
       confirmationCount: 0, subtotalCents, totalCents, reserveEarningsCents: 0};
   events.push('stripe_payment_verified','printful_draft_created');
-  const approved = s.fundingVerified && s.ownerApproved &&
-    s.fulfillmentCostCents > 0 &&
-    s.fulfillmentCostCents <= s.maxCostCents &&
-    s.fulfillmentCostCents < subtotalCents;
+  const approved = canConfirmTb3PrintfulOrder({
+    isProduction: true,
+    ownerApproved: s.ownerApproved,
+    fundingVerified: s.fundingVerified,
+    capCents: s.maxCostCents,
+    cost: (s.fulfillmentCostCents / 100).toFixed(2),
+    currency: 'USD',
+    merchandiseSubtotalCents: subtotalCents,
+  });
   if (!approved)
     return {events: [...events, 'confirmation_blocked'], draftCount: 1,
       confirmationCount: 0, subtotalCents, totalCents, reserveEarningsCents: 0};
