@@ -118,7 +118,10 @@ test('Meta catalog cannot publish unavailable products or unverified checkout', 
   assert.match(feed, /TB3_PRINTFUL_FUNDING_VERIFIED === 'true'/);
   assert.match(feed, /process.env.VERCEL_ENV === 'production'/);
   assert.match(feed, /text\/csv/);
-  assert.match(feed, /tb3.online\/tarris#merch-/);
+  assert.match(feed, /buildTb3MetaFeed/);
+  const builder = read('lib/tb3/meta-feed.ts');
+  assert.match(builder, /utm_source=instagram/);
+  assert.match(builder, /tb3.online\/tarris/);
 });
 
 test('TB3 Printful order costs require staff authorization', () => {
