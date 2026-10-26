@@ -18,7 +18,7 @@ type Order = {
   }[];
 };
 
-export default function Tb3MerchSales({ report = false }: { report?: boolean }) {
+export default function Tb3MerchSales({ report = false, canAudit = false }: { report?: boolean; canAudit?: boolean }) {
   const [visible, setVisible] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState('');
@@ -37,6 +37,9 @@ export default function Tb3MerchSales({ report = false }: { report?: boolean }) 
     note: string;
   } | null>(null);
   const [paymentsMessage, setPaymentsMessage] = useState('');
+  const [catalogAudit, setCatalogAudit] = useState<{ verified: boolean; matchedProductCount: number; configuredProductCount: number; products: {id:string;status:string}[] } | null>(null);
+  const [catalogAuditError, setCatalogAuditError] = useState('');
+  const [auditing, setAuditing] = useState(false);
 
   function prepareLoad() {
     setLoading(true);
@@ -118,6 +121,29 @@ export default function Tb3MerchSales({ report = false }: { report?: boolean }) 
         <p>Amount available for repayment: <strong>Not yet determined</strong></p>
         <p className="mt-3 text-sm">The $500 is a proposed working-capital target, not a verified balance or required Printful fee. Only reconciled net cash after manufacturing, shipping, Stripe fees, taxes, refunds and commitments can fund reserve growth or loan repayment. This panel does not automatically transfer or allocate money.</p>
       </aside>}
+      {report && canAudit && <div className="mt-4">
+        <button type="button" className="ep-pulse-cta" disabled={auditing}
+          onClick={async () => {
+            setAuditing(true); setCatalogAuditError(''); setCatalogAudit(null);
+            try {
+              const response = await fetch('/api/tb3/printful/catalog-audit', {cache:'no-store'});
+              if (!response.ok) throw new Error('Live Printful catalog verification unavailable.');
+              setCatalogAudit(await response.json());
+            } catch (error) {
+              setCatalogAuditError(error instanceof Error ? error.message : 'Catalog unavailable.');
+            } finally { setAuditing(false); }
+          }}>
+          {auditing ? 'Checking Printful catalog...' : 'Verify 14 products against Printful'}
+        </button>
+        {catalogAuditError && <p role="alert">{catalogAuditError}</p>}
+        {catalogAudit && <div role="status">
+          <p>Live Printful match: {catalogAudit.matchedProductCount}/{catalogAudit.configuredProductCount}
+            {catalogAudit.verified ? ' · All configured product variants matched' : ' · Attention required'}</p>
+          {!catalogAudit.verified && <ul>{catalogAudit.products.filter(item => item.status !== 'matched')
+            .map(item => <li key={item.id}>{item.id}: {item.status}</li>)}</ul>}
+          <p>Product existence and variant IDs only. Print artwork, shipping, costs and funding require separate confirmation.</p>
+        </div>}
+      </div>}
       {report && <details className="mt-5 rounded-lg border border-black/15 p-4">
         <summary className="cursor-pointer font-semibold">TB3 merchandise catalog · {tb3Catalog.length} products</summary>
         <p className="mt-2 text-sm">The storefront and this portal read the same configured product manifest. Provider publication and current stock require separate Printful verification.</p>
