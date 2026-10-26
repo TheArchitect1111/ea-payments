@@ -123,7 +123,7 @@ function TarrisHqContent() {
         <nav aria-label="TB3 HQ navigation" id="hq-nav" className="mt-6 grid grid-cols-2 gap-1 text-sm sm:grid-cols-4 lg:block lg:space-y-1">
           {tb3HqNavigation.items.map(({label,href},index)=><a key={href} href={href.replace("/tarris/future","")} className={index===0?"rounded bg-white px-3 py-2 font-bold text-black":"block rounded px-3 py-2 text-white/70 hover:bg-white/10"}>{label}</a>)}
         </nav>
-        <details className="mt-4"><summary aria-label="Settings" title="Settings" className="grid h-10 w-10 cursor-pointer list-none place-items-center rounded-lg border border-white/15">⚙</summary><p className="mt-2 text-xs text-white/60">Account preferences will be available when HQ tracking is connected.</p></details>
+        <details className="mt-4"><summary aria-label="Settings" title="Settings" className="grid h-10 w-10 cursor-pointer list-none place-items-center rounded-lg border border-white/15">⚙</summary><a href="/tarris/future/payment-setup" className="mt-3 block rounded border border-white/20 px-3 py-2 text-xs text-[#E2A8B2]">Merchant payment setup · owner/admin</a><p className="mt-2 text-xs text-white/60">Private payment setup requires an authorized merchant session.</p></details>
         <div className="mt-8 hidden text-[10px] leading-6 tracking-[0.16em] text-white/45 lg:block">
           DISCIPLINE.<br />DETERMINATION.<br />DEVELOPMENT.<br />DESTINY.
         </div>
