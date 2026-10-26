@@ -55,7 +55,7 @@ async function fulfill(session: Stripe.Checkout.Session, connectedAccountId: str
     throw new Error('TB3 address data unavailable.');
 
   const stripe = new Stripe(process.env.EA_STRIPE_CONNECT_SECRET_KEY!);
-  const customer = await stripe.customers.retrieve(session.customer as string, {stripeAccount: connectedAccountId});
+  const customer = await stripe.customers.retrieve(session.customer as string, undefined, {stripeAccount: connectedAccountId});
   if (customer.deleted || !customer.email ||
       !customer.shipping?.address ||
       customer.shipping.address.line1 !== rawRecipient.address1 ||
