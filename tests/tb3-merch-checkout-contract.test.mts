@@ -96,6 +96,13 @@ test('TB3 products expose stable public deep links for Instagram referrals', () 
   assert.match(storefront, /Product link for sharing/);
 });
 
+test('TB3 public page bypasses splash for merchandise referral links', () => {
+  const page = read('app/tarris/page.tsx');
+  assert.match(page, /window.location.hash/);
+  assert.match(page, /scrollIntoView\(\)/);
+  assert.match(page, /intro.style.display = 'none'/);
+});
+
 test('TB3 private report shares the same storefront merchandise manifest', () => {
   const storefront = read('app/tarris/merch-store.tsx');
   assert.match(storefront, /public\/tb3\/merch\/manifest\.json/);
