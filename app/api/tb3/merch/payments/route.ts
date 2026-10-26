@@ -45,9 +45,13 @@ export async function GET(req: NextRequest) {
       hasMore: response.has_more,
       grossCollectedCents: paid.reduce((sum, session) => sum + session.amount_total!, 0),
       verifiedPaidOrderCount: paid.length,
+      attributedInstagramOrders: paid.filter(session => session.metadata?.attribution_source === 'instagram').length,
+      attributedInstagramGrossCents: paid.filter(session => session.metadata?.attribution_source === 'instagram')
+        .reduce((sum, session) => sum + session.amount_total!, 0),
       feeDetailsComplete: fullyReconciled,
       recentStripeFeeCents: paymentDetails.reduce((n, x) => n + (x?.stripeFeeCents ?? 0), 0),
       recentStripeNetCents: fullyReconciled ? paymentDetails.reduce((n,x) => n + x!.stripeNetCents, 0) : null,
+      attributionNote: 'Instagram attribution is self-reported from campaign URLs; it is not independent Meta conversion verification.',
       note: 'Stripe net is not a cash balance or fulfillment profit. Payout timing, Printful charges, taxes, disputes, refunds, and older pages must be reconciled before reserve allocations or loan repayment.',
       orders: paid.map(session => ({
         reference: session.id,
