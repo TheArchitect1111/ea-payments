@@ -89,6 +89,13 @@ test('TB3 Stripe report requires staff authorization and private credentials', (
   assert.match(payments, /hasMore: response.has_more/);
   assert.doesNotMatch(payments, /process\.env\.STRIPE_SECRET_KEY/);
 });
+test('TB3 private report shares the same storefront merchandise manifest', () => {
+  const storefront = read('app/tarris/merch-store.tsx');
+  assert.match(storefront, /public\/tb3\/merch\/manifest\.json/);
+  assert.match(sales, /public\/tb3\/merch\/manifest\.json/);
+  assert.match(sales, /tb3Catalog\.map\(product/);
+});
+
 test('TB3 reserve plan does not invent loan deposits, profits or repayments', () => {
   assert.match(sales, /Fulfillment reserve/);
   assert.match(sales, /\$500\.00/);
