@@ -85,6 +85,15 @@ test('TB3 reserve plan does not invent loan deposits, profits or repayments', ()
   assert.match(sales, /does not automatically transfer or allocate money/);
 });
 
+test('Stripe fee reporting is tenant scoped and does not claim reserve cash', () => {
+  assert.match(payments, /paymentIntents.retrieve/);
+  assert.match(payments, /balance_transaction/);
+  assert.match(payments, /stripeAccount: accountId/);
+  assert.match(payments, /feeDetailsComplete: fullyReconciled/);
+  assert.match(payments, /recentStripeNetCents/);
+  assert.match(sales, /Reconciliation incomplete/);
+});
+
 test('Portal differentiates Printful fulfillment totals from verified gross', () => {
   assert.match(sales, /api\/tb3\/merch\/payments/);
   assert.match(sales, /Gross collected:/);
