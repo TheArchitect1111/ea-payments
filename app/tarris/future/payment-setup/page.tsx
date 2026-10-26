@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
-import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
+import { requireTb3MerchantSession } from '@/lib/tb3/merchant-access';
 import { MerchantPaymentSetup } from '@/lib/bricks/merchant-onboarding/MerchantPaymentSetup';
 
 export const dynamic = 'force-dynamic';
@@ -10,9 +9,7 @@ export const metadata = { title: 'TB3 HQ | Payment Setup', robots: 'noindex, nof
 // TB3 HQ's layout verifies private workspace access. Payment administration
 // additionally requires a tenant-bound owner/admin merchant session.
 export default async function Tb3HqPaymentSetup() {
-  const token = (await cookies()).get(EA_PORTAL_COOKIE)?.value;
-  const session = token ? await verifySession(token) : null;
-  if (!session || session.slug !== 'tarris' || !['owner', 'admin'].includes(session.role ?? '')) notFound();
+  if (!await requireTb3MerchantSession()) notFound();
   return (
     <main className="min-h-screen bg-[#0A0A0A] px-5 py-10 text-[#F7F5F2]">
       <div className="mx-auto max-w-2xl">
