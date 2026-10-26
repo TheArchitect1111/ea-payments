@@ -24,3 +24,18 @@ test('Meta feed has no university-affiliation merchandise claim', () => {
   const text=buildTb3MetaFeed();
   assert.match(text,/Not affiliated with University of Alabama/);
 });
+
+test('Meta feed defaults every variant to out of stock pending live verification', () => {
+  const rows=buildTb3MetaFeed().trim().split('\n').slice(1);
+  assert.equal(rows.length,82);
+  assert.ok(rows.every(row=>row.includes('"out of stock"')));
+});
+test('Meta feed only advertises verified variants when checkout is live', () => {
+  const one=catalog[0].variants[0].id;
+  const feed=buildTb3MetaFeed({checkoutLive:true,verifiedAvailableVariantIds:new Set([one])});
+  const rows=feed.trim().split('\n').slice(1);
+  assert.equal(rows.filter(row=>row.includes('"in stock"')).length,1);
+  assert.equal(rows.filter(row=>row.includes('"out of stock"')).length,81);
+  const disabled=buildTb3MetaFeed({checkoutLive:false,verifiedAvailableVariantIds:new Set([one])});
+  assert.equal(disabled.split('"in stock"').length,1);
+});
