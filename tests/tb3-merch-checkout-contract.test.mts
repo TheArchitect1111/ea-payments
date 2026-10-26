@@ -110,6 +110,16 @@ test('TB3 Printful verification button only appears for staff reports', () => {
   assert.match(sales, /api\/tb3\/printful\/catalog-audit/);
 });
 
+test('Meta catalog cannot publish unavailable products or unverified checkout', () => {
+  const feed = read('app/api/tb3/merch/meta-catalog/route.ts');
+  assert.match(feed, /TB3_PRINTFUL_CATALOG_VERIFIED === 'true'/);
+  assert.match(feed, /TB3_MERCH_CHECKOUT_ENABLED === 'true'/);
+  assert.match(feed, /TB3_PRINTFUL_FUNDING_VERIFIED === 'true'/);
+  assert.match(feed, /process.env.VERCEL_ENV === 'production'/);
+  assert.match(feed, /text\/csv/);
+  assert.match(feed, /tb3.online\/tarris#merch-/);
+});
+
 test('TB3 Printful order costs require staff authorization', () => {
   const orders = read('app/api/tb3/printful/orders/route.ts');
   assert.match(orders, /authorize\(req, true\)/);
