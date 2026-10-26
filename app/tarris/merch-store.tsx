@@ -12,8 +12,8 @@ function ProductCard({ product, index, add }: {
   add: (variantId: number) => void;
 }) {
   const [variantId, setVariantId] = useState(product.variants[0].id);
-  return <article className="min-w-0" data-product-id={product.printfulProductId}>
-    <div id={`merch-${index + 1}`} className="aspect-square bg-white p-3">
+  return <article id={`merch-${index + 1}`} className="min-w-0 scroll-mt-20" data-product-id={product.printfulProductId}>
+    <div className="aspect-square bg-white p-3">
       <img src={product.image} alt={product.name}
         className="h-full w-full object-contain" loading="lazy" />
     </div>
@@ -27,6 +27,7 @@ function ProductCard({ product, index, add }: {
           <option key={v.id} value={v.id}>{v.size}</option>)}
       </select>
     </label>
+    <a href={`/tarris#merch-${index + 1}`} className="mt-2 block text-xs underline" aria-label={`Direct shopping link for ${product.name}`}>Product link for sharing</a>
     <button type="button" onClick={() => add(variantId)}
       className="mt-3 min-h-11 w-full bg-[#A51C30] px-3 py-2 text-xs font-bold text-white">
       Add to Cart
