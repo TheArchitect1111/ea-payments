@@ -1,4 +1,5 @@
 import {test} from 'node:test';
+import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import catalog from '../public/tb3/merch/manifest.json';
 import {buildTb3MetaFeed} from '../lib/tb3/meta-feed';
@@ -38,4 +39,15 @@ test('Meta feed only advertises verified variants when checkout is live', () => 
   assert.equal(rows.filter(row=>row.includes('"out of stock"')).length,81);
   const disabled=buildTb3MetaFeed({checkoutLive:false,verifiedAvailableVariantIds:new Set([one])});
   assert.equal(disabled.split('"in stock"').length,1);
+});
+
+test('public Meta feed only becomes purchasable after all hard launch gates', () => {
+  const route=readFileSync(new URL('../app/api/tb3/merch/meta-catalog/route.ts',import.meta.url),'utf8');
+  assert.match(route,/TB3_PRINTFUL_FUNDING_VERIFIED/);
+  assert.match(route,/TB3_PRINTFUL_CATALOG_VERIFIED/);
+  assert.match(route,/getStripeMerchantStatus/);
+  assert.match(route,/auditTb3PrintfulCatalog/);
+  assert.match(route,/buildTb3MetaFeed\(\{/);
+  assert.match(route,/verifiedAvailableVariantIds/);
+  assert.match(route,/status:503/);
 });
