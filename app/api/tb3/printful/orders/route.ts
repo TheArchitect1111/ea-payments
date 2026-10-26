@@ -32,7 +32,7 @@ function safeTrackingUrl(value?: string) {
 
 export async function GET(req: NextRequest) {
   return handled(async () => {
-    await authorize(req);
+    await authorize(req, true);
     const rawOffset = req.nextUrl.searchParams.get('offset') ?? '0';
     if (!/^[0-9]{1,6}$/.test(rawOffset))
       return json({ error: 'Invalid page.' }, 400);
