@@ -24,3 +24,26 @@ test('TB3 Instagram product link works on mobile with no real checkout', async (
   await expect(card.getByRole('link',{name:/Direct shopping link/}))
     .toHaveAttribute('href','/tarris#merch-tb3-signature-tee-black');
 });
+
+test('all 14 TB3 merch images load and product share links remain unique', async ({page}) => {
+  await page.goto('/tarris#merch',{waitUntil:'domcontentloaded'});
+  const cards=page.locator('[data-product-id]');
+  await expect(cards).toHaveCount(14);
+  const links=await cards.getByRole('link',{name:/Direct shopping link/}).evaluateAll(
+    nodes=>nodes.map(n=>n.getAttribute('href')));
+  expect(new Set(links).size).toBe(14);
+  for (let i=0;i<14;i++) {
+    const img=cards.nth(i).locator('img');
+    await expect(img).toHaveAttribute('src',/^\\/tb3\\/merch\\/mockups\\//);
+    await img.scrollIntoViewIfNeeded();
+    await expect.poll(async()=>img.evaluate((el:HTMLImageElement)=>el.complete && el.naturalWidth>0))
+      .toBe(true);
+  }
+});
+test('checkout remains fail-closed in test environment even after a product is added', async ({page}) => {
+  await page.goto('/tarris#merch',{waitUntil:'domcontentloaded'});
+  await page.locator('[data-product-id]').first().getByRole('button',{name:'Add to Cart'}).click();
+  await expect(page.getByRole('heading',{name:'Your cart (1)'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Secure checkout'})).toHaveCount(0);
+  await expect(page.getByText(/Online checkout is being connected/)).toBeVisible();
+});
