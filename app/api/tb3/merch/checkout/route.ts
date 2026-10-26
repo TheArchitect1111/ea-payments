@@ -17,7 +17,11 @@ const enabled = () => process.env.VERCEL_ENV === 'production'
   && !!process.env.EA_MERCHANT_DATABASE_URL
   && !!process.env.PRINTFUL_API_KEY?.trim()
   && !!process.env.TB3_MERCH_DRAFT_FULFILLMENT_APPROVED
-  && process.env.TB3_MERCH_DRAFT_FULFILLMENT_APPROVED === 'true';
+  && process.env.TB3_MERCH_DRAFT_FULFILLMENT_APPROVED === 'true'
+  && process.env.TB3_MERCH_AUTO_FULFILLMENT_APPROVED === 'true'
+  && process.env.TB3_PRINTFUL_FUNDING_VERIFIED === 'true'
+  && Number.isSafeInteger(Number(process.env.TB3_MERCH_MAX_PRINTFUL_COST_CENTS))
+  && Number(process.env.TB3_MERCH_MAX_PRINTFUL_COST_CENTS) > 0;
 
 const schema = z.object({
   cart: z.unknown(),
