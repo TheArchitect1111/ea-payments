@@ -10,7 +10,8 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 // Fail closed until live Connect onboarding, webhook and Printful fulfillment are certified.
-const enabled = () => process.env.TB3_MERCH_CHECKOUT_ENABLED === 'true'
+const enabled = () => process.env.VERCEL_ENV === 'production'
+  && process.env.TB3_MERCH_CHECKOUT_ENABLED === 'true'
   && !!process.env.EA_STRIPE_CONNECT_SECRET_KEY?.startsWith('sk_live_')
   && !!process.env.EA_STRIPE_CONNECT_WEBHOOK_SECRET
   && !!process.env.EA_MERCHANT_DATABASE_URL
