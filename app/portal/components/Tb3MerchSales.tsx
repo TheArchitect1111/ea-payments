@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import tb3Catalog from '../../../public/tb3/merch/manifest.json';
 
 type Order = {
   id: number;
@@ -117,6 +118,19 @@ export default function Tb3MerchSales({ report = false }: { report?: boolean }) 
         <p>Amount available for repayment: <strong>Not yet determined</strong></p>
         <p className="mt-3 text-sm">The $500 is a proposed working-capital target, not a verified balance or required Printful fee. Only reconciled net cash after manufacturing, shipping, Stripe fees, taxes, refunds and commitments can fund reserve growth or loan repayment. This panel does not automatically transfer or allocate money.</p>
       </aside>}
+      {report && <details className="mt-5 rounded-lg border border-black/15 p-4">
+        <summary className="cursor-pointer font-semibold">TB3 merchandise catalog · {tb3Catalog.length} products</summary>
+        <p className="mt-2 text-sm">The storefront and this portal read the same configured product manifest. Provider publication and current stock require separate Printful verification.</p>
+        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {tb3Catalog.map(product => <div key={product.id} className="min-w-0 border border-black/10 p-2">
+            <img src={product.image} alt={product.name} loading="lazy" className="aspect-square w-full object-contain" />
+            <p className="mt-2 text-xs font-semibold">{product.name}</p>
+            <p className="text-xs">${product.price.toFixed(2)} {product.currency}</p>
+            <p className="text-xs">{product.variants.length} size/variant options</p>
+          </div>)}
+        </div>
+        <a href="/tarris#merch" className="mt-3 inline-block underline">View the public TB3 merchandise page</a>
+      </details>}
       {loading && <p role="status">Loading private orders...</p>}
       {error && <p role="alert">{error}</p>}
       {!loading && !error && <>
