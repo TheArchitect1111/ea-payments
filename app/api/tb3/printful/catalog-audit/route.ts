@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 type PrintfulProduct = { id: number; name: string };
-type PrintfulListing = { sync_variants?: { id: number; variant_id: number }[] };
+type PrintfulListing = { sync_variants?: { id: number; variant_id: number; is_ignored?: boolean; availability_status?: string; files?: unknown[] }[] };
 
 export async function GET(req: NextRequest) {
   return handled(async () => {
@@ -34,8 +34,14 @@ export async function GET(req: NextRequest) {
       const listing = await tb3Printful<PrintfulListing>(
         '/store/products/' + product.printfulProductId,
       );
-      const ids = new Set((listing.sync_variants ?? []).map(x => x.id));
-      const missingVariants = product.variants.filter(x => !ids.has(x.id)).map(x => x.id);
+      const providerVariants = new Map((listing.sync_variants ?? []).map(x => [x.id, x]));
+      const missingVariants = product.variants.filter(x => {
+        const live = providerVariants.get(x.id);
+        return !live || live.variant_id !== x.catalogVariantId || live.is_ignored === true ||
+          live.availability_status === 'discontinued' || live.availability_status === 'out_of_stock' ||
+          live.availability_status === 'temporary_out_of_stock' ||
+          (Array.isArray(live.files) && live.files.length === 0);
+      }).map(x => x.id);
       results.push({ id: product.id, productId: product.printfulProductId,
         status: missingVariants.length ? 'variant-mismatch' : 'matched', missingVariants });
     }
@@ -47,7 +53,7 @@ export async function GET(req: NextRequest) {
       verified: results.length === catalog.length &&
         results.every(x => x.status === 'matched'),
       products: results,
-      note: 'Presence and variant IDs only. Artwork print quality, printing costs, shipping, and billing remain separately unverified.',
+      note: 'Product identity, blank variant IDs and available provider flags only. Artwork print quality, printing costs, shipping, and billing remain separately unverified.',
     });
   });
 }
