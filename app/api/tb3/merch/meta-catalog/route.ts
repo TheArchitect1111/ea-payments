@@ -1,13 +1,15 @@
 import {NextResponse} from 'next/server';
 import catalog from '@/public/tb3/merch/manifest.json';
+import {getStripeMerchantStatus} from '@/lib/bricks/merchant-onboarding/stripe-connect';
+import {stripeMerchantStore} from '@/lib/bricks/merchant-onboarding/stripe-store';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 // Meta can only import products that are actually purchasable on the
 // seller's verified domain. Never advertise pending products as in stock.
-function ready() {
-  return process.env.VERCEL_ENV === 'production' &&
+async function ready() {
+  const configurationOk = process.env.VERCEL_ENV === 'production' &&
     process.env.TB3_MERCH_CHECKOUT_ENABLED === 'true' &&
     process.env.TB3_MERCH_AUTO_FULFILLMENT_APPROVED === 'true' &&
     process.env.TB3_PRINTFUL_FUNDING_VERIFIED === 'true' &&
@@ -19,6 +21,11 @@ function ready() {
     !!process.env.EA_STRIPE_CONNECT_SECRET_KEY?.startsWith('sk_live_') &&
     Number.isSafeInteger(Number(process.env.TB3_MERCH_MAX_PRINTFUL_COST_CENTS)) &&
     Number(process.env.TB3_MERCH_MAX_PRINTFUL_COST_CENTS) > 0;
+  if (!configurationOk) return false;
+  try {
+    const merchant = await getStripeMerchantStatus('tarris', stripeMerchantStore);
+    return merchant.status === 'ready' && merchant.chargesEnabled && merchant.payoutsEnabled;
+  } catch { return false; }
 }
 function csvField(value: string | number) {
   const s = String(value).replace(/"/g, '""');
@@ -26,7 +33,7 @@ function csvField(value: string | number) {
 }
 
 export async function GET() {
-  if (!ready()) return NextResponse.json({
+  if (!(await ready())) return NextResponse.json({
     error: 'TB3 catalog is not yet eligible for public sales.',
   }, {status:503,headers:{'Cache-Control':'no-store'}});
   const header = [
