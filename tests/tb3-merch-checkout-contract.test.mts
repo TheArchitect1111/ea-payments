@@ -188,3 +188,9 @@ test('TB3 live launch-readiness diagnostic is private, read-only and never certi
   assert.doesNotMatch(readiness,/method:\s*'POST'/);
   assert.doesNotMatch(readiness,/\/orders\//);
 });
+
+test('TB3 staff portal offers provider readiness check with no live certification shortcut', () => {
+  assert.match(sales,/api\/tb3\/merch\/readiness/);
+  assert.match(sales,/Run private launch-readiness check/);
+  assert.match(sales,/Live sale and repayment are never certified/);
+});
