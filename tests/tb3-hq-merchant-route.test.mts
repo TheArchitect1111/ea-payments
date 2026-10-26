@@ -10,16 +10,15 @@ test('TB3 HQ serves a dedicated merchant setup page, not the EA reports surface'
   assert.match(hq, /href="\/tarris\/future\/payment-setup"/);
   assert.match(page, /MerchantPaymentSetup/);
   assert.match(page, /tenantSlug="tarris"/);
-  assert.match(page, /\['owner', 'admin'\]/);
-  assert.match(page, /session\.slug !== 'tarris'/);
+  assert.match(page, /requireTb3MerchantSession/);
   assert.match(page, /notFound\(\)/);
 });
 
 test('TB3 Stripe return and refresh routes lead to the private HQ', () => {
   const stripe = read('app/api/portal/[slug]/payments/stripe/route.ts');
   assert.equal((stripe.match(/slug === 'tarris' \? '\/tarris\/future\/payment-setup'/g) ?? []).length, 2);
+  assert.match(stripe, /slug === 'tarris'\) return requireTb3MerchantSession\(\)/);
   assert.match(stripe, /session\.slug !== slug/);
-  assert.match(stripe, /\['owner','admin'\]/);
   assert.match(stripe, /Origin mismatch/);
   assert.match(stripe, /Merchant onboarding not configured/);
 });
@@ -30,4 +29,18 @@ test('merchant connection never bypasses live readiness gates', () => {
   const setup = read('lib/bricks/merchant-onboarding/MerchantPaymentSetup.tsx');
   assert.match(setup, /Connect Stripe securely/);
   assert.match(setup, /connect\.stripe\.com/);
+});
+
+test('TB3 merchant onboarding requires active tenant membership and admin authority', () => {
+  const access = read('lib/tb3/merchant-access.ts');
+  assert.match(access, /requirePortalSession\(\{ realm: 'portal' \}\)/);
+  assert.match(access, /hasTb3Identity\(session\)/);
+  assert.match(access, /findMembership\(session\.email, TB3_ORGANIZATION_ID\)/);
+  assert.match(access, /org\?\.status !== 'Active'/);
+  assert.match(access, /member\?\.status !== 'active'/);
+  assert.match(access, /normalizeRole\(member\.role\), 'admin'/);
+  const page = read('app/tarris/future/payment-setup/page.tsx');
+  const api = read('app/api/portal/[slug]/payments/stripe/route.ts');
+  assert.match(page, /requireTb3MerchantSession\(\)/);
+  assert.match(api, /requireTb3MerchantSession\(\)/);
 });
