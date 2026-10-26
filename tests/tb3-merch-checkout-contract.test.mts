@@ -139,6 +139,8 @@ test('TB3 live Printful catalog audit is private, read-only and shared with Meta
   assert.match(verifier, /\/store\/products\?limit=100&offset=/);
   assert.match(verifier, /\/store\/products\//);
   assert.match(verifier, /missingVariants/);
+  assert.match(verifier, /storeProduct.is_ignored===true/);
+  assert.match(verifier, /!Array.isArray\(actual.files\)/);
   assert.doesNotMatch(verifier, /method:\s*'POST'/);
   assert.doesNotMatch(verifier, /\/orders/);
   assert.match(meta, /liveCatalog\.verified/);
