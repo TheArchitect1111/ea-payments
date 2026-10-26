@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import Stripe from 'stripe';
 import { authorize, handled, json } from '@/lib/tb3/server';
+import { stripeMerchantStore } from '@/lib/bricks/merchant-onboarding/stripe-store';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -9,12 +10,14 @@ export async function GET(req: NextRequest) {
   return handled(async () => {
     // Revenue is private business information, even to a signed-in viewer.
     await authorize(req, true);
-    if (!process.env.TB3_STRIPE_SECRET_KEY)
+    if (!process.env.EA_STRIPE_CONNECT_SECRET_KEY || !process.env.EA_MERCHANT_DATABASE_URL)
       return json({error: 'TB3 payment reporting is not configured.'}, 503);
-    const stripe = new Stripe(process.env.TB3_STRIPE_SECRET_KEY);
-    const response = await stripe.checkout.sessions.list({limit: 100});
+    const accountId = await stripeMerchantStore.get('tarris');
+    if (!accountId) return json({error: 'TB3 merchant onboarding incomplete.'}, 503);
+    const stripe = new Stripe(process.env.EA_STRIPE_CONNECT_SECRET_KEY);
+    const response = await stripe.checkout.sessions.list({limit: 100}, {stripeAccount: accountId});
     const paid = response.data.filter(session =>
-      session.metadata?.type === 'tb3_merch' &&
+      session.metadata?.type === 'tb3_merch' && session.metadata?.tenant_id === 'tarris' &&
       session.mode === 'payment' && session.payment_status === 'paid' &&
       session.currency === 'usd' && typeof session.amount_total === 'number');
     return json({
