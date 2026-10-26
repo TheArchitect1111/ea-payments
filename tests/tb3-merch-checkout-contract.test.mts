@@ -8,8 +8,11 @@ const store = read('app/tarris/merch-store.tsx');
 const existingDeposit = read('app/api/checkout/tarris-bouie/route.ts');
 
 test('TB3 checkout is isolated from EA payments and fail-closed', () => {
-  assert.match(checkout, /TB3_STRIPE_SECRET_KEY/);
-  assert.match(checkout, /TB3_STRIPE_WEBHOOK_SECRET/);
+  assert.match(checkout, /EA_STRIPE_CONNECT_SECRET_KEY/);
+  assert.match(checkout, /EA_STRIPE_CONNECT_WEBHOOK_SECRET/);
+  assert.match(checkout, /getStripeMerchantStatus\('tarris', stripeMerchantStore\)/);
+  assert.match(checkout, /stripeAccount: merchant.providerMerchantReference/);
+  assert.doesNotMatch(checkout, /TB3_STRIPE_SECRET_KEY/);
   assert.match(checkout, /TB3_MERCH_DRAFT_FULFILLMENT_APPROVED/);
   assert.doesNotMatch(checkout, /process\.env\.STRIPE_SECRET_KEY/);
   assert.match(checkout, /if \(!enabled\(\)\)/);
@@ -38,7 +41,10 @@ test('TB3 webhook verifies signature and paid status independently', () => {
   assert.match(webhook, /constructEvent\(/);
   assert.match(webhook, /payment_status !== 'paid'/);
   assert.match(webhook, /stripe\.checkout\.sessions\.retrieve/);
-  assert.match(webhook, /TB3_STRIPE_WEBHOOK_SECRET/);
+  assert.match(webhook, /EA_STRIPE_CONNECT_WEBHOOK_SECRET/);
+  assert.match(webhook, /event.account !== expected/);
+  assert.match(webhook, /incoming.metadata.tenant_id !== 'tarris'/);
+  assert.doesNotMatch(webhook, /TB3_STRIPE_WEBHOOK_SECRET/);
   assert.doesNotMatch(webhook, /getStripe\(/);
 });
 test('Printful drafts use stable unique identity and are never auto-confirmed', () => {
@@ -53,7 +59,10 @@ const payments = read('app/api/tb3/merch/payments/route.ts');
 const sales = read('app/portal/components/Tb3MerchSales.tsx');
 test('TB3 Stripe report requires staff authorization and private credentials', () => {
   assert.match(payments, /authorize\(req, true\)/);
-  assert.match(payments, /TB3_STRIPE_SECRET_KEY/);
+  assert.match(payments, /EA_STRIPE_CONNECT_SECRET_KEY/);
+  assert.match(payments, /stripeMerchantStore.get\('tarris'\)/);
+  assert.match(payments, /stripeAccount: accountId/);
+  assert.doesNotMatch(payments, /TB3_STRIPE_SECRET_KEY/);
   assert.match(payments, /payment_status === 'paid'/);
   assert.match(payments, /metadata\?\.type === 'tb3_merch'/);
   assert.match(payments, /hasMore: response.has_more/);
