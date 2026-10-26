@@ -19,7 +19,8 @@ async function authorize(slug: string) {
   return session;
 }
 const configured = () => process.env.EA_STRIPE_CONNECT_ONBOARDING_ENABLED === 'true'
-  && ((process.env.EA_STRIPE_CONNECT_SECRET_KEY?.startsWith('sk_test_') ?? false) ||
+  && ((process.env.EA_STRIPE_CONNECT_SECRET_KEY?.startsWith(
+        process.env.VERCEL_ENV === 'production' ? 'sk_live_' : 'sk_test_') ?? false) ||
       (process.env.VERCEL_ENV === 'preview' &&
        process.env.EA_STRIPE_CONNECT_USE_EXISTING_TEST_KEY === 'true' &&
        (process.env.STRIPE_TEST_SECRET_KEY?.startsWith('sk_test_') ?? false)))
