@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { z } from 'zod';
 import { resolveTb3Cart } from '@/lib/tb3/merch-cart';
 import { tb3Printful } from '@/lib/tb3/printful-client';
+import { auditTb3PrintfulCatalog } from '@/lib/tb3/printful-catalog-audit';
 import { getStripeMerchantStatus } from '@/lib/bricks/merchant-onboarding/stripe-connect';
 import { stripeMerchantStore } from '@/lib/bricks/merchant-onboarding/stripe-store';
 
@@ -20,6 +21,7 @@ const enabled = () => process.env.VERCEL_ENV === 'production'
   && process.env.TB3_MERCH_DRAFT_FULFILLMENT_APPROVED === 'true'
   && process.env.TB3_MERCH_AUTO_FULFILLMENT_APPROVED === 'true'
   && process.env.TB3_PRINTFUL_FUNDING_VERIFIED === 'true'
+  && process.env.TB3_PRINTFUL_CATALOG_VERIFIED === 'true'
   && Number.isSafeInteger(Number(process.env.TB3_MERCH_MAX_PRINTFUL_COST_CENTS))
   && Number(process.env.TB3_MERCH_MAX_PRINTFUL_COST_CENTS) > 0;
 
@@ -58,6 +60,11 @@ export async function POST(req: NextRequest) {
     if (raw.length > 20000) return reply({error: 'Request too large.'}, 413);
     const input = schema.parse(JSON.parse(raw));
     const lines = resolveTb3Cart(input.cart);
+    // An owner attestation alone is insufficient: verify the live Printful
+    // store before creating any customer or paid Stripe Checkout session.
+    const liveCatalog = await auditTb3PrintfulCatalog();
+    if (!liveCatalog.verified)
+      return reply({error: 'TB3 merchandise catalog verification is incomplete.'}, 503);
     const rates = await tb3Printful<ShippingRate[]>('/shipping/rates', {
       method: 'POST',
       body: JSON.stringify({
