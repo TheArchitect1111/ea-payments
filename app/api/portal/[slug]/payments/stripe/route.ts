@@ -50,9 +50,9 @@ export async function POST(req:NextRequest,{params}:{params:Promise<{slug:string
   try {
     const origin = process.env.EA_STRIPE_CONNECT_PORTAL_ORIGIN ||
       'https://' + process.env.VERCEL_URL;
-    const target = new URL('/portal/'+encodeURIComponent(slug)+'/reports',origin);
+    const target = new URL(slug === 'tarris' ? '/tarris/future/payment-setup' : '/portal/'+encodeURIComponent(slug)+'/reports',origin);
     target.searchParams.set('payments','returned');
-    const refresh = new URL('/portal/'+encodeURIComponent(slug)+'/reports',origin);
+    const refresh = new URL(slug === 'tarris' ? '/tarris/future/payment-setup' : '/portal/'+encodeURIComponent(slug)+'/reports',origin);
     refresh.searchParams.set('payments','refresh');
     const linked = await startStripeOnboarding({
       tenantId:slug,ownerEmail:session.email!,
