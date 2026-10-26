@@ -44,3 +44,9 @@ test('TB3 merchant onboarding requires active tenant membership and admin author
   assert.match(page, /requireTb3MerchantSession\(\)/);
   assert.match(api, /requireTb3MerchantSession\(\)/);
 });
+
+test('unauthenticated TB3 visitors reach the real portal login instead of a public-page loop', () => {
+  const layout = read('app/tarris/future/layout.tsx');
+  assert.match(layout, /redirect\('\/portal\/login\?next=%2Ftarris%2Ffuture'\)/);
+  assert.doesNotMatch(layout, /redirect\('\/tarris\?hq=private'\)/);
+});
