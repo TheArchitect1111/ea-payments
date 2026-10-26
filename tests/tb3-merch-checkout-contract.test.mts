@@ -130,14 +130,18 @@ test('TB3 Printful order costs require staff authorization', () => {
   assert.match(orders, /fulfillmentCost/);
 });
 
-test('TB3 live Printful catalog audit is private, read-only and does not create orders', () => {
-  const audit = read('app/api/tb3/printful/catalog-audit/route.ts');
-  assert.match(audit, /authorize\(req, true\)/);
-  assert.match(audit, /\/store\/products\?limit=100&offset=/);
-  assert.match(audit, /\/store\/products\//);
-  assert.match(audit, /missingVariants/);
-  assert.doesNotMatch(audit, /method:\s*'POST'/);
-  assert.doesNotMatch(audit, /\/orders/);
+test('TB3 live Printful catalog audit is private, read-only and shared with Meta feed', () => {
+  const route = read('app/api/tb3/printful/catalog-audit/route.ts');
+  const verifier = read('lib/tb3/printful-catalog-audit.ts');
+  const meta = read('app/api/tb3/merch/meta-catalog/route.ts');
+  assert.match(route, /authorize\(req,true\)/);
+  assert.match(route, /auditTb3PrintfulCatalog/);
+  assert.match(verifier, /\/store\/products\?limit=100&offset=/);
+  assert.match(verifier, /\/store\/products\//);
+  assert.match(verifier, /missingVariants/);
+  assert.doesNotMatch(verifier, /method:\s*'POST'/);
+  assert.doesNotMatch(verifier, /\/orders/);
+  assert.match(meta, /liveCatalog\.verified/);
 });
 
 test('TB3 private report shares the same storefront merchandise manifest', () => {
