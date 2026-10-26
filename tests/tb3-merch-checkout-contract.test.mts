@@ -103,6 +103,13 @@ test('TB3 public page bypasses splash for merchandise referral links', () => {
   assert.match(page, /intro.style.display = 'none'/);
 });
 
+test('TB3 Printful verification button only appears for staff reports', () => {
+  const page = read('app/portal/[slug]/reports/page.tsx');
+  assert.match(page, /canAudit=\{staff\}/);
+  assert.match(sales, /report && canAudit/);
+  assert.match(sales, /api\/tb3\/printful\/catalog-audit/);
+});
+
 test('TB3 live Printful catalog audit is private, read-only and does not create orders', () => {
   const audit = read('app/api/tb3/printful/catalog-audit/route.ts');
   assert.match(audit, /authorize\(req, true\)/);
