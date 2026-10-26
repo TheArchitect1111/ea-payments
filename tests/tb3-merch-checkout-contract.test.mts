@@ -14,6 +14,7 @@ test('TB3 checkout is isolated from EA payments and fail-closed', () => {
   assert.match(checkout, /stripeAccount: merchant.providerMerchantReference/);
   assert.doesNotMatch(checkout, /TB3_STRIPE_SECRET_KEY/);
   assert.match(checkout, /TB3_MERCH_DRAFT_FULFILLMENT_APPROVED/);
+  assert.match(checkout, /process\.env\.VERCEL_ENV === 'production'/);
   assert.doesNotMatch(checkout, /process\.env\.STRIPE_SECRET_KEY/);
   assert.match(checkout, /if \(!enabled\(\)\)/);
 });
@@ -42,6 +43,7 @@ test('TB3 webhook verifies signature and paid status independently', () => {
   assert.match(webhook, /payment_status !== 'paid'/);
   assert.match(webhook, /stripe\.checkout\.sessions\.retrieve/);
   assert.match(webhook, /EA_STRIPE_CONNECT_WEBHOOK_SECRET/);
+  assert.match(webhook, /process\.env\.VERCEL_ENV !== 'production'/);
   assert.match(webhook, /event.account !== expected/);
   assert.match(webhook, /incoming.metadata.tenant_id !== 'tarris'/);
   assert.doesNotMatch(webhook, /TB3_STRIPE_WEBHOOK_SECRET/);
