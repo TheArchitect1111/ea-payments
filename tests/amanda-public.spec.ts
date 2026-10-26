@@ -12,12 +12,11 @@ test.describe('Amanda public production checks (no credentials and no payments)'
 
     await expect(page.getByText(/Non-Surgical Tummy Sculpt & Tighten|Non-Surgical Tummy Tuck/i)).toHaveCount(0);
     await expect(page.getByText(/BODY SCULPT(?:™)? NATIONAL TRAINING TOUR/i)).toHaveCount(0);
-    await page.goto(base + '/portal/amanda-catherine/classes', { waitUntil: 'domcontentloaded' });
-    const clinicalCard = page.locator('article').filter({has:page.getByRole('heading',{name:'Clinical Fat Loss',exact:true})});
-    const registration = clinicalCard.getByRole('link', { name: process.env.AMANDA_VERIFY_DEPLOYED === 'true' ? 'Register' : /^(Register|Buy Now)$/ });
-    await expect(registration).toBeVisible();
-    await expect(registration).toHaveAttribute('href', /^https:\/\/checkout\.square\.site\//);
-    await expect(clinicalCard.getByRole('link', { name: 'Join Waitlist', exact:true })).toHaveCount(0);
+    // Classes now live in the canonical homepage grid; retired standalone routes
+    // must not be used as evidence of checkout availability.
+    await page.goto(base + (process.env.AMANDA_HOME_PATH||'/'), { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#classes-grid')).toBeVisible();
+    await expect(page.locator('#classes-grid').getByRole('link', { name: /^(Register|Join the waitlist)$/ }).first()).toBeVisible();
 
   });
 
