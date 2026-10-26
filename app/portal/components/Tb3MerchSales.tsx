@@ -43,6 +43,9 @@ export default function Tb3MerchSales({ report = false, canAudit = false }: { re
   const [catalogAudit, setCatalogAudit] = useState<{ verified: boolean; matchedProductCount: number; configuredProductCount: number; products: {id:string;status:string}[] } | null>(null);
   const [catalogAuditError, setCatalogAuditError] = useState('');
   const [auditing, setAuditing] = useState(false);
+  const [launchCheck, setLaunchCheck] = useState<{merchantReady:boolean;printfulProductsMatched:number;printfulCatalogVerified:boolean;readyForRealOrderTest:boolean;nextGate:string}|null>(null);
+  const [launchCheckError, setLaunchCheckError] = useState('');
+  const [checkingLaunch, setCheckingLaunch] = useState(false);
 
   function prepareLoad() {
     setLoading(true);
@@ -126,6 +129,31 @@ export default function Tb3MerchSales({ report = false, canAudit = false }: { re
         <p>Amount available for repayment: <strong>Not yet determined</strong></p>
         <p className="mt-3 text-sm">The $500 is a proposed working-capital target, not a verified balance or required Printful fee. Only reconciled net cash after manufacturing, shipping, Stripe fees, taxes, refunds and commitments can fund reserve growth or loan repayment. This panel does not automatically transfer or allocate money.</p>
       </aside>}
+      {report && canAudit && <div className="mt-4 rounded-lg border border-black/15 p-4">
+        <h3 className="text-lg font-bold">TB3 live commerce readiness</h3>
+        <button type="button" className="ep-pulse-cta" disabled={checkingLaunch}
+          onClick={async()=>{
+            setCheckingLaunch(true);setLaunchCheck(null);setLaunchCheckError('');
+            try{
+              const response=await fetch('/api/tb3/merch/readiness',{cache:'no-store'});
+              if(!response.ok)throw new Error('Provider readiness check unavailable.');
+              setLaunchCheck(await response.json());
+            }catch(error){
+              setLaunchCheckError(error instanceof Error?error.message:'Unable to check readiness.');
+            }finally{setCheckingLaunch(false);}
+          }}>
+          {checkingLaunch?'Checking Stripe and Printful...':'Run private launch-readiness check'}
+        </button>
+        {launchCheckError && <p role="alert">{launchCheckError}</p>}
+        {launchCheck && <div role="status" className="mt-3 text-sm">
+          <p>Stripe merchant charges/payouts ready: {launchCheck.merchantReady?'Yes':'No'}</p>
+          <p>Printful products verified: {launchCheck.printfulProductsMatched}/14
+            {launchCheck.printfulCatalogVerified?' (verified)':' (incomplete)'}</p>
+          <p>Ready for separately approved live test order: {launchCheck.readyForRealOrderTest?'Yes':'No'}</p>
+          <p>{launchCheck.nextGate}</p>
+          <p>Live sale and repayment are never certified by this check.</p>
+        </div>}
+      </div>}
       {report && canAudit && <div className="mt-4">
         <button type="button" className="ep-pulse-cta" disabled={auditing}
           onClick={async () => {
