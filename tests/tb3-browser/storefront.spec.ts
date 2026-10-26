@@ -16,7 +16,7 @@ test('TB3 Instagram product link works on mobile with no real checkout', async (
   await page.setViewportSize({width:375,height:812});
   await page.route('**/api/tb3/merch/checkout', route =>
     route.fulfill({status:200,contentType:'application/json',body:'{"available":false}'}));
-  await page.goto('/tarris#merch-tb3-signature-tee-black',{waitUntil:'domcontentloaded'});
+  await page.goto('/tarris?utm_source=instagram&utm_medium=social&utm_campaign=tb3_merch#merch-tb3-signature-tee-black',{waitUntil:'domcontentloaded'});
   await expect(page.locator('[data-product-id]')).toHaveCount(14);
   const card=page.locator('#merch-tb3-signature-tee-black');
   await expect(card).toBeVisible();
