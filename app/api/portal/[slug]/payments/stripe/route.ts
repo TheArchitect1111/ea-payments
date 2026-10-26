@@ -14,7 +14,7 @@ async function authorize(slug: string) {
   const jar = await cookies();
   const sessionToken = jar.get(EA_PORTAL_COOKIE)?.value;
   const session = sessionToken ? await verifySession(sessionToken) : null;
-  if (!session || session.slug !== slug || !['owner','admin'].includes(session.role)
+  if (!session || session.slug !== slug || !['owner','admin'].includes(session.role ?? '')
       || !session.email) return null;
   return session;
 }
