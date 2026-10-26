@@ -77,6 +77,14 @@ test('TB3 Stripe report requires staff authorization and private credentials', (
   assert.match(payments, /hasMore: response.has_more/);
   assert.doesNotMatch(payments, /process\.env\.STRIPE_SECRET_KEY/);
 });
+test('TB3 reserve plan does not invent loan deposits, profits or repayments', () => {
+  assert.match(sales, /Fulfillment reserve/);
+  assert.match(sales, /\$500\.00/);
+  assert.match(sales, /Not yet recorded or verified/);
+  assert.match(sales, /Not yet reconciled/);
+  assert.match(sales, /does not automatically transfer or allocate money/);
+});
+
 test('Portal differentiates Printful fulfillment totals from verified gross', () => {
   assert.match(sales, /api\/tb3\/merch\/payments/);
   assert.match(sales, /Gross collected:/);
