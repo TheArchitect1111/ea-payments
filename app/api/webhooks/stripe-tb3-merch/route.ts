@@ -98,7 +98,8 @@ async function fulfill(session: Stripe.Checkout.Session, connectedAccountId: str
 }
 
 export async function POST(req: NextRequest) {
-  if (process.env.TB3_MERCH_CHECKOUT_ENABLED !== 'true' ||
+  if (process.env.VERCEL_ENV !== 'production' ||
+      process.env.TB3_MERCH_CHECKOUT_ENABLED !== 'true' ||
       process.env.TB3_MERCH_DRAFT_FULFILLMENT_APPROVED !== 'true' ||
       !process.env.EA_STRIPE_CONNECT_SECRET_KEY?.startsWith('sk_live_') ||
       !process.env.EA_STRIPE_CONNECT_WEBHOOK_SECRET ||
