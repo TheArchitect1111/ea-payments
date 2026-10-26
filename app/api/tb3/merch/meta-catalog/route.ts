@@ -1,5 +1,6 @@
 import {NextResponse} from 'next/server';
 import {buildTb3MetaFeed} from '@/lib/tb3/meta-feed';
+import catalog from '@/public/tb3/merch/manifest.json';
 import {getStripeMerchantStatus} from '@/lib/bricks/merchant-onboarding/stripe-connect';
 import {stripeMerchantStore} from '@/lib/bricks/merchant-onboarding/stripe-store';
 import {auditTb3PrintfulCatalog} from '@/lib/tb3/printful-catalog-audit';
@@ -34,7 +35,10 @@ export async function GET() {
   if (!(await ready())) return NextResponse.json({
     error: 'TB3 catalog is not yet eligible for public sales.',
   }, {status:503,headers:{'Cache-Control':'no-store'}});
-  return new NextResponse(buildTb3MetaFeed(),{
+  return new NextResponse(buildTb3MetaFeed({
+    checkoutLive: true,
+    verifiedAvailableVariantIds: new Set(catalog.flatMap(p=>p.variants.map(v=>v.id))),
+  }),{
     status:200,
     headers:{
       'Content-Type':'text/csv; charset=utf-8',
