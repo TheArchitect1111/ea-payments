@@ -34,7 +34,7 @@ test('all 14 TB3 merch images load and product share links remain unique', async
   expect(new Set(links).size).toBe(14);
   for (let i=0;i<14;i++) {
     const img=cards.nth(i).locator('img');
-    await expect(img).toHaveAttribute('src',/^\\/tb3\\/merch\\/mockups\\//);
+    expect((await img.getAttribute('src'))?.startsWith('/tb3/merch/mockups/')).toBe(true);
     await img.scrollIntoViewIfNeeded();
     await expect.poll(async()=>img.evaluate((el:HTMLImageElement)=>el.complete && el.naturalWidth>0))
       .toBe(true);
