@@ -17,8 +17,8 @@ export default async function ReportsPage({ params }: { params: Promise<{ slug: 
   // Read back tenant-specific durable defaults after module authorization.
   const certifiedContent = slug.toLowerCase().startsWith('amanda-catherine')
     ? null : await portalContentDefault(slug, 'reports');
-  const staff=['staff','admin','owner'].includes(session.role);
-  const canManageTb3Payments=['admin','owner'].includes(session.role);
+  const staff=['staff','admin','owner'].includes(session.role ?? '');
+  const canManageTb3Payments=['admin','owner'].includes(session.role ?? '');
   const reports=certifiedContent?await listContent({organizationId:certifiedContent.organizationId,portalSlug:slug},'reports',staff?'staff':'member'):[];
   const isAmanda = slug.toLowerCase().startsWith('amanda-catherine');
   const artifacts = listReportArtifacts(slug, client, access);
