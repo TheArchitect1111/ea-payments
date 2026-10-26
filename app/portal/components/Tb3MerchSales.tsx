@@ -103,7 +103,8 @@ export default function Tb3MerchSales({ report = false }: { report?: boolean }) 
           <p>Gross collected: ${(payments.grossCollectedCents / 100).toFixed(2)} USD</p>
           <p>Stripe fees (recent verified sessions): ${(payments.recentStripeFeeCents / 100).toFixed(2)} USD</p>
           <p>Stripe net (verified session subset): {payments.feeDetailsComplete && payments.recentStripeNetCents !== null
-            ? '
+            ? (payments.recentStripeNetCents / 100).toFixed(2) + ' USD'
+            : 'Reconciliation incomplete'}</p>
           <p>{payments.note}</p>
           {payments.hasMore && <p>Older checkout sessions are not included.</p>}
         </div> : <p role="status">{paymentsMessage || 'Loading verified payment report...'}</p>}
