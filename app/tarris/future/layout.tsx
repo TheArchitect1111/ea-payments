@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { cookies, headers } from 'next/headers';
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { requirePortalSession, resolvePortalSession } from '@/lib/auth/resolve-portal-session';
 import { findMembership } from '@/lib/memberships';
@@ -40,12 +40,8 @@ export default async function TarrisFutureLayout({ children }: { children: React
     Boolean(cookieStore.get('_vercel_jwt')?.value);
 
   if (!verifiedPreviewShare && !(await hasApplicationAccess())) {
-    // Guests need a real sign-in path, not a loop back to the public athlete page.
-    // Preserve the intended TB3 destination after authenticated login.
-    const path = (await headers()).get('x-invoke-path') ?? '/tarris/future/payment-setup';
-    const next = path.startsWith('/tarris/future/') && !path.startsWith('//')
-      ? path : '/tarris/future';
-    redirect('/portal/login?next=' + encodeURIComponent(next));
+    // Preserve private HQ access checks; offer a usable login instead of a public-page loop.
+    redirect('/portal/login?next=%2Ftarris%2Ffuture');
   }
 
   return (
