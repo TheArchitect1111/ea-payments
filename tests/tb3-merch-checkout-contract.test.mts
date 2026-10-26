@@ -103,5 +103,5 @@ test('Stripe fee reporting is tenant scoped and does not claim reserve cash', ()
 test('Portal differentiates Printful fulfillment totals from verified gross', () => {
   assert.match(sales, /api\/tb3\/merch\/payments/);
   assert.match(sales, /Gross collected:/);
-  assert.match(sales, /Retail totals do not confirm payment/);
+  assert.match(sales, /Retail totals and fulfillment costs alone do not establish settled revenue/);
 });
