@@ -22,7 +22,7 @@ test('TB3 Instagram product link works on mobile with no real checkout', async (
   await expect(card).toBeVisible();
   await expect(card.getByText('TB3 Signature Tee - Black')).toBeVisible();
   await expect(card.getByRole('link',{name:/Direct shopping link/}))
-    .toHaveAttribute('href','/tarris#merch-tb3-signature-tee-black');
+    .toHaveAttribute('href','/tarris?utm_source=instagram&utm_medium=social&utm_campaign=tb3_merch#merch-tb3-signature-tee-black');
 });
 
 test('all 14 TB3 merch images load and product share links remain unique', async ({page}) => {
