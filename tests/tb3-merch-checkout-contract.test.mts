@@ -70,8 +70,8 @@ test('Printful drafts use stable identity and confirm only when authorized and w
   assert.match(webhook, /TB3_MERCH_AUTO_FULFILLMENT_APPROVED/);
   assert.match(webhook, /TB3_PRINTFUL_FUNDING_VERIFIED/);
   assert.match(webhook, /TB3_MERCH_MAX_PRINTFUL_COST_CENTS/);
-  assert.match(webhook, /costCents > cap/);
-  assert.match(webhook, /costCents >= expectedSubtotalCents/);
+  assert.match(webhook, /canConfirmTb3PrintfulOrder/);
+  assert.match(webhook, /merchandiseSubtotalCents: expectedSubtotalCents/);
   assert.match(webhook, /process.env.VERCEL_ENV === 'production'/);
   assert.match(webhook, /'\/orders\/' \+ order.id \+ '\/confirm'/);
 });
