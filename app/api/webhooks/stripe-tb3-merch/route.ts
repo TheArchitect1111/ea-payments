@@ -4,6 +4,7 @@ import Stripe from 'stripe';
 import { resolveTb3Cart } from '@/lib/tb3/merch-cart';
 import { PrintfulError, tb3Printful } from '@/lib/tb3/printful-client';
 import { stripeMerchantStore } from '@/lib/bricks/merchant-onboarding/stripe-store';
+import { canConfirmTb3PrintfulOrder } from '@/lib/tb3/fulfillment-approval';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -111,16 +112,16 @@ async function fulfill(session: Stripe.Checkout.Session, connectedAccountId: str
     });
     return;
   }
-  const cap = Number(process.env.TB3_MERCH_MAX_PRINTFUL_COST_CENTS);
-  const total = Number(order.costs?.total);
-  const costCents = Math.round(total * 100);
-  if (!Number.isSafeInteger(cap) || cap <= 0 ||
-      order.costs?.currency !== 'USD' ||
-      order.costs.total === null || order.costs.total === undefined ||
-      !Number.isFinite(total) || !Number.isSafeInteger(costCents) ||
-      costCents <= 0 || costCents > cap ||
-      costCents >= expectedSubtotalCents)
-    throw new Error('Printful cost authorization or price ceiling failed.');
+  const allowed = canConfirmTb3PrintfulOrder({
+    isProduction: process.env.VERCEL_ENV === 'production',
+    ownerApproved: approved,
+    fundingVerified: process.env.TB3_PRINTFUL_FUNDING_VERIFIED === 'true',
+    capCents: Number(process.env.TB3_MERCH_MAX_PRINTFUL_COST_CENTS),
+    cost: order.costs?.total,
+    currency: order.costs?.currency,
+    merchandiseSubtotalCents: expectedSubtotalCents,
+  });
+  if (!allowed) throw new Error('Printful cost authorization or price ceiling failed.');
   await tb3Printful<PrintfulOrder>('/orders/' + order.id + '/confirm', {
     method: 'POST',
   });
