@@ -49,6 +49,13 @@ test('TB3 webhook verifies signature and paid status independently', () => {
   assert.doesNotMatch(webhook, /TB3_STRIPE_WEBHOOK_SECRET/);
   assert.doesNotMatch(webhook, /getStripe\(/);
 });
+test('TB3 paid checkout must reconcile with trusted catalog before Printful draft', () => {
+  assert.match(webhook, /expectedSubtotalCents/);
+  assert.match(webhook, /session.amount_subtotal !== expectedSubtotalCents/);
+  assert.match(webhook, /session.amount_total < expectedSubtotalCents/);
+  assert.match(webhook, /TB3 Stripe payment does not match server catalog totals/);
+});
+
 test('Printful drafts use stable unique identity and are never auto-confirmed', () => {
   assert.match(webhook, /createHash\('sha256'\)/);
   assert.match(webhook, /\/orders\?confirm=false/);
