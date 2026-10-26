@@ -1,5 +1,5 @@
 import {NextResponse} from 'next/server';
-import catalog from '@/public/tb3/merch/manifest.json';
+import {buildTb3MetaFeed} from '@/lib/tb3/meta-feed';
 import {getStripeMerchantStatus} from '@/lib/bricks/merchant-onboarding/stripe-connect';
 import {stripeMerchantStore} from '@/lib/bricks/merchant-onboarding/stripe-store';
 
@@ -27,35 +27,11 @@ async function ready() {
     return merchant.status === 'ready' && merchant.chargesEnabled && merchant.payoutsEnabled;
   } catch { return false; }
 }
-function csvField(value: string | number) {
-  const s = String(value).replace(/"/g, '""');
-  return '"' + s + '"';
-}
-
 export async function GET() {
   if (!(await ready())) return NextResponse.json({
     error: 'TB3 catalog is not yet eligible for public sales.',
   }, {status:503,headers:{'Cache-Control':'no-store'}});
-  const header = [
-    'id','title','description','availability','condition','price',
-    'link','image_link','brand','item_group_id','size'
-  ];
-  const rows = [header.join(',')];
-  for (const product of catalog) {
-    for (const variant of product.variants) {
-      const values = [
-        'tb3-' + variant.id,
-        product.name + ' / ' + variant.size,
-        'Official TB3 Tarris Bouie personal-brand merchandise. Not affiliated with University of Alabama.',
-        'in stock','new',variant.price.toFixed(2) + ' USD',
-        'https://tb3.online/tarris#merch-' + product.id,
-        'https://tb3.online' + product.image,
-        'TB3',product.id,variant.size,
-      ];
-      rows.push(values.map(csvField).join(','));
-    }
-  }
-  return new NextResponse(rows.join('\n') + '\n',{
+  return new NextResponse(buildTb3MetaFeed(),{
     status:200,
     headers:{
       'Content-Type':'text/csv; charset=utf-8',
