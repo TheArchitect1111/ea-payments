@@ -7,6 +7,12 @@ const checkout = read('app/api/tb3/merch/checkout/route.ts');
 const store = read('app/tarris/merch-store.tsx');
 const existingDeposit = read('app/api/checkout/tarris-bouie/route.ts');
 
+test('TB3 cannot collect customer payment while Printful funding is unverified', () => {
+  assert.match(checkout, /TB3_MERCH_AUTO_FULFILLMENT_APPROVED === 'true'/);
+  assert.match(checkout, /TB3_PRINTFUL_FUNDING_VERIFIED === 'true'/);
+  assert.match(checkout, /Number\.isSafeInteger\(Number\(process\.env\.TB3_MERCH_MAX_PRINTFUL_COST_CENTS\)\)/);
+});
+
 test('TB3 checkout is isolated from EA payments and fail-closed', () => {
   assert.match(checkout, /EA_STRIPE_CONNECT_SECRET_KEY/);
   assert.match(checkout, /EA_STRIPE_CONNECT_WEBHOOK_SECRET/);
