@@ -29,6 +29,9 @@ export default function Tb3MerchSales({ report = false, canAudit = false }: { re
   const [source, setSource] = useState('');
   const [payments, setPayments] = useState<{
     verifiedPaidOrderCount: number;
+    attributedInstagramOrders: number;
+    attributedInstagramGrossCents: number;
+    attributionNote: string;
     grossCollectedCents: number;
     feeDetailsComplete: boolean;
     recentStripeFeeCents: number;
@@ -105,6 +108,8 @@ export default function Tb3MerchSales({ report = false, canAudit = false }: { re
         {payments ? <div role="status">
           <p>Verified paid checkouts (most recent 100 sessions): {payments.verifiedPaidOrderCount}</p>
           <p>Gross collected: ${(payments.grossCollectedCents / 100).toFixed(2)} USD</p>
+          <p>Instagram-attributed paid orders: {payments.attributedInstagramOrders} · Gross ${(payments.attributedInstagramGrossCents / 100).toFixed(2)} USD</p>
+          <p className="text-sm">{payments.attributionNote}</p>
           <p>Stripe fees (recent verified sessions): ${(payments.recentStripeFeeCents / 100).toFixed(2)} USD</p>
           <p>Stripe net (verified session subset): {payments.feeDetailsComplete && payments.recentStripeNetCents !== null
             ? (payments.recentStripeNetCents / 100).toFixed(2) + ' USD'
