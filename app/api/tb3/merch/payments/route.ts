@@ -20,18 +20,23 @@ export async function GET(req: NextRequest) {
       session.metadata?.type === 'tb3_merch' && session.metadata?.tenant_id === 'tarris' &&
       session.mode === 'payment' && session.payment_status === 'paid' &&
       session.currency === 'usd' && typeof session.amount_total === 'number');
-    const paymentDetails = await Promise.all(paid.map(async session => {
-      if (typeof session.payment_intent !== 'string') return null;
-      const intent = await stripe.paymentIntents.retrieve(session.payment_intent,
-        {expand: ['latest_charge.balance_transaction']}, {stripeAccount: accountId});
-      const charge = intent.latest_charge;
-      if (!charge || typeof charge === 'string' || charge.refunded ||
-          (charge.amount_refunded ?? 0) > 0 || charge.disputed) return null;
-      const balance = charge.balance_transaction;
-      if (!balance || typeof balance === 'string' || balance.currency !== 'usd') return null;
-      return {reference: session.id, stripeFeeCents: balance.fee,
-        stripeNetCents: balance.net, chargeStatus: charge.status};
-    }));
+    // Bound provider calls so larger sales histories do not overwhelm Stripe.
+    const paymentDetails: ({reference:string;stripeFeeCents:number;stripeNetCents:number;chargeStatus:string}|null)[] = [];
+    for (let i = 0; i < paid.length; i += 5) {
+      const batch = await Promise.all(paid.slice(i, i + 5).map(async session => {
+        if (typeof session.payment_intent !== 'string') return null;
+        const intent = await stripe.paymentIntents.retrieve(session.payment_intent,
+          {expand: ['latest_charge.balance_transaction']}, {stripeAccount: accountId});
+        const charge = intent.latest_charge;
+        if (!charge || typeof charge === 'string' || charge.refunded ||
+            (charge.amount_refunded ?? 0) > 0 || charge.disputed) return null;
+        const balance = charge.balance_transaction;
+        if (!balance || typeof balance === 'string' || balance.currency !== 'usd') return null;
+        return {reference: session.id, stripeFeeCents: balance.fee,
+          stripeNetCents: balance.net, chargeStatus: charge.status};
+      }));
+      paymentDetails.push(...batch);
+    }
     const fullyReconciled = !response.has_more && paymentDetails.every(x => x !== null);
     return json({
       currency: 'USD',
