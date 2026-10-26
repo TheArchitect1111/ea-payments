@@ -8,6 +8,8 @@ type Order = {
   products: { name: string; quantity: number }[];
   retailTotal: string | number | null;
   currency: string | null;
+  fulfillmentCost: string | number | null;
+  fulfillmentCurrency: string | null;
   shipments: {
     carrier: string;
     trackingNumber: string;
@@ -91,7 +93,7 @@ export default function Tb3MerchSales({ report = false }: { report?: boolean }) 
     {visible && <div>
       <button type="button" className="ep-pulse-cta" disabled={loading}
         onClick={() => { prepareLoad(); setRefresh(value => value + 1); }}>Refresh orders</button>
-      <p>Fulfillment status and tracking from Printful. Retail totals do not confirm payment, revenue, profits, refunds, or payouts.</p>
+      <p>Fulfillment status, tracking, and available manufacturing costs from Printful. These figures are not proof of an actual charge. Retail totals and fulfillment costs alone do not establish settled revenue, net profit, refunds, or payouts.</p>
       {report && <>
         {payments ? <div role="status">
           <p>Verified paid checkouts (most recent 100 sessions): {payments.verifiedPaidOrderCount}</p>
@@ -116,7 +118,7 @@ export default function Tb3MerchSales({ report = false }: { report?: boolean }) 
           <table className="ep-data-table">
             <thead><tr>
               <th>Order</th><th>Products</th><th>Status</th>
-              <th>Tracking</th><th>Retail total</th>
+              <th>Tracking</th><th>Retail total</th><th>Printful cost</th>
             </tr></thead>
             <tbody>{orders.map(order => <tr key={order.id}>
               <td>{order.reference}</td>
@@ -133,6 +135,9 @@ export default function Tb3MerchSales({ report = false }: { report?: boolean }) 
               <td>{order.retailTotal === null
                 ? 'Not provided'
                 : String(order.retailTotal) + ' ' + (order.currency || '')}</td>
+              <td>{order.fulfillmentCost === null
+                ? 'Not provided'
+                : String(order.fulfillmentCost) + ' ' + (order.fulfillmentCurrency || '')}</td>
             </tr>)}</tbody>
           </table>
         </div>
