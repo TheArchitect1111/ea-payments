@@ -66,7 +66,7 @@ export default function TarrisPublicPage() {
     const intro = document.getElementById("tarris-splash-intro");
     if (!intro) return;
     // Instagram merchandise deep links should open the item immediately.
-    if (/^#merch(?:-\\d+)?$/.test(window.location.hash)) {
+    if (/^#merch(?:-\d+)?$/.test(window.location.hash)) {
       intro.style.display = 'none';
       document.getElementById('site')?.classList?.add('visible');
       window.requestAnimationFrame(() => {
