@@ -103,6 +103,16 @@ test('TB3 public page bypasses splash for merchandise referral links', () => {
   assert.match(page, /intro.style.display = 'none'/);
 });
 
+test('TB3 live Printful catalog audit is private, read-only and does not create orders', () => {
+  const audit = read('app/api/tb3/printful/catalog-audit/route.ts');
+  assert.match(audit, /authorize\(req, true\)/);
+  assert.match(audit, /\/store\/products\?limit=100&offset=/);
+  assert.match(audit, /\/store\/products\//);
+  assert.match(audit, /missingVariants/);
+  assert.doesNotMatch(audit, /method:\s*'POST'/);
+  assert.doesNotMatch(audit, /\/orders/);
+});
+
 test('TB3 private report shares the same storefront merchandise manifest', () => {
   const storefront = read('app/tarris/merch-store.tsx');
   assert.match(storefront, /public\/tb3\/merch\/manifest\.json/);
