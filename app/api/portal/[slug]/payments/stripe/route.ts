@@ -37,8 +37,8 @@ export async function GET(_req: NextRequest,{params}:{params:Promise<{slug:strin
       if (conn?.stripe_account_id) {
         try {
           const verified = await verifyDirectAccount(conn.stripe_account_id);
-          return respond({available:true,mode:'direct',status: verified.ready ? 'active':'pending',chargesEnabled:verified.charges_enabled,payoutsEnabled:verified.payouts_enabled,accountId:verified.accountId});
-        } catch { return respond({available:true,mode:'direct',status:'pending',chargesEnabled:false,payoutsEnabled:false,storedAccountId:conn.stripe_account_id}); }
+          return respond({available:true,mode:'direct',status: verified.ready ? 'active':'pending',chargesEnabled:verified.charges_enabled,payoutsEnabled:verified.payouts_enabled});
+        } catch { return respond({available:true,mode:'direct',status:'pending',chargesEnabled:false,payoutsEnabled:false}); }
       }
       return respond({available:true,mode:'direct',status:'setup_required'});
     } catch { return respond({available:false,mode:'direct',status:'setup_required',diagnostic:'provider_or_database'},503); }
