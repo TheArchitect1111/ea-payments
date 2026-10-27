@@ -80,7 +80,7 @@ async function tb3DirectOnboard(req: NextRequest) {
   if (!approvedTb3Code(input.approvalCode))
     return respond({error:'TB3 approval required'},403);
   const ownerEmail = typeof input.familyEmail === 'string' ? input.familyEmail.trim().toLowerCase() : '';
-  if (ownerEmail.length > 254 || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(ownerEmail))
+  if (ownerEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmail))
     return respond({error:'Valid family email required'},400);
   const accountId = typeof input.accountId === 'string' ? input.accountId.trim() : '';
   if (!/^acct_[A-Za-z0-9]+$/.test(accountId))
