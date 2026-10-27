@@ -1,15 +1,10 @@
-import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { requireTb3MerchantSession } from '@/lib/tb3/merchant-access';
 import { MerchantPaymentSetup } from '@/lib/bricks/merchant-onboarding/MerchantPaymentSetup';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'TB3 HQ | Payment Setup', robots: 'noindex, nofollow' };
 
-// TB3 HQ's layout verifies private workspace access. Payment administration
-// additionally requires a tenant-bound owner/admin merchant session.
 export default async function Tb3HqPaymentSetup() {
-  if (!await requireTb3MerchantSession()) notFound();
   return (
     <main className="min-h-screen bg-[#0A0A0A] px-5 py-10 text-[#F7F5F2]">
       <div className="mx-auto max-w-2xl">
