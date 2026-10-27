@@ -131,15 +131,25 @@ export async function POST(req:NextRequest,{params}:{params:Promise<{slug:string
       'https://' + process.env.VERCEL_URL;
     const target = new URL(slug === 'tarris' ? '/tarris/future/payment-setup' : '/portal/'+encodeURIComponent(slug)+'/reports',origin);
     target.searchParams.set('payments','returned');
+    if (sandbox) target.searchParams.set('sandbox','1');
     const refresh = new URL(slug === 'tarris' ? '/tarris/future/payment-setup' : '/portal/'+encodeURIComponent(slug)+'/reports',origin);
     refresh.searchParams.set('payments','refresh');
+    if (sandbox) refresh.searchParams.set('sandbox','1');
     const linked = await startStripeOnboarding({
       tenantId:sandbox ? 'tarris-sandbox' : slug,ownerEmail,
       returnUrl:target.toString(),refreshUrl:refresh.toString(),
       store:stripeMerchantStore,
     });
     return respond({url:linked.url});
-  } catch {
+  } catch (error) {
+    // Preview-only troubleshooting without logging credentials, emails or account IDs.
+    if (slug === 'tarris' && process.env.VERCEL_ENV === 'preview') {
+      const type = error instanceof Error ? error.name : 'UnknownError';
+      const code = error && typeof error === 'object' && 'code' in error
+        && typeof error.code === 'string' ? error.code : 'unknown';
+      console.error('TB3_STRIPE_ONBOARDING_FAILURE', {type,code,sandbox});
+      return respond({error:'Unable to initiate secure Stripe onboarding',diagnostic:'onboarding_failed',errorType:type,errorCode:code},503);
+    }
     return respond({error:'Unable to initiate secure Stripe onboarding'},503);
   }
 }
