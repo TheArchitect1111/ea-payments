@@ -45,9 +45,12 @@ export async function startStripeOnboarding(input: {
       throw new Error('Untrusted return URL');
   }
   const stripe = platformStripe();
+  let stage = 'lookup';
+  try {
   let accountId = await store.get(tenantId);
   if (!accountId) {
     // Standard onboarding: merchant owns Stripe dashboard and bank relationship.
+    stage = 'create_account';
     const created = await stripe.accounts.create({
       type: 'standard',
       country: 'US',
@@ -56,17 +59,28 @@ export async function startStripeOnboarding(input: {
       metadata: { ea_tenant_id: tenantId },
     }, { idempotencyKey: 'ea-connect-create-' + tenantId });
     // Atomic insert prevents reassignment in concurrent requests.
+    stage = 'save_mapping';
     accountId = await store.putIfAbsent(tenantId, created.id);
     if (accountId !== created.id) throw new Error('Concurrent account mapping changed; retry onboarding');
   }
+  stage = 'retrieve_account';
   const account = await stripe.accounts.retrieve(accountId);
   if (account.metadata?.ea_tenant_id !== tenantId || account.type !== 'standard')
     throw new Error('Connected account tenant or type mismatch');
+  stage = 'create_link';
   const link = await stripe.accountLinks.create({
     account: accountId, type: 'account_onboarding',
     refresh_url: refreshUrl, return_url: returnUrl,
   });
   return { accountId, url: link.url };
+  } catch (error) {
+    if (tenantId === 'tarris-sandbox' && process.env.VERCEL_ENV === 'preview') {
+      const stripeType = error && typeof error === 'object' && 'type' in error && typeof error.type === 'string' ? error.type : 'unknown';
+      console.error('TB3_SANDBOX_CONNECT_STAGE', {stage, stripeType});
+      throw new Error('TB3_SANDBOX_STAGE_' + stage);
+    }
+    throw error;
+  }
 }
 
 export async function getStripeMerchantStatus(
