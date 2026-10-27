@@ -32,6 +32,7 @@ export function MerchantPaymentSetup({
   const [error, setError] = useState('');
   const [familyEmail, setFamilyEmail] = useState('');
   const [approvalCode, setApprovalCode] = useState('');
+  const [accountId, setAccountId] = useState('');
   useEffect(() => {
     if (!tenantSlug) return;
     let active = true;
@@ -45,8 +46,8 @@ export function MerchantPaymentSetup({
   async function begin() {
     if ((provider !== 'stripe' && provider !== 'bank') || !tenantSlug || working) return;
     if (tenantSlug === 'tarris' &&
-        (!familyEmail || !approvalCode)) {
-      setError('Enter the approved family email and setup code.');
+        (!familyEmail || !approvalCode || !accountId)) {
+      setError('Enter the approved family email, setup code, and Stripe account ID.');
       return;
     }
     setWorking(true);
@@ -57,13 +58,18 @@ export function MerchantPaymentSetup({
           method:'POST',
           credentials:'same-origin',
           headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({
-            familyEmail,
-            approvalCode,
-            sandbox
-          })
+          body:JSON.stringify(tenantSlug === 'tarris'
+            ? {familyEmail, approvalCode, accountId, sandbox}
+            : {familyEmail, approvalCode, sandbox})
         });
       const payload = await response.json();
+      if (tenantSlug === 'tarris') {
+        if (!response.ok || payload.ok !== true || payload.mode !== 'direct')
+          throw new Error(payload.error || 'Stripe account verification is not available.');
+        setStatus(payload.ready ? 'active' : 'pending');
+        setWorking(false);
+        return;
+      }
       if (!response.ok || typeof payload.url !== 'string')
         throw new Error(payload.errorCode && sandbox ? 'Stripe setup failed (' + payload.errorType + ': ' + payload.errorCode + ').' : payload.error || 'Secure onboarding is not yet available.');
       const url = new URL(payload.url);
@@ -91,9 +97,9 @@ export function MerchantPaymentSetup({
     {tenantSlug === 'tarris' ? (
       <p className="mt-4 text-sm">
         {provider === 'bank'
-          ? 'Add an eligible checking or savings account to receive TB3 merchandise payouts. Stripe securely collects and verifies your bank details. This is not a separate direct-bank processor.'
+          ? 'Configure bank payouts in the family’s existing Stripe Dashboard. Enter the family Stripe account ID below to verify its payment and payout capabilities. No bank details are collected here.'
           : provider === 'stripe'
-            ? 'Connect a Stripe account and configure an eligible bank account for payouts during setup.'
+            ? 'Verify the family-owned Stripe account ID below. This does not create an account, activate checkout, or configure bank payouts.'
             : 'PayPal Business onboarding is not connected yet. You cannot add a PayPal payout account here today.'}
       </p>
     ) : (
@@ -123,6 +129,17 @@ export function MerchantPaymentSetup({
           />
         </label>
         <label className="text-sm font-semibold">
+          Stripe account ID (acct_...)
+          <input
+            type="text"
+            autoComplete="off"
+            className="mt-2 block w-full rounded border p-3"
+            placeholder="acct_..."
+            value={accountId}
+            onChange={e => setAccountId(e.target.value)}
+          />
+        </label>
+        <label className="text-sm font-semibold">
           TB3 setup approval code
           <input
             type="password"
@@ -138,7 +155,7 @@ export function MerchantPaymentSetup({
       ? <button type="button" className="mt-4 min-h-11 rounded bg-black px-5 py-3 text-white"
           onClick={() => { if (provider !== 'bank') onBeginProviderSetup(provider); }}>Begin secure provider setup</button>
       : tenantSlug && (provider === 'stripe' || provider === 'bank') ?
-        <button type="button" disabled={working} className="mt-4 min-h-11 rounded bg-black px-5 py-3 text-white disabled:opacity-50" onClick={begin}>{working ? 'Opening Stripe…' : provider === 'bank' ? 'Add bank account through Stripe' : 'Connect Stripe securely'}</button>
+        <button type="button" disabled={working} className="mt-4 min-h-11 rounded bg-black px-5 py-3 text-white disabled:opacity-50" onClick={begin}>{working ? 'Verifying…' : tenantSlug === 'tarris' ? 'Verify family Stripe account' : provider === 'bank' ? 'Add bank account through Stripe' : 'Connect Stripe securely'}</button>
       : <p className="mt-4 text-sm">Secure provider setup is not yet connected.
           No bank information is collected here and payments remain disabled.</p>}
   </section>;
