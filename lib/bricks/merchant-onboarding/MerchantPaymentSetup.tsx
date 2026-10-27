@@ -82,7 +82,7 @@ export function MerchantPaymentSetup({
         value={provider} onChange={event => { setProvider(event.target.value as PaymentProvider | 'bank'); setError(''); }}>
         {tenantSlug === 'tarris' ? <option value="bank">Bank account (payouts via Stripe)</option> : null}
         <option value="stripe">Stripe</option>
-        <option value="paypal">PayPal Business (setup unavailable)</option>
+        <option value="paypal">{tenantSlug === 'tarris' ? 'PayPal Business (setup unavailable)' : 'PayPal Business'}</option>
       </select>
     </label>
     {tenantSlug === 'tarris' ? (
