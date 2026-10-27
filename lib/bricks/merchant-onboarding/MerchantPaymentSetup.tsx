@@ -29,6 +29,8 @@ export function MerchantPaymentSetup({
   const [status, setStatus] = useState<MerchantConnectionStatus>(connectionStatus);
   const [working, setWorking] = useState(false);
   const [error, setError] = useState('');
+  const [familyEmail, setFamilyEmail] = useState('');
+  const [approvalCode, setApprovalCode] = useState('');
   useEffect(() => {
     if (!tenantSlug) return;
     let active = true;
@@ -41,11 +43,24 @@ export function MerchantPaymentSetup({
   }, [tenantSlug]);
   async function begin() {
     if (provider !== 'stripe' || !tenantSlug || working) return;
+    if (tenantSlug === 'tarris' &&
+        (!familyEmail || !approvalCode)) {
+      setError('Enter the approved family email and setup code.');
+      return;
+    }
     setWorking(true);
     setError('');
     try {
       const response = await fetch('/api/portal/' + encodeURIComponent(tenantSlug) + '/payments/stripe',
-        {method:'POST',credentials:'same-origin'});
+        {
+          method:'POST',
+          credentials:'same-origin',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            familyEmail,
+            approvalCode
+          })
+        });
       const payload = await response.json();
       if (!response.ok || typeof payload.url !== 'string')
         throw new Error('Secure onboarding is not yet available.');
@@ -78,6 +93,31 @@ export function MerchantPaymentSetup({
       country, account capabilities, and integration configuration.</p>
     <p role="status" className="mt-4 text-sm">Connection status: {status.replaceAll('_', ' ')}</p>
     {error ? <p role="alert" className="mt-2 text-sm">{error}</p> : null}
+
+    {tenantSlug === 'tarris' && provider === 'stripe' ? (
+      <div className="mt-4 grid gap-3">
+        <label className="text-sm font-semibold">
+          Family representative email
+          <input
+            type="email"
+            autoComplete="email"
+            className="mt-2 block w-full rounded border p-3"
+            value={familyEmail}
+            onChange={e => setFamilyEmail(e.target.value)}
+          />
+        </label>
+        <label className="text-sm font-semibold">
+          TB3 setup approval code
+          <input
+            type="password"
+            autoComplete="off"
+            className="mt-2 block w-full rounded border p-3"
+            value={approvalCode}
+            onChange={e => setApprovalCode(e.target.value)}
+          />
+        </label>
+      </div>
+    ) : null}
     {onBeginProviderSetup
       ? <button type="button" className="mt-4 min-h-11 rounded bg-black px-5 py-3 text-white"
           onClick={() => onBeginProviderSetup(provider)}>Begin secure provider setup</button>
