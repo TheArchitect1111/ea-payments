@@ -61,10 +61,10 @@ async function tb3DirectStatus(sandbox: boolean) {
       return respond({available:true,mode:'direct',status:'setup_required'});
     try {
       const verified = await verifyDirectAccount(conn.stripe_account_id);
-      return respond({available:true,mode:'direct',status:verified.ready ? 'active' : 'pending',
+      return respond({available:true,mode:'direct',status:verified.ready ? 'ready' : 'pending_provider',
         chargesEnabled:verified.charges_enabled,payoutsEnabled:verified.payouts_enabled});
     } catch {
-      return respond({available:true,mode:'direct',status:'pending',
+      return respond({available:true,mode:'direct',status:'pending_provider',
         chargesEnabled:false,payoutsEnabled:false});
     }
   } catch {
