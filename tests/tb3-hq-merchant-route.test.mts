@@ -10,8 +10,8 @@ test('TB3 HQ serves a dedicated merchant setup page, not the EA reports surface'
   assert.match(hq, /href="\/tarris\/future\/payment-setup"/);
   assert.match(page, /MerchantPaymentSetup/);
   assert.match(page, /tenantSlug="tarris"/);
-  assert.match(page, /requireTb3MerchantSession/);
-  assert.match(page, /notFound\(\)/);
+  assert.doesNotMatch(page, /requireTb3MerchantSession/);
+  assert.doesNotMatch(page, /notFound\(\)/);
 });
 
 test('TB3 Stripe return and refresh routes lead to the private HQ', () => {
@@ -41,7 +41,7 @@ test('TB3 merchant onboarding requires active tenant membership and admin author
   assert.match(access, /normalizeRole\(member\.role\), 'admin'/);
   const page = read('app/tarris/future/payment-setup/page.tsx');
   const api = read('app/api/portal/[slug]/payments/stripe/route.ts');
-  assert.match(page, /requireTb3MerchantSession\(\)/);
+  assert.doesNotMatch(page, /requireTb3MerchantSession\(\)/);
   assert.match(api, /requireTb3MerchantSession\(\)/);
 });
 

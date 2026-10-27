@@ -1,8 +1,0 @@
-'use client';
-import { useState, type FormEvent } from 'react';
-export default function FamilyStripeForm() {
- const [email,setEmail]=useState(''),[url,setUrl]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
- async function submit(e:FormEvent){e.preventDefault();setBusy(true);setError('');setUrl('');
-  try {const r=await fetch('/api/tb3/family-stripe-setup',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({familyEmail:email})});const j=await r.json();if(!r.ok||typeof j.url!=='string'||new URL(j.url).hostname!=='connect.stripe.com')throw Error(j.error||'Stripe setup unavailable');setUrl(j.url);}catch(e){setError(e instanceof Error?e.message:'Setup failed');}finally{setBusy(false)} }
- return <section className="mx-auto max-w-xl rounded-xl border p-6"><h1 className="text-2xl font-bold">Bouie family Stripe connection</h1><p className="my-4">Authorized EA administrator: enter the approved Bouie family member's email, then share the Stripe link privately. Family members need no TB3 login.</p><form onSubmit={submit} className="grid gap-3"><label htmlFor="family-email">Family representative email</label><input id="family-email" required type="email" className="border p-3" value={email} onChange={e=>setEmail(e.target.value)}/><button disabled={busy} className="bg-black p-3 text-white" type="submit">{busy?'Opening Stripe…':'Create Stripe connection link'}</button></form>{error&&<p role="alert">{error}</p>}{url&&<div className="mt-4"><a className="break-all underline" href={url} target="_blank" rel="noreferrer">Open Stripe</a><button className="ml-2 border p-2" type="button" onClick={()=>navigator.clipboard.writeText(url)}>Copy link</button></div>}</section>;
-}
