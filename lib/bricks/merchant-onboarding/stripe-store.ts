@@ -20,7 +20,7 @@ function getMerchantConfig() {
   return url.toString();
 }
 async function withMerchantDb<T>(fn:(client:Client)=>Promise<T>):Promise<T> {
-  const client=new Client({connectionString:getMerchantConfig(),ssl:{rejectUnauthorized:true},connectionTimeoutMillis:5000,query_timeout:8000,statement_timeout:8000});
+  const client=new Client({connectionString:getMerchantConfig(),ssl:{rejectUnauthorized:true,...(process.env.EA_MERCHANT_DB_CA_PEM ? {ca:process.env.EA_MERCHANT_DB_CA_PEM} : {})},connectionTimeoutMillis:5000,query_timeout:8000,statement_timeout:8000});
   await client.connect();
   try { return await fn(client); } finally { await client.end(); }
 }
