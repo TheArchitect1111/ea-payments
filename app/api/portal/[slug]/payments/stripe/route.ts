@@ -93,7 +93,7 @@ export async function POST(req:NextRequest,{params}:{params:Promise<{slug:string
 
     if (
       ownerEmail.length > 254 ||
-      !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(ownerEmail)
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmail)
     ) {
       return respond({error:'Valid family email required'},400);
     }
