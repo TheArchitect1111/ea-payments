@@ -13,10 +13,13 @@ export type ConnectedAccountStore = {
 };
 
 function platformStripe() {
-  const key = process.env.EA_STRIPE_CONNECT_SECRET_KEY ||
-    (process.env.VERCEL_ENV === 'preview' && process.env.EA_STRIPE_CONNECT_USE_EXISTING_TEST_KEY === 'true'
-      ? process.env.STRIPE_TEST_SECRET_KEY : undefined);
   const expectedPrefix = process.env.VERCEL_ENV === 'production' ? 'sk_live_' : 'sk_test_';
+  const preferred = process.env.EA_STRIPE_CONNECT_SECRET_KEY;
+  const fallback = process.env.VERCEL_ENV === 'preview' &&
+    process.env.EA_STRIPE_CONNECT_USE_EXISTING_TEST_KEY === 'true'
+      ? process.env.STRIPE_TEST_SECRET_KEY : undefined;
+  // A stale Connect-specific secret must not shadow an enabled, valid preview test key.
+  const key = preferred?.startsWith(expectedPrefix) ? preferred : fallback;
   if (!key || !key.startsWith(expectedPrefix))
     throw new Error('Stripe Connect key does not match deployment environment');
   return new Stripe(key);
