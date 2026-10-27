@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createEACommsBrick, type EACommsBrick } from '../index';
-import { createCheckoutAdapter } from '../../adapters/checkout.adapter';
+import { checkoutAdapter } from '../../adapters/checkout.adapter';
 import type { Brick, CheckoutResult } from '../../BrickInterface';
 import { TEMPLATE_REQUIREMENTS } from '../templates';
 import type { CommsAuditRow, CommsAuditTable } from '../sendTemplate';
@@ -59,12 +59,12 @@ const contact = { email: 'RECIPIENT@example.com', verified: true as const };
 
 // Both variants must satisfy the chassis contract without ts-ignore or changed payment logic.
 const typedComms: EACommsBrick = brick;
-const typedPayment: Brick = createCheckoutAdapter();
+const typedPayment: Brick = checkoutAdapter;
 test('generic chassis socket typing preserves legacy payment adapter', async () => {
   assert.equal(typedComms.price().currency, 'CAD');
   assert.equal((await typedComms.checkout({ type: 'stripe-test', courseId: 'example' })).notApplicable, true);
   const paid: CheckoutResult = await typedPayment.checkout({ type: 'stripe-test', courseId: 'example' });
-  assert.match(paid.sessionId, /^cs_test_/);
+  assert.match(paid.sessionId, /^cs_\d+_checkout$/);
   assert.ok(paid.entitlement.length > 0);
 });
 

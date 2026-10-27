@@ -2,10 +2,11 @@
 // Public TB3 story and storefront. Official images are single-use on this surface.
 // WIRED: TB3 / -> /tarris -> ENTER TB3 HQ -> /tarris/future.
 import Link from "next/link";
+import { Tb3MerchStore } from "./merch-store";
 import { ChassisPreview } from "./chassis-preview";
 import BookingForm from "./book/booking-form";
 import { Tb3FilmGrid } from "./tb3-film";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 const pillars = [
   ["ATHLETE", "Discipline in the classroom. Determination on the court.", "LEARN MORE"],
@@ -35,21 +36,6 @@ const pillarAssets: Record<string, ImageAsset[]> = {
     { id: "community-secondary", asset: "OFFICIAL_12_KIDS_ART.png", alt: "Young people working on art together", ratio: "aspect-[4/3]" },
   ],
 };
-type MerchProduct = { id: string; image: string; label: string; price: string; redImage?: string };
-const merchProducts: MerchProduct[] = [
-  { id: "merch-short-red", image: "MOCK_TEE_SHORT_RED.jpg", label: "TB3 TEE - RED", price: "$35" },
-  { id: "merch-short-white", image: "MOCK_TEE_SHORT_WHITE.jpg", label: "TB3 TEE - WHITE", price: "$35" },
-  { id: "merch-long-red", image: "MOCK_TEE_LONG_RED.jpg", label: "TB3 LONG SLEEVE - RED", price: "$45" },
-  { id: "merch-long-white", image: "MOCK_TEE_LONG_WHITE.jpg", label: "TB3 LONG SLEEVE - WHITE", price: "$45" },
-  { id: "merch-cap", image: "MOCK_HAT_WHITE.jpg", redImage: "MOCK_HAT_RED.jpg", label: "TB3 CAP - WHITE", price: "$30" },
-  { id: "merch-hoodie-red", image: "MOCK_HOODIE_RED.jpg", label: "TB3 HOODIE - RED", price: "$75" },
-  { id: "merch-hoodie-white", image: "MOCK_HOODIE_WHITE.jpg", label: "TB3 HOODIE - WHITE", price: "$75" },
-  { id: "merch-hoodie-premium", image: "MOCK_HOODIE_WHITE_LOGO_DETAIL_1.jpg", label: "TB3 HOODIE - PREMIUM LOGO", price: "$85" },
-  { id: "tb3-sig-collage-tee-black", image: "tb3/merch/collage-sig-black.jpg", label: "TB3 Collage Signature Tee - Black", price: "$65" },
-  { id: "tb3-sig-collage-hoodie-black", image: "tb3/merch/collage-sig-black.jpg", label: "TB3 Collage Signature Hoodie - Black", price: "$65" },
-  { id: "tb3-sig-collage-tee-white", image: "tb3/merch/collage-sig-white.jpg", label: "TB3 Collage Signature Tee - White", price: "$65" },
-  { id: "tb3-sig-collage-hoodie-white", image: "tb3/merch/collage-sig-white.jpg", label: "TB3 Collage Signature Hoodie - White", price: "$65" },
-];
 const nav = ["HOME", "ATHLETE", "STORY", "BRAND", "NIL", "COMMUNITY", "MEDIA", "MERCH", "FUTURE"];
 
 type ImageAsset = { id: string; asset: string; alt: string; ratio?: string };
@@ -69,22 +55,6 @@ function ImageSlot({ id, asset, alt, ratio = "aspect-[4/5]", hero = false }: Ima
     <img id={id} src={`/images/tb3-official/${asset}`} alt={alt} style={{ objectPosition }} className={`absolute inset-0 h-full w-full ${hero ? "object-contain" : "object-cover"}`} loading={hero ? "eager" : "lazy"} />
   </div>;
 }
-function MerchProductCard({ product, index }: { product: MerchProduct; index: number }) {
-  const [red, setRed] = useState(false);
-  const image = red && product.redImage ? product.redImage : product.image;
-  const label = red && product.redImage ? "TB3 CAP - RED" : product.label;
-  return <article className="min-w-0">
-    <div id={`merch-${index + 1}`} className="aspect-square overflow-hidden bg-[#E5E5E5] p-[10px]">
-      {image ? <img src={image.startsWith("tb3/") ? `/${image}` : `/merch/${image}`} alt={label} className="h-full w-full object-contain" loading="lazy" /> : <div role="img" aria-label={`${label} artwork pending`} className="flex h-full w-full items-center justify-center bg-black px-4 text-center text-sm font-bold tracking-wider text-white">TB3 SIGNATURE COLLECTION</div>}
-    </div>
-    <p className="mt-3 text-[9px] font-bold tracking-wider">{product.label} <span className="font-normal">{product.price}</span></p>
-    {product.redImage && <div className="mt-2 flex items-center gap-2 text-[9px]">
-      <span className="text-black/60">COLOR</span>
-      <button type="button" onClick={() => setRed(false)} aria-pressed={!red} className={`border px-2 py-1 ${!red ? "border-black" : "border-black/20"}`}>WHITE</button>
-      <button type="button" onClick={() => setRed(true)} aria-pressed={red} className={`border px-2 py-1 ${red ? "border-black" : "border-black/20"}`}>RED</button>
-    </div>}
-  </article>;
-}
 function ActionLink({ children, className = "", href = "/tarris/future" }: { children: ReactNode; className?: string; href?: string }) {
   return <Link href={href} className={`inline-flex hover:underline ${className}`}>{children}</Link>;
 }
@@ -95,6 +65,15 @@ export default function TarrisPublicPage() {
   useEffect(() => {
     const intro = document.getElementById("tarris-splash-intro");
     if (!intro) return;
+    // Instagram merchandise deep links should open the item immediately.
+    if (/^#merch(?:-[a-z0-9-]+)?$/.test(window.location.hash)) {
+      intro.style.display = 'none';
+      document.getElementById('site')?.classList?.add('visible');
+      window.requestAnimationFrame(() => {
+        document.getElementById(window.location.hash.slice(1))?.scrollIntoView();
+      });
+      return;
+    }
     document.body.prepend(intro);
     document.body.style.overflow = "hidden";
     const btn = document.getElementById("enter-site-btn");
@@ -164,11 +143,11 @@ export default function TarrisPublicPage() {
         </section>
         <section id="merch" className="scroll-mt-5 py-10">
           <div className="mb-6"><p className="text-[9px] tracking-[0.25em] text-[#A51C30]">TB3 STORE</p><h2 className="mt-2 text-3xl font-black tracking-tight">WEAR THE VISION.</h2></div>
-          <div id="merch-store" className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">{merchProducts.map((product, index) => <MerchProductCard key={product.id} product={product} index={index} />)}</div>
+          <Tb3MerchStore />
         </section>
         <BookingForm/>
       </main>
-      <footer className="border-t border-black/20"><div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-6 px-5 py-8 lg:px-10"><a href="#home" aria-label="TB3 home" className="text-4xl font-black tracking-[-0.1em] text-[#A51C30]">TB3</a><div className="flex flex-wrap gap-4 text-[9px] font-semibold tracking-wider"><a href="#home">HOME</a>{["ABOUT", "CONTACT", "PRIVACY", "TERMS"].map((label) => <ActionLink key={label} href={label === "ABOUT" ? "/tarris#story" : label === "CONTACT" ? "/tarris/book" : label === "PRIVACY" ? "/privacy" : "/terms"}>{label}</ActionLink>)}</div><ActionLink href="/tarris#media" className="text-[9px] tracking-wider">SOCIAL</ActionLink><span className="font-serif text-2xl italic text-[#A51C30]">Different On Purpose. Not affiliated with University of Alabama. Official NIL merchandise of Tarris Bouie.</span></div></footer>
+      <footer className="border-t border-black/20"><div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-6 px-5 py-8 lg:px-10"><a href="#home" aria-label="TB3 home" className="text-4xl font-black tracking-[-0.1em] text-[#A51C30]">TB3</a><div className="flex flex-wrap gap-4 text-[9px] font-semibold tracking-wider"><a href="#home">HOME</a>{["ABOUT", "CONTACT", "PRIVACY", "TERMS"].map((label) => <ActionLink key={label} href={label === "ABOUT" ? "/tarris#story" : label === "CONTACT" ? "/tarris/book" : label === "PRIVACY" ? "/privacy" : "/terms"}>{label}</ActionLink>)}</div><ActionLink href="/tarris#merch" className="text-[9px] tracking-wider">SHOP TB3</ActionLink><span className="font-serif text-2xl italic text-[#A51C30]">Different On Purpose. Not affiliated with University of Alabama. Official NIL merchandise of Tarris Bouie.</span></div></footer>
     </div>
     </>
   );

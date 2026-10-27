@@ -1,0 +1,55 @@
+name: TB3 Merchandise Safety
+on:
+  pull_request:
+    paths:
+      - 'app/tarris/merch-store.tsx'
+      - 'app/portal/components/Tb3MerchSales.tsx'
+      - 'app/api/tb3/merch/**'
+      - 'app/api/webhooks/stripe-tb3-merch/**'
+      - 'lib/tb3/**'
+      - 'tests/tb3-**'
+      - 'playwright.tb3.config.ts'
+      - 'tests/merchant-onboarding-contract.test.mts'
+      - 'tests/stripe-connect-contract.test.mts'
+      - 'tests/stripe-connect-onboarding-safety.test.mts'
+      - 'app/api/portal/**/payments/stripe/**'
+      - 'lib/bricks/merchant-onboarding/**'
+      - '.github/workflows/tb3-merch-safety.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tb3-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: TB3 catalog and checkout tests
+        run: node --import tsx --test tests/tb3-printful-cart.test.mts tests/tb3-commerce-sandbox.test.mts tests/tb3-printful-transport.test.mts tests/tb3-fulfillment-approval.test.mts tests/tb3-reserve-reconciliation.test.mts tests/tb3-meta-feed.test.mts tests/tb3-merch-checkout-contract.test.mts tests/merchant-onboarding-contract.test.mts tests/stripe-connect-contract.test.mts tests/stripe-connect-onboarding-safety.test.mts
+      - name: Chassis guard
+        run: node scripts/guard-brick-chassis.mjs --self-test && node scripts/guard-brick-chassis.mjs
+
+  tb3-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install chromium --only-shell
+      - name: Real Chromium storefront and mobile cart tests, no payment
+        run: npx playwright test --config=playwright.tb3.config.ts
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: tb3-browser-failure-evidence
+          path: test-results/
+          retention-days: 7

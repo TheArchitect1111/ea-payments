@@ -3,6 +3,7 @@ import { listContent } from '@/lib/bricks/content-family';
 import CertifiedReportGenerator from '@/app/portal/components/CertifiedReportGenerator';
 import Link from 'next/link';
 import Tb3MerchSales from '@/app/portal/components/Tb3MerchSales';
+import { MerchantPaymentSetup } from '@/lib/bricks/merchant-onboarding/MerchantPaymentSetup';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { listReportArtifacts } from '@/lib/portal-reports';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
@@ -16,7 +17,8 @@ export default async function ReportsPage({ params }: { params: Promise<{ slug: 
   // Read back tenant-specific durable defaults after module authorization.
   const certifiedContent = slug.toLowerCase().startsWith('amanda-catherine')
     ? null : await portalContentDefault(slug, 'reports');
-  const staff=['staff','admin','owner'].includes(session.role);
+  const staff=['staff','admin','owner'].includes(session.role ?? '');
+  const canManageTb3Payments=['admin','owner'].includes(session.role ?? '');
   const reports=certifiedContent?await listContent({organizationId:certifiedContent.organizationId,portalSlug:slug},'reports',staff?'staff':'member'):[];
   const isAmanda = slug.toLowerCase().startsWith('amanda-catherine');
   const artifacts = listReportArtifacts(slug, client, access);
@@ -30,7 +32,10 @@ export default async function ReportsPage({ params }: { params: Promise<{ slug: 
       lede={isAmanda ? 'Live intake, application, membership, media, volunteer, event, and follow-up signals.' : `Curated operational views for ${client.organization || client.clientName}.`}
     >
       {isAmanda ? <AmandaOperationsPanel slug={slug} /> : null}
-      {slug === 'tarris' ? <Tb3MerchSales report /> : null}
+      {slug === 'tarris' ? <>
+        {canManageTb3Payments ? <MerchantPaymentSetup tenantLabel="TB3" tenantSlug={slug} initialProvider="stripe" /> : null}
+        {staff ? <Tb3MerchSales report canAudit /> : null}
+      </> : null}
       {staff && certifiedContent && access.enabledModuleIds.has('documents') ?
         <CertifiedReportGenerator sourceKind="documents" /> :
         staff && certifiedContent && access.enabledModuleIds.has('resources') ?

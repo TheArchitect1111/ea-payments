@@ -1,0 +1,28 @@
+/** Paid external commerce source: call only after the upstream event signature and paid status are verified.
+ * Uses external order identity, not buyer email, so repeat purchases remain separate orders. */
+export async function recordVerifiedExternalCommerce(tenant:BrickTenant, input:{
+  externalOrderId:string;source:'bonfire'|'bonfire-csv';offerId:string;title:string;
+  amount:number;currency:'usd';email:string;name:string;
+}){
+ await requireAdmitted(tenant,'billing');
+ const config=await getConfig(tenant,'billing');
+ const offer=config.offers.find(o=>o.id===input.offerId);
+ if(!offer||offer.amount!==input.amount||offer.currency!==input.currency)
+  throw Error('External order does not match configured Billing offer');
+ const id=idFor(tenant,'billing',['external',input.source,input.externalOrderId].join(':'));
+ const savedId=enrollmentId(id);
+ const next={...tenant,id,kind:'billing' as const,offerId:input.offerId,
+   email:input.email.trim().toLowerCase(),name:input.name,
+   payment_status:'paid' as const,payment_reference:input.externalOrderId,
+   confirmationSent:false,tracking:input.source,source:input.source,
+   amount:input.amount,currency:input.currency};
+ const old=await readBrickRecord<typeof next>(tenant,savedId);
+ if(old){
+  if(JSON.stringify(old)!==JSON.stringify(next))throw Error('External payment conflict');
+  return {order:old,replay:true};
+ }
+ await writeBrickRecord(tenant,savedId,next);
+ await writeBrickRecord(tenant,'commerce-track-payment-'+id,{...tenant,kind:'billing',
+   id,event:'payment_confirmed',reference:input.externalOrderId,source:input.source});
+ return {order:next,replay:false};
+}

@@ -40,7 +40,8 @@ export default async function TarrisFutureLayout({ children }: { children: React
     Boolean(cookieStore.get('_vercel_jwt')?.value);
 
   if (!verifiedPreviewShare && !(await hasApplicationAccess())) {
-    redirect('/tarris?hq=private');
+    // Preserve private HQ access checks; offer a usable login instead of a public-page loop.
+    redirect('/portal/login?next=%2Ftarris%2Ffuture');
   }
 
   return (

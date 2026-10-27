@@ -18,7 +18,7 @@ export type TrackingLead = {
 export type TrackingPayment = {
   event_type: 'payment_confirmed'; registration_id?: string;
   email: string; class_id: string; payment_status: 'paid';
-  payment_reference: string; payment_provider: 'square' | 'stripe' | 'bonfire';
+  payment_reference: string; payment_provider: 'square' | 'stripe';
   timestamp: string; is_test?: boolean; client_id?:string;
 };
 
