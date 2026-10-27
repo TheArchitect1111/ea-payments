@@ -78,7 +78,8 @@ export async function startStripeOnboarding(input: {
       const stripeType = error && typeof error === 'object' && 'type' in error && typeof error.type === 'string' ? error.type : 'unknown';
       const stripeCode = error && typeof error === 'object' && 'raw' in error && error.raw && typeof error.raw === 'object' && 'code' in error.raw && typeof error.raw.code === 'string' ? error.raw.code : 'none';
       const stripeParam = error && typeof error === 'object' && 'raw' in error && error.raw && typeof error.raw === 'object' && 'param' in error.raw && typeof error.raw.param === 'string' ? error.raw.param : 'none';
-      console.error('TB3_SANDBOX_CONNECT_STAGE', {stage, stripeType, stripeCode, stripeParam});
+      const stripeReason = error instanceof Error ? error.message.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[email]').replace(/(?:sk|rk)_(?:test|live)_[A-Za-z0-9]+/g, '[redacted-key]').slice(0, 300) : 'unavailable';
+      console.error('TB3_SANDBOX_CONNECT_STAGE', {stage, stripeType, stripeCode, stripeParam, stripeReason});
       throw new Error('TB3_SANDBOX_STAGE_' + stage);
     }
     throw error;
