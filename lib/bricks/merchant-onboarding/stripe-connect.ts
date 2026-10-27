@@ -76,7 +76,9 @@ export async function startStripeOnboarding(input: {
   } catch (error) {
     if (tenantId === 'tarris-sandbox' && process.env.VERCEL_ENV === 'preview') {
       const stripeType = error && typeof error === 'object' && 'type' in error && typeof error.type === 'string' ? error.type : 'unknown';
-      console.error('TB3_SANDBOX_CONNECT_STAGE', {stage, stripeType});
+      const stripeCode = error && typeof error === 'object' && 'raw' in error && error.raw && typeof error.raw === 'object' && 'code' in error.raw && typeof error.raw.code === 'string' ? error.raw.code : 'none';
+      const stripeParam = error && typeof error === 'object' && 'raw' in error && error.raw && typeof error.raw === 'object' && 'param' in error.raw && typeof error.raw.param === 'string' ? error.raw.param : 'none';
+      console.error('TB3_SANDBOX_CONNECT_STAGE', {stage, stripeType, stripeCode, stripeParam});
       throw new Error('TB3_SANDBOX_STAGE_' + stage);
     }
     throw error;
