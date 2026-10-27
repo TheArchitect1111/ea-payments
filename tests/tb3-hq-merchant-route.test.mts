@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 const read = (path: string) => readFileSync(path, 'utf8');
 
 test('TB3 HQ serves a dedicated merchant setup page, not the EA reports surface', () => {
-  const page = read('app/tarris/future/payment-setup/page.tsx');
+  const page = read('app/tarris/(payment-access)/future/payment-setup/page.tsx');
   const hq = read('app/tarris/future/page.tsx');
   assert.match(hq, /href="\/tarris\/future\/payment-setup"/);
   assert.match(page, /MerchantPaymentSetup/);
@@ -39,7 +39,7 @@ test('TB3 merchant onboarding requires active tenant membership and admin author
   assert.match(access, /org\?\.status !== 'Active'/);
   assert.match(access, /member\?\.status !== 'active'/);
   assert.match(access, /normalizeRole\(member\.role\), 'admin'/);
-  const page = read('app/tarris/future/payment-setup/page.tsx');
+  const page = read('app/tarris/(payment-access)/future/payment-setup/page.tsx');
   const api = read('app/api/portal/[slug]/payments/stripe/route.ts');
   assert.doesNotMatch(page, /requireTb3MerchantSession\(\)/);
   assert.match(api, /requireTb3MerchantSession\(\)/);
