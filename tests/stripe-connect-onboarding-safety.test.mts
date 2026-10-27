@@ -47,3 +47,16 @@ test('onboarding configuration matches live credentials to production and test c
   assert.ok(api.includes("STRIPE_TEST_SECRET_KEY?.startsWith('sk_test_')"));
   assert.ok(adapter.includes('Stripe Connect key does not match deployment environment'));
 });
+
+test('TB3 public status does not disclose merchant account identifiers',()=>{
+  const status = api.split('async function tb3DirectStatus')[1]?.split('async function tb3DirectOnboard')[0];
+  assert.ok(status,'TB3 status handler must exist');
+  assert.doesNotMatch(status,/\b(?:accountId|storedAccountId)\s*:/);
+  assert.ok(api.includes("if (slug === 'tarris') return tb3DirectStatus(sandbox);"));
+});
+
+test('non-TB3 tenants retain authorized Connect onboarding',()=>{
+  assert.ok(api.includes("if (slug === 'tarris') return tb3DirectOnboard(req);"));
+  assert.ok(api.includes("if (slug !== 'tarris' && !await authorize(slug)"));
+  assert.ok(api.includes('const linked = await startStripeOnboarding({'));
+});
