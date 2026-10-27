@@ -10,6 +10,7 @@ type Props = {
   tenantSlug?: string;
   initialProvider?: PaymentProvider;
   connectionStatus?: MerchantConnectionStatus;
+  sandbox?: boolean;
   onBeginProviderSetup?: (provider: PaymentProvider) => void;
 };
 const labels = {
@@ -22,7 +23,7 @@ const labels = {
 
 export function MerchantPaymentSetup({
   tenantLabel, tenantSlug, initialProvider = 'paypal', connectionStatus = 'not_connected',
-  onBeginProviderSetup,
+  onBeginProviderSetup, sandbox = false,
 }: Props) {
   const [provider, setProvider] = useState<PaymentProvider | 'bank'>(initialProvider);
   const available = SUPPORTED_METHODS[provider === 'bank' ? 'stripe' : provider];
@@ -34,13 +35,13 @@ export function MerchantPaymentSetup({
   useEffect(() => {
     if (!tenantSlug) return;
     let active = true;
-    fetch('/api/portal/' + encodeURIComponent(tenantSlug) + '/payments/stripe',
+    fetch('/api/portal/' + encodeURIComponent(tenantSlug) + '/payments/stripe' + (sandbox ? '?sandbox=1' : ''),
       {credentials:'same-origin',cache:'no-store'})
       .then(async response => response.json())
       .then(data => { if (active && typeof data.status === 'string') setStatus(data.status); })
       .catch(() => { if (active) setStatus('setup_required'); });
     return () => { active = false; };
-  }, [tenantSlug]);
+  }, [tenantSlug, sandbox]);
   async function begin() {
     if ((provider !== 'stripe' && provider !== 'bank') || !tenantSlug || working) return;
     if (tenantSlug === 'tarris' &&
@@ -58,7 +59,8 @@ export function MerchantPaymentSetup({
           headers:{'Content-Type':'application/json'},
           body:JSON.stringify({
             familyEmail,
-            approvalCode
+            approvalCode,
+            sandbox
           })
         });
       const payload = await response.json();
@@ -74,7 +76,8 @@ export function MerchantPaymentSetup({
     }
   }
   return <section aria-label="Payment setup" className="rounded-xl border border-black/20 p-5">
-    <h2 className="text-xl font-bold">Payment setup</h2>
+    <h2 className="text-xl font-bold">{sandbox ? 'Stripe sandbox test (no real money)' : 'Payment setup'}</h2>
+    {sandbox ? <p className="mt-2 rounded bg-yellow-100 p-2 text-sm text-black">TEST ONLY: Use fictional merchant information and Stripe test data. This connects a separate tarris-sandbox merchant, never the family payout account.</p> : null}
     <p className="mt-2 text-sm">Connect a payment provider for {tenantLabel}. Your bank details
       and account verification stay with the provider, not Efficiency Architects.</p>
     <label className="mt-4 block text-sm font-semibold">Payment processor
