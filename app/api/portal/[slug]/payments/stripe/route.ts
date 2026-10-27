@@ -52,6 +52,7 @@ const configured = () => process.env.EA_STRIPE_CONNECT_ONBOARDING_ENABLED === 't
 
 export async function GET(_req: NextRequest,{params}:{params:Promise<{slug:string}>}) {
   const {slug} = await params;
+  const sandbox = slug === 'tarris' && process.env.VERCEL_ENV === 'preview' && _req.nextUrl.searchParams.get('sandbox') === '1';
   // Public TB3 setup may check availability, never account identifiers.
   // Other tenants retain their original authorization.
   if (slug !== 'tarris' && !await authorize(slug))
@@ -67,7 +68,7 @@ export async function GET(_req: NextRequest,{params}:{params:Promise<{slug:strin
     return respond({available:false,status:'setup_required'});
   }
   try {
-    const status = await getStripeMerchantStatus(slug,stripeMerchantStore);
+    const status = await getStripeMerchantStatus(sandbox ? 'tarris-sandbox' : slug,stripeMerchantStore);
     return respond({available:true,status:status.status,
       chargesEnabled:status.chargesEnabled,payoutsEnabled:status.payoutsEnabled});
   } catch {
@@ -87,11 +88,13 @@ export async function POST(req:NextRequest,{params}:{params:Promise<{slug:string
     return respond({error:'Origin mismatch'},403);
 
   let ownerEmail: string;
+  let sandbox = false;
 
   if (slug === 'tarris') {
     let input: {
       approvalCode?: unknown;
       familyEmail?: unknown;
+      sandbox?: unknown;
     };
 
     try {
@@ -103,6 +106,7 @@ export async function POST(req:NextRequest,{params}:{params:Promise<{slug:string
     if (!approvedTb3Code(input.approvalCode))
       return respond({error:'TB3 approval required'},403);
 
+    sandbox = process.env.VERCEL_ENV === 'preview' && input.sandbox === true;
     ownerEmail = typeof input.familyEmail === 'string'
       ? input.familyEmail.trim().toLowerCase()
       : '';
@@ -130,7 +134,7 @@ export async function POST(req:NextRequest,{params}:{params:Promise<{slug:string
     const refresh = new URL(slug === 'tarris' ? '/tarris/future/payment-setup' : '/portal/'+encodeURIComponent(slug)+'/reports',origin);
     refresh.searchParams.set('payments','refresh');
     const linked = await startStripeOnboarding({
-      tenantId:slug,ownerEmail,
+      tenantId:sandbox ? 'tarris-sandbox' : slug,ownerEmail,
       returnUrl:target.toString(),refreshUrl:refresh.toString(),
       store:stripeMerchantStore,
     });
