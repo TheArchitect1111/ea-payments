@@ -24,8 +24,8 @@ export function MerchantPaymentSetup({
   tenantLabel, tenantSlug, initialProvider = 'paypal', connectionStatus = 'not_connected',
   onBeginProviderSetup,
 }: Props) {
-  const [provider, setProvider] = useState<PaymentProvider>(initialProvider);
-  const available = SUPPORTED_METHODS[provider];
+  const [provider, setProvider] = useState<PaymentProvider | 'bank'>(initialProvider);
+  const available = SUPPORTED_METHODS[provider === 'bank' ? 'stripe' : provider];
   const [status, setStatus] = useState<MerchantConnectionStatus>(connectionStatus);
   const [working, setWorking] = useState(false);
   const [error, setError] = useState('');
@@ -42,7 +42,7 @@ export function MerchantPaymentSetup({
     return () => { active = false; };
   }, [tenantSlug]);
   async function begin() {
-    if (provider !== 'stripe' || !tenantSlug || working) return;
+    if ((provider !== 'stripe' && provider !== 'bank') || !tenantSlug || working) return;
     if (tenantSlug === 'tarris' &&
         (!familyEmail || !approvalCode)) {
       setError('Enter the approved family email and setup code.');
@@ -79,22 +79,35 @@ export function MerchantPaymentSetup({
       and account verification stay with the provider, not Efficiency Architects.</p>
     <label className="mt-4 block text-sm font-semibold">Payment processor
       <select className="mt-2 block min-h-11 w-full rounded border p-2"
-        value={provider} onChange={event => setProvider(event.target.value as PaymentProvider)}>
-        <option value="paypal">PayPal Business</option>
+        value={provider} onChange={event => { setProvider(event.target.value as PaymentProvider | 'bank'); setError(''); }}>
+        {tenantSlug === 'tarris' ? <option value="bank">Bank account (payouts via Stripe)</option> : null}
         <option value="stripe">Stripe</option>
+        <option value="paypal">PayPal Business (setup unavailable)</option>
       </select>
     </label>
-    <p className="mt-4 text-sm font-semibold">Potential payment methods</p>
-    <ul className="mt-2 list-disc pl-6 text-sm">
-      {CUSTOMER_PAYMENT_METHODS.filter(method => available.includes(method))
-        .map(method => <li key={method}>{labels[method]}</li>)}
-    </ul>
+    {tenantSlug === 'tarris' ? (
+      <p className="mt-4 text-sm">
+        {provider === 'bank'
+          ? 'Add an eligible checking or savings account to receive TB3 merchandise payouts. Stripe securely collects and verifies your bank details. This is not a separate direct-bank processor.'
+          : provider === 'stripe'
+            ? 'Connect a Stripe account and configure an eligible bank account for payouts during setup.'
+            : 'PayPal Business onboarding is not connected yet. You cannot add a PayPal payout account here today.'}
+      </p>
+    ) : (
+      <>
+        <p className="mt-4 text-sm font-semibold">Potential customer payment methods</p>
+        <ul className="mt-2 list-disc pl-6 text-sm">
+          {CUSTOMER_PAYMENT_METHODS.filter(method => available.includes(method))
+            .map(method => <li key={method}>{labels[method]}</li>)}
+        </ul>
+      </>
+    )}
     <p className="mt-2 text-xs">Availability depends on provider approval,
       country, account capabilities, and integration configuration.</p>
     <p role="status" className="mt-4 text-sm">Connection status: {status.replaceAll('_', ' ')}</p>
     {error ? <p role="alert" className="mt-2 text-sm">{error}</p> : null}
 
-    {tenantSlug === 'tarris' && provider === 'stripe' ? (
+    {tenantSlug === 'tarris' && (provider === 'stripe' || provider === 'bank') ? (
       <div className="mt-4 grid gap-3">
         <label className="text-sm font-semibold">
           Family representative email
@@ -120,9 +133,9 @@ export function MerchantPaymentSetup({
     ) : null}
     {onBeginProviderSetup
       ? <button type="button" className="mt-4 min-h-11 rounded bg-black px-5 py-3 text-white"
-          onClick={() => onBeginProviderSetup(provider)}>Begin secure provider setup</button>
-      : tenantSlug && provider === 'stripe' ?
-        <button type="button" disabled={working} className="mt-4 min-h-11 rounded bg-black px-5 py-3 text-white disabled:opacity-50" onClick={begin}>{working ? 'Opening Stripe…' : 'Connect Stripe securely'}</button>
+          onClick={() => { if (provider !== 'bank') onBeginProviderSetup(provider); }}>Begin secure provider setup</button>
+      : tenantSlug && (provider === 'stripe' || provider === 'bank') ?
+        <button type="button" disabled={working} className="mt-4 min-h-11 rounded bg-black px-5 py-3 text-white disabled:opacity-50" onClick={begin}>{working ? 'Opening Stripe…' : provider === 'bank' ? 'Add bank account through Stripe' : 'Connect Stripe securely'}</button>
       : <p className="mt-4 text-sm">Secure provider setup is not yet connected.
           No bank information is collected here and payments remain disabled.</p>}
   </section>;
