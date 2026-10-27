@@ -66,7 +66,7 @@ export function MerchantPaymentSetup({
       if (tenantSlug === 'tarris') {
         if (!response.ok || payload.ok !== true || payload.mode !== 'direct')
           throw new Error(payload.error || 'Stripe account verification is not available.');
-        setStatus(payload.ready ? 'active' : 'pending');
+        setStatus(payload.ready ? 'ready' : 'pending_provider');
         setWorking(false);
         return;
       }
