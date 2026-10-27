@@ -35,7 +35,7 @@ async function withMerchantDb<T>(fn:(client:Client)=>Promise<T>):Promise<T> {
 export async function getDirectConnection(tenantId: string) {
   return withMerchantDb(async client => {
     const found = await client.query<AccountRow>(
-      'SELECT stripe_account_id, mode, charges_enabled, payouts_enabled, details_submitted FROM public.ea_merchant_connections WHERE tenant_id=$1 LIMIT 1',
+      'SELECT stripe_account_id FROM public.ea_merchant_connections WHERE tenant_id=$1 LIMIT 1',
       [tenantId]
     );
     return found.rows[0] ?? null;
