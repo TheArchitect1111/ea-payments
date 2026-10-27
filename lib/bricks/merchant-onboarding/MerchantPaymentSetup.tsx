@@ -65,13 +65,13 @@ export function MerchantPaymentSetup({
         });
       const payload = await response.json();
       if (!response.ok || typeof payload.url !== 'string')
-        throw new Error('Secure onboarding is not yet available.');
+        throw new Error(payload.errorCode && sandbox ? 'Stripe setup failed (' + payload.errorType + ': ' + payload.errorCode + ').' : payload.error || 'Secure onboarding is not yet available.');
       const url = new URL(payload.url);
       if (url.protocol !== 'https:' || (url.hostname !== 'connect.stripe.com' && url.hostname !== 'dashboard.stripe.com'))
         throw new Error('Invalid payment provider destination.');
       window.location.assign(url.toString());
-    } catch {
-      setError('Secure Stripe onboarding is not yet available. No changes were made.');
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Secure Stripe onboarding is not yet available.');
       setWorking(false);
     }
   }
