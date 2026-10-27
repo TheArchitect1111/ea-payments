@@ -4,7 +4,8 @@ import { MerchantPaymentSetup } from '@/lib/bricks/merchant-onboarding/MerchantP
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'TB3 HQ | Payment Setup', robots: 'noindex, nofollow' };
 
-export default async function Tb3HqPaymentSetup() {
+export default async function Tb3HqPaymentSetup({searchParams}:{searchParams:Promise<{sandbox?:string}>}) {
+  const sandbox = (await searchParams).sandbox === '1';
   return (
     <main className="min-h-screen bg-[#0A0A0A] px-5 py-10 text-[#F7F5F2]">
       <div className="mx-auto max-w-2xl">
@@ -16,7 +17,7 @@ export default async function Tb3HqPaymentSetup() {
           connection is not yet available. Checkout and fulfillment remain disabled until verification and launch gates pass.
         </p>
         <div className="rounded-2xl bg-white p-2 text-black">
-          <MerchantPaymentSetup tenantLabel="TB3" tenantSlug="tarris" initialProvider="stripe" />
+          <MerchantPaymentSetup tenantLabel="TB3" tenantSlug="tarris" initialProvider="stripe" sandbox={sandbox} />
         </div>
       </div>
     </main>
