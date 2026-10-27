@@ -65,6 +65,15 @@ export default function TarrisPublicPage() {
   useEffect(() => {
     const intro = document.getElementById("tarris-splash-intro");
     if (!intro) return;
+    // Instagram merchandise deep links should open the item immediately.
+    if (/^#merch(?:-[a-z0-9-]+)?$/.test(window.location.hash)) {
+      intro.style.display = 'none';
+      document.getElementById('site')?.classList?.add('visible');
+      window.requestAnimationFrame(() => {
+        document.getElementById(window.location.hash.slice(1))?.scrollIntoView();
+      });
+      return;
+    }
     document.body.prepend(intro);
     document.body.style.overflow = "hidden";
     const btn = document.getElementById("enter-site-btn");

@@ -3,20 +3,31 @@ import Stripe from 'stripe';
 import { z } from 'zod';
 import { resolveTb3Cart } from '@/lib/tb3/merch-cart';
 import { tb3Printful } from '@/lib/tb3/printful-client';
+import { auditTb3PrintfulCatalog } from '@/lib/tb3/printful-catalog-audit';
+import { getStripeMerchantStatus } from '@/lib/bricks/merchant-onboarding/stripe-connect';
+import { stripeMerchantStore } from '@/lib/bricks/merchant-onboarding/stripe-store';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Kept disabled until the TB3-owned account and fulfillment ledger are certified.
-// Never fall back to EA's STRIPE_SECRET_KEY.
-const enabled = () => process.env.TB3_MERCH_CHECKOUT_ENABLED === 'true'
-  && !!process.env.TB3_STRIPE_SECRET_KEY
-  && !!process.env.TB3_STRIPE_WEBHOOK_SECRET
+// Fail closed until live Connect onboarding, webhook and Printful fulfillment are certified.
+const enabled = () => process.env.VERCEL_ENV === 'production'
+  && process.env.TB3_MERCH_CHECKOUT_ENABLED === 'true'
+  && !!process.env.EA_STRIPE_CONNECT_SECRET_KEY?.startsWith('sk_live_')
+  && !!process.env.EA_STRIPE_CONNECT_WEBHOOK_SECRET
+  && !!process.env.EA_MERCHANT_DATABASE_URL
+  && !!process.env.PRINTFUL_API_KEY?.trim()
   && !!process.env.TB3_MERCH_DRAFT_FULFILLMENT_APPROVED
-  && process.env.TB3_MERCH_DRAFT_FULFILLMENT_APPROVED === 'true';
+  && process.env.TB3_MERCH_DRAFT_FULFILLMENT_APPROVED === 'true'
+  && process.env.TB3_MERCH_AUTO_FULFILLMENT_APPROVED === 'true'
+  && process.env.TB3_PRINTFUL_FUNDING_VERIFIED === 'true'
+  && process.env.TB3_PRINTFUL_CATALOG_VERIFIED === 'true'
+  && Number.isSafeInteger(Number(process.env.TB3_MERCH_MAX_PRINTFUL_COST_CENTS))
+  && Number(process.env.TB3_MERCH_MAX_PRINTFUL_COST_CENTS) > 0;
 
 const schema = z.object({
   cart: z.unknown(),
+  attribution: z.enum(['instagram', 'direct']).optional(),
   email: z.string().email().max(254),
   recipient: z.object({
     name: z.string().trim().min(2).max(100),
@@ -49,6 +60,11 @@ export async function POST(req: NextRequest) {
     if (raw.length > 20000) return reply({error: 'Request too large.'}, 413);
     const input = schema.parse(JSON.parse(raw));
     const lines = resolveTb3Cart(input.cart);
+    // An owner attestation alone is insufficient: verify the live Printful
+    // store before creating any customer or paid Stripe Checkout session.
+    const liveCatalog = await auditTb3PrintfulCatalog();
+    if (!liveCatalog.verified)
+      return reply({error: 'TB3 merchandise catalog verification is incomplete.'}, 503);
     const rates = await tb3Printful<ShippingRate[]>('/shipping/rates', {
       method: 'POST',
       body: JSON.stringify({
@@ -70,7 +86,12 @@ export async function POST(req: NextRequest) {
     if (!Number.isSafeInteger(shippingCents))
       return reply({error: 'Shipping could not be calculated.'}, 503);
 
-    const stripe = new Stripe(process.env.TB3_STRIPE_SECRET_KEY!);
+    const merchant = await getStripeMerchantStatus('tarris', stripeMerchantStore);
+    if (merchant.status !== 'ready' || !merchant.providerMerchantReference ||
+        !merchant.chargesEnabled || !merchant.payoutsEnabled)
+      return reply({error: 'TB3 merchant onboarding is incomplete.'}, 503);
+    const stripe = new Stripe(process.env.EA_STRIPE_CONNECT_SECRET_KEY!);
+    const connectedAccount = {stripeAccount: merchant.providerMerchantReference};
     // Prepopulate the same verified destination for Stripe Tax and Printful.
     // No changes to the delivery address during Stripe Checkout.
     const customer = await stripe.customers.create({
@@ -95,7 +116,7 @@ export async function POST(req: NextRequest) {
           postal_code: input.recipient.zip,
         },
       },
-    });
+    }, connectedAccount);
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
@@ -117,6 +138,8 @@ export async function POST(req: NextRequest) {
       automatic_tax: {enabled: true},
       metadata: {
         type: 'tb3_merch',
+        attribution_source: input.attribution || 'direct',
+        tenant_id: 'tarris',
         destination: JSON.stringify(input.recipient),
         variant_quantities: JSON.stringify(lines.map(x => [x.variantId, x.quantity])),
         fulfillment: 'pending_verified_webhook',
@@ -124,7 +147,7 @@ export async function POST(req: NextRequest) {
       },
       success_url: 'https://tb3.online/tarris?merch_checkout=success#merch',
       cancel_url: 'https://tb3.online/tarris?merch_checkout=cancelled#merch',
-    });
+    }, connectedAccount);
     if (!session.url) return reply({error: 'Secure checkout unavailable.'}, 503);
     return reply({url: session.url});
   } catch (error) {

@@ -17,7 +17,8 @@ export default async function ReportsPage({ params }: { params: Promise<{ slug: 
   // Read back tenant-specific durable defaults after module authorization.
   const certifiedContent = slug.toLowerCase().startsWith('amanda-catherine')
     ? null : await portalContentDefault(slug, 'reports');
-  const staff=['staff','admin','owner'].includes(session.role);
+  const staff=['staff','admin','owner'].includes(session.role ?? '');
+  const canManageTb3Payments=['admin','owner'].includes(session.role ?? '');
   const reports=certifiedContent?await listContent({organizationId:certifiedContent.organizationId,portalSlug:slug},'reports',staff?'staff':'member'):[];
   const isAmanda = slug.toLowerCase().startsWith('amanda-catherine');
   const artifacts = listReportArtifacts(slug, client, access);
@@ -32,8 +33,8 @@ export default async function ReportsPage({ params }: { params: Promise<{ slug: 
     >
       {isAmanda ? <AmandaOperationsPanel slug={slug} /> : null}
       {slug === 'tarris' ? <>
-        {staff ? <MerchantPaymentSetup tenantLabel="TB3" /> : null}
-        <Tb3MerchSales report />
+        {canManageTb3Payments ? <MerchantPaymentSetup tenantLabel="TB3" tenantSlug={slug} initialProvider="stripe" /> : null}
+        {staff ? <Tb3MerchSales report canAudit /> : null}
       </> : null}
       {staff && certifiedContent && access.enabledModuleIds.has('documents') ?
         <CertifiedReportGenerator sourceKind="documents" /> :

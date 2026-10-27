@@ -26,6 +26,26 @@ test('all 14 products resolve to their configured prices and variants', () => {
   }
 });
 
+test('all 14 catalog items have unique Printful identities and usable storefront assets', () => {
+  assert.equal(new Set(catalog.map(x => x.id)).size, 14);
+  assert.equal(new Set(catalog.map(x => x.printfulProductId)).size, 14);
+  for (const item of catalog) {
+    assert.ok(Number.isSafeInteger(item.printfulProductId) && item.printfulProductId > 0);
+    assert.ok(item.variants.length > 0);
+    const raw = JSON.parse(readFileSync(new URL('../public/tb3/merch/manifest.json', import.meta.url), 'utf8'));
+    const product = raw.find((entry: {id:string}) => entry.id === item.id);
+    assert.ok(product.image.startsWith('/tb3/merch/mockups/'));
+    const imagePath = new URL('../public' + product.image, import.meta.url);
+    assert.ok(readFileSync(imagePath).length > 1000, 'Missing or empty image: ' + item.id);
+    assert.equal(product.currency, 'USD');
+    assert.ok(product.price > 0);
+    for (const variant of product.variants) {
+      assert.ok(Number.isSafeInteger(variant.catalogVariantId) && variant.catalogVariantId > 0);
+      assert.equal(variant.price, product.price, 'Catalog size price drift: ' + item.id);
+    }
+  }
+});
+
 test('duplicate sizes merge within order limits', () => {
   const variantId = catalog[0].variants[0].id;
   const lines = resolveTb3Cart([
@@ -50,4 +70,12 @@ test('rejects unknown variants, price injection and invalid quantities', () => {
       variantId: p.variants[0].id, quantity: 10
     }))
   ]) assert.throws(() => resolveTb3Cart(value));
+});
+
+
+test('TB3 checkout fails closed without Printful fulfillment credentials', () => {
+  const checkout = readFileSync(new URL('../app/api/tb3/merch/checkout/route.ts', import.meta.url), 'utf8');
+  const webhook = readFileSync(new URL('../app/api/webhooks/stripe-tb3-merch/route.ts', import.meta.url), 'utf8');
+  assert.match(checkout, /const enabled = \(\) =>[\s\S]*?!!process\.env\.PRINTFUL_API_KEY\?\.trim\(\)/);
+  assert.match(webhook, /export async function POST[\s\S]*?!process\.env\.PRINTFUL_API_KEY\?\.trim\(\)/);
 });

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   merchantCanTakePayments, selectMerchantConnection, canOfferCustomerMethod, SUPPORTED_METHODS,
   type MerchantConnection,
-} from '../lib/bricks/merchant-onboarding/contract.ts';
+} from '../lib/bricks/merchant-onboarding/contract';
 
 const ready: MerchantConnection = {
   tenantId: 'tarris', provider: 'paypal', status: 'ready',

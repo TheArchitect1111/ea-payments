@@ -6,14 +6,13 @@ import catalog from '../../public/tb3/merch/manifest.json';
 type Product = (typeof catalog)[number];
 type Line = { variantId: number; quantity: number };
 
-function ProductCard({ product, index, add }: {
+function ProductCard({ product, add }: {
   product: Product;
-  index: number;
   add: (variantId: number) => void;
 }) {
   const [variantId, setVariantId] = useState(product.variants[0].id);
-  return <article className="min-w-0" data-product-id={product.printfulProductId}>
-    <div id={`merch-${index + 1}`} className="aspect-square bg-white p-3">
+  return <article id={`merch-${product.id}`} className="min-w-0 scroll-mt-20" data-product-id={product.printfulProductId}>
+    <div className="aspect-square bg-white p-3">
       <img src={product.image} alt={product.name}
         className="h-full w-full object-contain" loading="lazy" />
     </div>
@@ -27,6 +26,7 @@ function ProductCard({ product, index, add }: {
           <option key={v.id} value={v.id}>{v.size}</option>)}
       </select>
     </label>
+    <a href={`/tarris?utm_source=instagram&utm_medium=social&utm_campaign=tb3_merch#merch-${product.id}`} className="mt-2 block text-xs underline" aria-label={`Direct shopping link for ${product.name}`}>Product link for sharing</a>
     <button type="button" onClick={() => add(variantId)}
       className="mt-3 min-h-11 w-full bg-[#A51C30] px-3 py-2 text-xs font-bold text-white">
       Add to Cart
@@ -55,10 +55,12 @@ export function Tb3MerchStore() {
     setProcessing(true);
     setMessage('Checking secure shipping and payment...');
     try {
+      const attribution = new URL(window.location.href).searchParams.get('utm_source') === 'instagram'
+        ? 'instagram' : 'direct';
       const response = await fetch('/api/tb3/merch/checkout', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({cart, email, recipient}),
+        body: JSON.stringify({cart, email, recipient, attribution}),
       });
       const payload = await response.json();
       if (!response.ok || !payload.url ||
@@ -95,8 +97,8 @@ export function Tb3MerchStore() {
   return <>
     <p role="status" className="mb-4 min-h-5 text-sm">{message}</p>
     <div id="merch-store" className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-      {catalog.map((product, index) =>
-        <ProductCard key={product.id} product={product} index={index} add={add} />)}
+      {catalog.map(product =>
+        <ProductCard key={product.id} product={product} add={add} />)}
     </div>
     <section aria-label="Shopping cart" className="mt-8 border-t border-black/20 pt-6">
       <h3 className="text-xl font-bold">Your cart ({count})</h3>

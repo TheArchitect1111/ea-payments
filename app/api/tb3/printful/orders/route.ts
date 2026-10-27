@@ -12,6 +12,7 @@ type Order = {
   created: number;
   items?: { name?: string; quantity: number }[];
   retail_costs?: { currency?: string; total?: string | number | null } | null;
+  costs?: { currency?: string; total?: string | number | null } | null;
   shipments?: {
     carrier?: string;
     tracking_number?: string;
@@ -31,7 +32,7 @@ function safeTrackingUrl(value?: string) {
 
 export async function GET(req: NextRequest) {
   return handled(async () => {
-    await authorize(req);
+    await authorize(req, true);
     const rawOffset = req.nextUrl.searchParams.get('offset') ?? '0';
     if (!/^[0-9]{1,6}$/.test(rawOffset))
       return json({ error: 'Invalid page.' }, 400);
@@ -50,6 +51,8 @@ export async function GET(req: NextRequest) {
           quantity: item.quantity,
         })),
         retailTotal: order.retail_costs?.total ?? null,
+        fulfillmentCost: order.costs?.total ?? null,
+        fulfillmentCurrency: order.costs?.currency ?? null,
         currency: order.retail_costs?.currency ?? null,
         shipments: (order.shipments ?? []).map(shipment => ({
           carrier: shipment.carrier || '',
