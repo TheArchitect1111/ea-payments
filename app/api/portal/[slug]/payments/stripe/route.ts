@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs';
-export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
-  const slug = params.slug;
-  if (slug !== 'tarris') return NextResponse.json({ available: false, mode: 'unknown' }, { status: 404 });
+export async function GET(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  if (slug !== 'tarris') return NextResponse.json({ available: false, mode: 'unknown', got: slug }, { status: 404 });
   const hasKey = !!process.env.TB3_STRIPE_SECRET_KEY;
   return NextResponse.json({
     available: hasKey,
@@ -11,8 +11,9 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
     diagnostic: hasKey ? 'ready_for_acct_id' : 'no_key'
   });
 }
-export async function POST(req: NextRequest, { params }: { params: { slug: string } }) {
-  if (params.slug !== 'tarris') return NextResponse.json({ error: 'not found' }, { status: 404 });
+export async function POST(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  if (slug !== 'tarris') return NextResponse.json({ error: 'not found' }, { status: 404 });
   try {
     const body = await req.json();
     const accountId = body.accountId || body.acct || body.stripe_account_id || '';
