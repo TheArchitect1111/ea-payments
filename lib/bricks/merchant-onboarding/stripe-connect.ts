@@ -57,7 +57,7 @@ export async function startStripeOnboarding(input: {
       email: ownerEmail,
       capabilities: { transfers: { requested: true }, card_payments: { requested: true } },
       metadata: { ea_tenant_id: tenantId },
-    }, { idempotencyKey: 'ea-connect-create-' + tenantId });
+    }, { idempotencyKey: tenantId === 'tarris-sandbox' ? 'ea-connect-create-tarris-sandbox-v2' : 'ea-connect-create-' + tenantId });
     // Atomic insert prevents reassignment in concurrent requests.
     stage = 'save_mapping';
     accountId = await store.putIfAbsent(tenantId, created.id);
