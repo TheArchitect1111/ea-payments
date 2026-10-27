@@ -147,7 +147,9 @@ export async function POST(req:NextRequest,{params}:{params:Promise<{slug:string
       const type = error instanceof Error ? error.name : 'UnknownError';
       const code = error && typeof error === 'object' && 'code' in error
         && typeof error.code === 'string' ? error.code : 'unknown';
-      console.error('TB3_STRIPE_ONBOARDING_FAILURE', {type,code,sandbox});
+      const safeReasons = ['Untrusted return URL','Trusted portal origin not configured','Concurrent account mapping changed; retry onboarding','Connected account tenant or type mismatch','Merchant registry write unconfirmed','Stripe Connect key does not match deployment environment'];
+      const reason = error instanceof Error && safeReasons.includes(error.message) ? error.message : 'other';
+      console.error('TB3_STRIPE_ONBOARDING_FAILURE', {type,code,reason,sandbox});
       return respond({error:'Unable to initiate secure Stripe onboarding',diagnostic:'onboarding_failed',errorType:type,errorCode:code},503);
     }
     return respond({error:'Unable to initiate secure Stripe onboarding'},503);
