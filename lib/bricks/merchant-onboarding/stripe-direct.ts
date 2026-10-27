@@ -1,5 +1,11 @@
 import Stripe from "stripe";
 
+export function isDirectStripeConfigured(): boolean {
+  const expectedPrefix = process.env.VERCEL_ENV === 'production' ? 'sk_live_' : 'sk_test_';
+  return !!process.env.TB3_STRIPE_SECRET_KEY?.startsWith(expectedPrefix)
+    && !!process.env.EA_MERCHANT_DATABASE_URL;
+}
+
 function getStripeForTenant() {
   const key = process.env.TB3_STRIPE_SECRET_KEY;
   if (!key) throw new Error("TB3_STRIPE_SECRET_KEY missing - set in Vercel Env");
