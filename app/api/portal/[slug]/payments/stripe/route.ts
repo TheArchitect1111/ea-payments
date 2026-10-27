@@ -56,12 +56,28 @@ export async function GET(_req: NextRequest,{params}:{params:Promise<{slug:strin
   // Other tenants retain their original authorization.
   if (slug !== 'tarris' && !await authorize(slug))
     return respond({error:'Not authorized'},403);
-  if (!configured()) return respond({available:false,status:'setup_required'});
+  if (!configured()) {
+    if (slug === 'tarris' && process.env.VERCEL_ENV === 'preview') {
+      return respond({
+        available:false,
+        status:'setup_required',
+        diagnostic:'configuration'
+      });
+    }
+    return respond({available:false,status:'setup_required'});
+  }
   try {
     const status = await getStripeMerchantStatus(slug,stripeMerchantStore);
     return respond({available:true,status:status.status,
       chargesEnabled:status.chargesEnabled,payoutsEnabled:status.payoutsEnabled});
   } catch {
+    if (slug === 'tarris' && process.env.VERCEL_ENV === 'preview') {
+      return respond({
+        available:false,
+        status:'setup_required',
+        diagnostic:'provider_or_database'
+      },503);
+    }
     return respond({available:false,status:'setup_required'},503);
   }
 }
