@@ -140,39 +140,16 @@ export async function POST(req:NextRequest,{params}:{params:Promise<{slug:string
   const {slug} = await params;
   if (req.headers.get('origin') !== req.nextUrl.origin)
     return respond({error:'Origin mismatch'},403);
-  if (slug === 'tarris') return tb3DirectOnboard(req);
+  if (slug === 'tarris') {
+    const merchantSession = await authorize(slug);
+    if (!merchantSession) return respond({error:'Not authorized'},403);
+    return tb3DirectOnboard(req);
+  }
 
   let ownerEmail: string;
   let sandbox = false;
 
-  if (slug === 'tarris') {
-    let input: {
-      approvalCode?: unknown;
-      familyEmail?: unknown;
-      sandbox?: unknown;
-    };
-
-    try {
-      input = await req.json();
-    } catch {
-      return respond({error:'Invalid request'},400);
-    }
-
-    if (!approvedTb3Code(input.approvalCode))
-      return respond({error:'TB3 approval required'},403);
-
-    sandbox = process.env.VERCEL_ENV === 'preview' && input.sandbox === true;
-    ownerEmail = typeof input.familyEmail === 'string'
-      ? input.familyEmail.trim().toLowerCase()
-      : '';
-
-    if (
-      ownerEmail.length > 254 ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmail)
-    ) {
-      return respond({error:'Valid family email required'},400);
-    }
-  } else {
+  {
     const session = await authorize(slug);
     if (!session) return respond({error:'Not authorized'},403);
     ownerEmail = session.email!;
