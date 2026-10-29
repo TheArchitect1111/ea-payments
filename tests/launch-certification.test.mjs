@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { mkdtempSync, readFileSync as read, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { classifyFailureDomain, discoverClients, evaluateCertification, evidenceFromBrowserGates, renderMarkdown, writeCertificationReports } from '../lib/launch-certification/engine.mjs';
+import { resolveVercelPreview } from '../lib/launch-certification/vercel-preview.mjs';
 
 const root = process.cwd();
 const clients = JSON.parse(readFileSync(resolve(root, 'config/launch-certification/clients.json'), 'utf8'));
@@ -32,6 +33,42 @@ test('discovers configured clients from one shared registry', () => {
   assert.equal(discoverClients(clients, 'tarris')[0].deployment.publicBaseUrl, 'https://tb3.online');
   assert.equal(discoverClients(clients, 'amanda')[0].sourceOfTruth[0], 'src/clients/amanda/chassis.config.ts');
   assert.throws(() => discoverClients(clients, 'missing'), /Unknown certification client/);
+});
+
+test('preview discovery binds the Vercel URL to the exact ready commit and project', async () => {
+  const sourceCommit = 'c'.repeat(40);
+  let requestedUrl;
+  const result = await resolveVercelPreview({
+    sourceCommit, token: 'test-token', projectId: 'prj_test', teamId: 'team_test', maxAttempts: 1,
+    fetchImpl: async (url, options) => {
+      requestedUrl = new URL(url);
+      assert.equal(options.headers.Authorization, 'Bearer test-token');
+      return { ok: true, json: async () => ({ deployments: [
+        { uid: 'wrong-sha', projectId: 'prj_test', state: 'READY', url: 'old.vercel.app', meta: { githubCommitSha: 'd'.repeat(40) } },
+        { uid: 'exact', projectId: 'prj_test', state: 'READY', target: null, url: 'ea-payments-preview.vercel.app', meta: { githubCommitSha: sourceCommit } },
+      ] }) };
+    },
+  });
+  assert.equal(requestedUrl.searchParams.get('sha'), sourceCommit);
+  assert.equal(requestedUrl.searchParams.get('projectId'), 'prj_test');
+  assert.equal(requestedUrl.searchParams.get('target'), 'preview');
+  assert.equal(result.url, 'https://ea-payments-preview.vercel.app');
+  assert.equal(result.deploymentId, 'exact');
+  assert.equal(result.sourceCommit, sourceCommit);
+});
+
+test('preview discovery rejects another project, production targets, and non-Vercel URLs', async () => {
+  const sourceCommit = 'e'.repeat(40);
+  const candidates = [
+    { uid: 'wrong-project', projectId: 'other', state: 'READY', url: 'a.vercel.app', meta: { githubCommitSha: sourceCommit } },
+    { uid: 'production', projectId: 'prj_test', state: 'READY', target: 'production', url: 'b.vercel.app', meta: { githubCommitSha: sourceCommit } },
+    { uid: 'external-host', projectId: 'prj_test', state: 'READY', target: 'preview', url: 'example.com', meta: { githubCommitSha: sourceCommit } },
+  ];
+  await assert.rejects(resolveVercelPreview({
+    sourceCommit, token: 'test-token', projectId: 'prj_test', teamId: 'team_test', maxAttempts: 1,
+    fetchImpl: async () => ({ ok: true, json: async () => ({ deployments: candidates }) }),
+  }), /Could not resolve a READY preview/);
+  await assert.rejects(resolveVercelPreview({ sourceCommit, token: '', projectId: 'prj_test', teamId: 'team_test' }), /VERCEL_TOKEN/);
 });
 
 test('missing mandatory evidence blocks certification', () => {

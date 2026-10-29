@@ -14,7 +14,7 @@ if (tb3Placeholders && routePath !== '/tarris/future') throw new Error('TB3 plac
 const minVisuals = tb3Placeholders ? 0 : Number(process.env.EA_MIN_VISUALS || 1);
 const outDir = path.resolve(process.env.EA_GATE_OUTPUT || 'artifacts/ea-gate');
 const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET || '';
-const bypassHeaders = bypassSecret ? {
+const bypassHeaders = certificationEnvironment === 'preview' && bypassSecret ? {
   'x-vercel-protection-bypass': bypassSecret,
   'x-vercel-set-bypass-cookie': 'true',
 } : {};

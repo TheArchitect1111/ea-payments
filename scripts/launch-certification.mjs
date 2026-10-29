@@ -40,6 +40,8 @@ function readBrowserGateReports(directory) {
 
 const suppliedEvidence = readEvidenceRecords();
 const browserGateReports = readBrowserGateReports(browserGateDirectory);
+const previewBypassSecret = environment === 'preview' ? (process.env.VERCEL_AUTOMATION_BYPASS_SECRET || '') : '';
+const previewHeaders = previewBypassSecret ? { 'x-vercel-protection-bypass': previewBypassSecret } : {};
 
 async function inspect(client) {
   const configuredBase = baseUrlOverride || (environment === 'production' ? client.deployment.publicBaseUrl : '');
@@ -50,14 +52,14 @@ async function inspect(client) {
     observations.push({ route: '*', status: 0, result: `no ${environment} deployment URL was configured; no deployment was probed` });
   } else {
     try {
-      const response = await fetch(`${base}/api/ops/build-info`, { cache: 'no-store', signal: AbortSignal.timeout(12000) });
+      const response = await fetch(`${base}/api/ops/build-info`, { headers: previewHeaders, cache: 'no-store', signal: AbortSignal.timeout(12000) });
       if (response.ok) buildInfo = await response.json();
     } catch (error) {
       observations.push({ route: '/api/ops/build-info', status: 0, result: `deployment identity unavailable: ${error instanceof Error ? error.message : String(error)}` });
     }
     for (const route of client.deployment.routes) {
       try {
-        const response = await fetch(new URL(route.path, `${base}/`), { redirect: 'follow', cache: 'no-store', signal: AbortSignal.timeout(20000) });
+        const response = await fetch(new URL(route.path, `${base}/`), { headers: previewHeaders, redirect: 'follow', cache: 'no-store', signal: AbortSignal.timeout(20000) });
         const body = await response.text();
         const contentType = response.headers.get('content-type') || '';
         const routeUsable = response.status >= 200 && response.status < 400 && body.trim().length > 80 && contentType.includes('text/html');
