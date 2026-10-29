@@ -73,7 +73,7 @@ function ClassroomInner() {
             <div className="mt-4 bg-zinc-900 p-4 rounded-lg border border-zinc-800">
               <h2 className="font-semibold">{activeModule.title}</h2>
               <p className="text-sm text-zinc-400 mt-1">{activeModule.description} • {activeModule.duration}</p>
-              <button onClick={markComplete} className="mt-3 bg-white text-black text-sm px-4 py-2 rounded-full font-medium">
+              <button data-cta-name="Mark Complete & Unlock Next" data-cta-key="mark-complete-unlock-next" onClick={markComplete} className="mt-3 bg-white text-black text-sm px-4 py-2 rounded-full font-medium">
                 {completed.includes(activeId) ? '✓ Completed - Next →' : 'Mark Complete & Unlock Next'}
               </button>
             </div>
