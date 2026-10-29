@@ -100,8 +100,16 @@ jobs:
           EA_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -e
-          tb3_base="${EA_CERTIFICATION_BASE_URL:-https://tb3.online}"
-          amanda_base="${EA_CERTIFICATION_BASE_URL:-https://amandacatherine.ca}"
+          tb3_base="${EA_CERTIFICATION_BASE_URL:-}"
+          amanda_base="${EA_CERTIFICATION_BASE_URL:-}"
+          if [ "$EA_CERTIFICATION_ENVIRONMENT" = "production" ]; then
+            tb3_base="${tb3_base:-https://tb3.online}"
+            amanda_base="${amanda_base:-https://amandacatherine.ca}"
+          fi
+          if [ -z "$tb3_base" ] || [ -z "$amanda_base" ]; then
+            echo "Browser gate skipped: no exact ${EA_CERTIFICATION_ENVIRONMENT} deployment URL is configured. Certification will remain blocked on missing deployment evidence."
+            exit 0
+          fi
           EA_PREVIEW_URL="$tb3_base" EA_GATE_PATH=/tarris EA_GATE_OUTPUT=artifacts/ea-gate/tb3-public node scripts/ea-preview-gate.mjs
           EA_PREVIEW_URL="$tb3_base" EA_GATE_PATH=/tarris/future EA_GATE_OUTPUT=artifacts/ea-gate/tb3-hq node scripts/ea-preview-gate.mjs
           EA_PREVIEW_URL="$amanda_base" EA_GATE_PATH=/amanda-catherine EA_GATE_OUTPUT=artifacts/ea-gate/amanda-public node scripts/ea-preview-gate.mjs

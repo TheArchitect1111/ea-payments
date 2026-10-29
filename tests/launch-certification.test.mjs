@@ -110,6 +110,8 @@ test('browser gate evidence covers only media and responsive checks for the exac
   const browserEvidence = evidenceFromBrowserGates(client, [gate], { environment: 'preview', deploymentBaseUrl: 'https://tb3.online' });
   assert.deepEqual(browserEvidence.map((item) => item.checkId).sort(), ['website:media', 'website:responsive-ui']);
   const record = evaluateCertification({ client, capabilityRegistry: capabilities, evidence: browserEvidence, sourceCommit, environment: 'preview', now: time, root });
+  assert.equal(record.deployment.baseUrl, null);
+  assert.equal(evidenceFromBrowserGates(client, [gate], { environment: 'preview', deploymentBaseUrl: '' }).length, 0);
   assert.ok(record.checks.find((item) => item.checkId === 'website:responsive-ui').status === 'passed');
   assert.ok(record.checks.find((item) => item.checkId === 'website:media').status === 'passed');
   assert.equal(record.checks.find((item) => item.checkId === 'website:accessibility').status, 'missing');
@@ -117,6 +119,8 @@ test('browser gate evidence covers only media and responsive checks for the exac
   const localOnly = evidenceFromBrowserGates(client, [{ ...gate, previewUrl: 'http://127.0.0.1:3000', details: { certificationTransport: 'exact-built-checkout-local' } }], { environment: 'preview', deploymentBaseUrl: 'https://tb3.online' });
   assert.ok(localOnly.every((item) => item.status === 'unverified'));
   assert.equal(evidenceFromBrowserGates(client, [{ ...gate, target: 'https://other.example/tarris' }], { environment: 'preview', deploymentBaseUrl: 'https://tb3.online' }).length, 0);
+  const localGateNotBoundToProduction = evidenceFromBrowserGates(client, [gate], { environment: 'preview', deploymentBaseUrl: '' });
+  assert.equal(localGateNotBoundToProduction.length, 0);
 });
 
 test('failure domains route to concrete engineering disciplines', () => {

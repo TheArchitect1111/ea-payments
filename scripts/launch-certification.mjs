@@ -42,35 +42,41 @@ const suppliedEvidence = readEvidenceRecords();
 const browserGateReports = readBrowserGateReports(browserGateDirectory);
 
 async function inspect(client) {
-  const base = (baseUrlOverride || client.deployment.publicBaseUrl).replace(/\/$/, '');
+  const configuredBase = baseUrlOverride || (environment === 'production' ? client.deployment.publicBaseUrl : '');
+  const base = configuredBase.replace(/\/$/, '');
   const observations = [];
   let buildInfo = null;
-  try {
-    const response = await fetch(`${base}/api/ops/build-info`, { cache: 'no-store', signal: AbortSignal.timeout(12000) });
-    if (response.ok) buildInfo = await response.json();
-  } catch (error) {
-    observations.push({ route: '/api/ops/build-info', status: 0, result: `deployment identity unavailable: ${error instanceof Error ? error.message : String(error)}` });
-  }
-  for (const route of client.deployment.routes) {
+  if (!base) {
+    observations.push({ route: '*', status: 0, result: `no ${environment} deployment URL was configured; no deployment was probed` });
+  } else {
     try {
-      const response = await fetch(new URL(route.path, `${base}/`), { redirect: 'follow', cache: 'no-store', signal: AbortSignal.timeout(20000) });
-      const body = await response.text();
-      const contentType = response.headers.get('content-type') || '';
-      const routeUsable = response.status >= 200 && response.status < 400 && body.trim().length > 80 && contentType.includes('text/html');
-      observations.push({ route: route.path, capability: route.capability, status: response.status, bodyBytes: Buffer.byteLength(body), contentType, result: routeUsable ? 'reachable with HTML response; route contents and authenticated behavior not inferred' : 'failed HTTP or HTML route check' });
+      const response = await fetch(`${base}/api/ops/build-info`, { cache: 'no-store', signal: AbortSignal.timeout(12000) });
+      if (response.ok) buildInfo = await response.json();
     } catch (error) {
-      observations.push({ route: route.path, capability: route.capability, status: 0, result: `request failed: ${error instanceof Error ? error.message : String(error)}` });
+      observations.push({ route: '/api/ops/build-info', status: 0, result: `deployment identity unavailable: ${error instanceof Error ? error.message : String(error)}` });
+    }
+    for (const route of client.deployment.routes) {
+      try {
+        const response = await fetch(new URL(route.path, `${base}/`), { redirect: 'follow', cache: 'no-store', signal: AbortSignal.timeout(20000) });
+        const body = await response.text();
+        const contentType = response.headers.get('content-type') || '';
+        const routeUsable = response.status >= 200 && response.status < 400 && body.trim().length > 80 && contentType.includes('text/html');
+        observations.push({ route: route.path, capability: route.capability, status: response.status, bodyBytes: Buffer.byteLength(body), contentType, result: routeUsable ? 'reachable with HTML response; route contents and authenticated behavior not inferred' : 'failed HTTP or HTML route check' });
+      } catch (error) {
+        observations.push({ route: route.path, capability: route.capability, status: 0, result: `request failed: ${error instanceof Error ? error.message : String(error)}` });
+      }
     }
   }
   const deployedCommit = /^[a-f0-9]{40}$/i.test(buildInfo?.commitSha || '') ? buildInfo.commitSha : null;
   const environmentMatches = Boolean(buildInfo?.environment) && buildInfo.environment === environment;
-  const publicRoutesReachable = observations.length === client.deployment.routes.length && observations.every((item) => item.result.startsWith('reachable with HTML'));
+  const routeObservations = observations.filter((item) => item.route !== '*');
+  const publicRoutesReachable = Boolean(base) && routeObservations.length === client.deployment.routes.length && routeObservations.every((item) => item.result.startsWith('reachable with HTML'));
   const routeIdentityVerified = publicRoutesReachable && Boolean(deployedCommit) && environmentMatches;
   const evidence = client.installedCapabilities.includes('website') ? [{
     checkId: 'website:public-routes', status: routeIdentityVerified ? 'passed' : 'unverified',
     reason: routeIdentityVerified ? '' : 'Route response did not prove the requested deployment identity and environment',
     sourceCommit: deployedCommit || runnerCommit, environment,
-    timestamp: new Date().toISOString(), evidenceRef: `${client.deployment.routes.map((route) => `${base}${route.path}`).join(', ')}; build-info=${buildInfo?.commitSha || 'unavailable'}`,
+    timestamp: new Date().toISOString(), evidenceRef: base ? `${client.deployment.routes.map((route) => `${base}${route.path}`).join(', ')}; build-info=${buildInfo?.commitSha || 'unavailable'}` : `deployment URL unavailable for ${environment}`,
   }] : [];
   return {
     sourceCommit: deployedCommit || runnerCommit,
@@ -85,13 +91,14 @@ async function inspect(client) {
 let failed = false;
 for (const client of clients) {
   const live = await inspect(client);
-  const browserEvidence = evidenceFromBrowserGates(client, browserGateReports, { environment, deploymentBaseUrl: baseUrlOverride || client.deployment.publicBaseUrl });
+  const deploymentBaseUrl = baseUrlOverride || (environment === 'production' ? client.deployment.publicBaseUrl : '');
+  const browserEvidence = evidenceFromBrowserGates(client, browserGateReports, { environment, deploymentBaseUrl });
   const record = evaluateCertification({
     client, capabilityRegistry, evidence: [...suppliedEvidence, ...browserEvidence, ...live.evidence],
     sourceCommit: live.sourceCommit, runnerCommit,
     environment,
     deploymentId: live.deploymentId,
-    deploymentBaseUrl: baseUrlOverride || client.deployment.publicBaseUrl,
+    deploymentBaseUrl: deploymentBaseUrl || null,
     configurationFingerprint: live.configurationFingerprint,
     observations: live.observations,
     root,
