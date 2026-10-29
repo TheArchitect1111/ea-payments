@@ -10,7 +10,8 @@ on:
       - 'app/api/ops/build-info/route.ts'
       - 'lib/**'
       - 'scripts/launch-certification.mjs'
-      - 'scripts/resolve-vercel-preview.mjs'
+      - 'scripts/resolve-github-preview.mjs'
+      - 'lib/launch-certification/github-preview-check.mjs'
       - 'scripts/ea-preview-gate.mjs'
       - 'src/**'
       - 'tests/launch-certification.test.mjs'
@@ -41,6 +42,7 @@ on:
         type: string
 
 permissions:
+  checks: read
   contents: read
   issues: write
 
@@ -72,11 +74,9 @@ jobs:
           (github.event_name == 'workflow_dispatch' && inputs.environment == 'preview' && inputs.base_url == '' && vars.EA_PREVIEW_URL == '')
         continue-on-error: true
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          EA_VERCEL_PROJECT_ID: prj_u7zAr2vz8bLLC4s77xlU5FnB8VTM
-          EA_VERCEL_TEAM_ID: team_s7mlAoJkDCQYaXiSC8nYDNIX
-          EA_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha }}
-        run: node scripts/resolve-vercel-preview.mjs
+          GITHUB_TOKEN: ${{ github.token }}
+          EA_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.event.deployment.sha || github.sha }}
+        run: node scripts/resolve-github-preview.mjs
       - name: Test certification decisions and multi-client manifests
         run: npm run test:launch-certification
       - name: Verify the existing LEGO certification evidence contract
@@ -111,7 +111,7 @@ jobs:
         id: visual
         if: always() && steps.build.outcome == 'success'
         env:
-          EA_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+          EA_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.event.deployment.sha || github.sha }}
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: |
           set -e
@@ -133,7 +133,7 @@ jobs:
         id: certification
         if: always()
         env:
-          EA_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+          EA_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.event.deployment.sha || github.sha }}
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: |
           client='${{ github.event.inputs.client || 'all' }}'

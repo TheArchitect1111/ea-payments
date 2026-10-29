@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { mkdtempSync, readFileSync as read, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { classifyFailureDomain, discoverClients, evaluateCertification, evidenceFromBrowserGates, renderMarkdown, writeCertificationReports } from '../lib/launch-certification/engine.mjs';
-import { resolveVercelPreview } from '../lib/launch-certification/vercel-preview.mjs';
+import { previewUrlFromCheckRuns, resolveGithubPreview } from '../lib/launch-certification/github-preview-check.mjs';
 
 const root = process.cwd();
 const clients = JSON.parse(readFileSync(resolve(root, 'config/launch-certification/clients.json'), 'utf8'));
@@ -35,40 +35,43 @@ test('discovers configured clients from one shared registry', () => {
   assert.throws(() => discoverClients(clients, 'missing'), /Unknown certification client/);
 });
 
-test('preview discovery binds the Vercel URL to the exact ready commit and project', async () => {
+test('preview discovery reads a successful Vercel check bound to the exact source commit', async () => {
   const sourceCommit = 'c'.repeat(40);
   let requestedUrl;
-  const result = await resolveVercelPreview({
-    sourceCommit, token: 'test-token', projectId: 'prj_test', teamId: 'team_test', maxAttempts: 1,
+  const result = await resolveGithubPreview({
+    sourceCommit, repository: 'TheArchitect1111/ea-payments', token: 'test-token', maxAttempts: 1,
     fetchImpl: async (url, options) => {
       requestedUrl = new URL(url);
       assert.equal(options.headers.Authorization, 'Bearer test-token');
-      return { ok: true, json: async () => ({ deployments: [
-        { uid: 'wrong-sha', projectId: 'prj_test', state: 'READY', url: 'old.vercel.app', meta: { githubCommitSha: 'd'.repeat(40) } },
-        { uid: 'exact', projectId: 'prj_test', state: 'READY', target: null, url: 'ea-payments-preview.vercel.app', meta: { githubCommitSha: sourceCommit } },
+      return { ok: true, json: async () => ({ check_runs: [
+        { name: 'Vercel Preview Comments', head_sha: 'd'.repeat(40), status: 'completed', conclusion: 'success', output: { summary: 'https://vercel.live/open-feedback/ea-payments-other-the-architects-projects-cc813778.vercel.app' } },
+        { name: 'Vercel Preview Comments', head_sha: sourceCommit, status: 'in_progress', conclusion: null, output: { summary: 'https://vercel.live/open-feedback/ea-payments-pending-the-architects-projects-cc813778.vercel.app' } },
+        { name: 'Vercel Preview Comments', head_sha: sourceCommit, status: 'completed', conclusion: 'success', output: { summary: '✅ Preview ready. [Go to feedback](https://vercel.live/open-feedback/ea-payments-preview-the-architects-projects-cc813778.vercel.app?via=pr-comment-feedback-link)' } },
       ] }) };
     },
   });
-  assert.equal(requestedUrl.searchParams.get('sha'), sourceCommit);
-  assert.equal(requestedUrl.searchParams.get('projectId'), 'prj_test');
-  assert.equal(requestedUrl.searchParams.get('target'), 'preview');
-  assert.equal(result.url, 'https://ea-payments-preview.vercel.app');
-  assert.equal(result.deploymentId, 'exact');
+  assert.equal(requestedUrl.pathname, `/repos/TheArchitect1111/ea-payments/commits/${sourceCommit}/check-runs`);
+  assert.equal(requestedUrl.searchParams.get('per_page'), '100');
+  assert.equal(result.url, 'https://ea-payments-preview-the-architects-projects-cc813778.vercel.app');
   assert.equal(result.sourceCommit, sourceCommit);
 });
 
-test('preview discovery rejects another project, production targets, and non-Vercel URLs', async () => {
+test('preview discovery rejects wrong commits, failed checks, and untrusted hosts', () => {
   const sourceCommit = 'e'.repeat(40);
-  const candidates = [
-    { uid: 'wrong-project', projectId: 'other', state: 'READY', url: 'a.vercel.app', meta: { githubCommitSha: sourceCommit } },
-    { uid: 'production', projectId: 'prj_test', state: 'READY', target: 'production', url: 'b.vercel.app', meta: { githubCommitSha: sourceCommit } },
-    { uid: 'external-host', projectId: 'prj_test', state: 'READY', target: 'preview', url: 'example.com', meta: { githubCommitSha: sourceCommit } },
-  ];
-  await assert.rejects(resolveVercelPreview({
-    sourceCommit, token: 'test-token', projectId: 'prj_test', teamId: 'team_test', maxAttempts: 1,
-    fetchImpl: async () => ({ ok: true, json: async () => ({ deployments: candidates }) }),
-  }), /Could not resolve a READY preview/);
-  await assert.rejects(resolveVercelPreview({ sourceCommit, token: '', projectId: 'prj_test', teamId: 'team_test' }), /VERCEL_TOKEN/);
+  const check = (head_sha, conclusion, host) => ({ name: 'Vercel Preview Comments', head_sha, status: 'completed', conclusion, output: { summary: `https://vercel.live/open-feedback/${host}` } });
+  assert.equal(previewUrlFromCheckRuns([
+    check('f'.repeat(40), 'success', 'ea-payments-other-the-architects-projects-cc813778.vercel.app'),
+    check(sourceCommit, 'failure', 'ea-payments-failed-the-architects-projects-cc813778.vercel.app'),
+    check(sourceCommit, 'success', 'example.com'),
+  ], sourceCommit), null);
+});
+
+test('preview resolver rejects absent or malformed source identity and check evidence', async () => {
+  await assert.rejects(resolveGithubPreview({ sourceCommit: 'bad', repository: 'TheArchitect1111/ea-payments', token: 'test-token' }), /full 40-character/);
+  await assert.rejects(resolveGithubPreview({ sourceCommit: 'e'.repeat(40), repository: '', token: 'test-token' }), /GITHUB_REPOSITORY/);
+  await assert.rejects(resolveGithubPreview({ sourceCommit: 'e'.repeat(40), repository: 'TheArchitect1111/ea-payments', token: 'test-token', maxAttempts: 1,
+    fetchImpl: async () => ({ ok: true, json: async () => ({ check_runs: [] }) }),
+  }), /Could not resolve a successful/);
 });
 
 test('missing mandatory evidence blocks certification', () => {

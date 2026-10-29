@@ -14,7 +14,7 @@ const baseUrlOverride = arg('base-url', process.env.EA_CERTIFICATION_BASE_URL ||
 const outputDirectory = resolve(root, arg('output', 'artifacts/launch-certification'));
 const evidenceFile = arg('evidence-file', process.env.EA_CERTIFICATION_EVIDENCE_FILE || '');
 const browserGateDirectory = resolve(root, arg('browser-gate-dir', 'artifacts/ea-gate'));
-let runnerCommit = process.env.GITHUB_SHA || process.env.EA_SOURCE_COMMIT || '';
+let runnerCommit = process.env.EA_SOURCE_COMMIT || process.env.GITHUB_SHA || '';
 if (!runnerCommit) {
   try { runnerCommit = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(); } catch { /* manifest validation reports missing identity */ }
 }
