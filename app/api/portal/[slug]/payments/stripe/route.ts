@@ -149,34 +149,7 @@ export async function POST(req:NextRequest,{params}:{params:Promise<{slug:string
   let ownerEmail: string;
   let sandbox = false;
 
-  if (slug === 'tarris') {
-    let input: {
-      approvalCode?: unknown;
-      familyEmail?: unknown;
-      sandbox?: unknown;
-    };
-
-    try {
-      input = await req.json();
-    } catch {
-      return respond({error:'Invalid request'},400);
-    }
-
-    if (!approvedTb3Code(input.approvalCode))
-      return respond({error:'TB3 approval required'},403);
-
-    sandbox = process.env.VERCEL_ENV === 'preview' && input.sandbox === true;
-    ownerEmail = typeof input.familyEmail === 'string'
-      ? input.familyEmail.trim().toLowerCase()
-      : '';
-
-    if (
-      ownerEmail.length > 254 ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmail)
-    ) {
-      return respond({error:'Valid family email required'},400);
-    }
-  } else {
+  {
     const session = await authorize(slug);
     if (!session) return respond({error:'Not authorized'},403);
     ownerEmail = session.email!;
