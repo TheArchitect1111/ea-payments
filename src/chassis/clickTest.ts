@@ -11,7 +11,7 @@ export async function clickTest(bricks: readonly Brick[], courseId: string, type
   const h=await brick.health();assert.equal(h.status,200,id+' health: '+h.evidence);
   assertPriceContract(brick.price());
   if(['checkout','billing','welcome','email','entitlement'].includes(id)) {
-   const co=await brick.checkout({type,courseId});assert(co.sessionId&&co.entitlement,id+' no verified entitlement');
+   const co=await brick.checkout({type,courseId});assert(!('notApplicable' in co),id+' checkout is not applicable');assert(co.sessionId&&co.entitlement,id+' no verified entitlement');
    const w=await brick.welcome({sessionId:co.sessionId});assert(w.successPage&&w.emailId&&w.receiptPdf&&w.nextSteps&&w.accessLink,id+' incomplete delivery');
   }
   assert.equal(brick.attach(),true,id+' has no recorded real integration proof');

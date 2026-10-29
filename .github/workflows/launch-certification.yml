@@ -1,0 +1,185 @@
+name: EA Launch Certification
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'app/**'
+      - 'config/launch-certification/**'
+      - 'config/capability-inventory.json'
+      - 'app/api/ops/build-info/route.ts'
+      - 'lib/**'
+      - 'scripts/launch-certification.mjs'
+      - 'src/**'
+      - 'tests/launch-certification.test.mjs'
+      - 'tests/launch-build-info.test.mts'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/launch-certification.yml'
+  deployment_status:
+  schedule:
+    - cron: '25 9 * * *'
+  workflow_dispatch:
+    inputs:
+      client:
+        description: 'Client to certify, or all configured clients'
+        required: true
+        type: choice
+        options: [tarris, amanda, all]
+        default: all
+      environment:
+        description: 'Deployment environment to verify'
+        required: true
+        type: choice
+        options: [preview, production]
+        default: production
+      base_url:
+        description: 'Optional exact preview/deployment URL'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: launch-certification-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  certify:
+    if: github.event_name != 'deployment_status' || github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      EA_CERTIFICATION_ENVIRONMENT: ${{ github.event.inputs.environment || (github.event_name == 'pull_request' && 'preview') || github.event.deployment.environment || 'production' }}
+      EA_CERTIFICATION_BASE_URL: ${{ github.event.inputs.base_url || github.event.deployment_status.environment_url || (github.event_name == 'pull_request' && vars.EA_PREVIEW_URL) || '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Test certification decisions and multi-client manifests
+        run: npm run test:launch-certification
+      - name: Verify the existing LEGO certification evidence contract
+        run: node scripts/test-lego-certification-contract.mjs
+      - name: Run the existing module evidence runner
+        id: existing_evidence
+        continue-on-error: true
+        env:
+          GITHUB_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node scripts/run-lego-certification-evidence.mjs
+      - name: Run chassis wiring guard
+        id: chassis_guard
+        if: always()
+        run: npm run test:brick-chassis-guard
+      - name: Run TB3 commerce ledger regression
+        id: tb3_commerce
+        if: always()
+        run: npm run test:tb3-bonfire
+      - name: Run full existing repository test suite
+        id: regression
+        if: always()
+        continue-on-error: true
+        run: npm test
+      - name: Build candidate application
+        id: build
+        if: always()
+        run: npm run build
+      - name: Install browser for existing responsive and visual gate
+        if: always() && steps.build.outcome == 'success'
+        run: npx playwright install --with-deps chromium
+      - name: Reuse the existing desktop/mobile browser gate for installed client routes
+        id: visual
+        if: always() && steps.build.outcome == 'success'
+        env:
+          EA_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -e
+          tb3_base="${EA_CERTIFICATION_BASE_URL:-https://tb3.online}"
+          amanda_base="${EA_CERTIFICATION_BASE_URL:-https://amandacatherine.ca}"
+          EA_PREVIEW_URL="$tb3_base" EA_GATE_PATH=/tarris EA_GATE_OUTPUT=artifacts/ea-gate/tb3-public node scripts/ea-preview-gate.mjs
+          EA_PREVIEW_URL="$tb3_base" EA_GATE_PATH=/tarris/future EA_GATE_OUTPUT=artifacts/ea-gate/tb3-hq node scripts/ea-preview-gate.mjs
+          EA_PREVIEW_URL="$amanda_base" EA_GATE_PATH=/amanda-catherine EA_GATE_OUTPUT=artifacts/ea-gate/amanda-public node scripts/ea-preview-gate.mjs
+          EA_PREVIEW_URL="$amanda_base" EA_GATE_PATH=/portal/amanda-catherine EA_GATE_OUTPUT=artifacts/ea-gate/amanda-portal node scripts/ea-preview-gate.mjs
+      - name: Certify configured clients against exact deployment evidence
+        id: certification
+        if: always()
+        env:
+          EA_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          client='${{ github.event.inputs.client || 'all' }}'
+          npm run launch:certification -- --client="$client" --environment="$EA_CERTIFICATION_ENVIRONMENT" --base-url="$EA_CERTIFICATION_BASE_URL"
+      - name: Upload machine and human-readable certification reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: launch-certification-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            artifacts/launch-certification/
+            artifacts/ea-gate/
+            artifacts/lego-certification/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Create or update one repair issue per blocked client
+        if: always() && (steps.chassis_guard.outcome == 'failure' || steps.tb3_commerce.outcome == 'failure' || steps.regression.outcome == 'failure' || steps.build.outcome == 'failure' || steps.visual.outcome == 'failure' || steps.certification.outcome == 'failure')
+        uses: actions/github-script@v7
+        env:
+          REGRESSION_RESULT: ${{ steps.regression.outcome }}
+          BUILD_RESULT: ${{ steps.build.outcome }}
+          BROWSER_RESULT: ${{ steps.visual.outcome }}
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const dir = 'artifacts/launch-certification';
+            if (!fs.existsSync(dir)) return;
+            const files = fs.readdirSync(dir).filter((file) => file.endsWith('.json'));
+            for (const file of files) {
+              const report = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8'));
+              if (report.decision === 'CERTIFIED') continue;
+              const title = `[Launch Certification] ${report.client.id} NOT CERTIFIED`;
+              const domains = [...new Set(report.failedRequirements.map((failure) => {
+                const text = `${failure.checkId || ''} ${failure.reason || ''}`.toLowerCase();
+                if (/payment|checkout|stripe|commerce|fulfillment|printful|refund/.test(text)) return 'payments-commerce';
+                if (/auth|permission|tenant|secret|security/.test(text)) return 'authentication-security';
+                if (/database|persist|upload|data|backup|recovery/.test(text)) return 'database-data-integrity';
+                if (/email|sms|notification|delivery/.test(text)) return 'communications-integrations';
+                if (/api|provider|integration|sync|webhook/.test(text)) return 'backend-integrations';
+                if (/monitor|deployment|operations|log/.test(text)) return 'infrastructure-operations';
+                if (/responsive|accessibility|visual|navigation|website|media|form/.test(text)) return 'frontend-ux';
+                return 'quality-assurance';
+              }))];
+              const body = [
+                `Automated certification for **${report.client.displayName}** returned **${report.decision}**.`,
+                '',
+                `- Environment: ${report.deployment.environment}`,
+                `- Deployment: ${report.deployment.identity}`,
+                `- Source commit: ${report.sourceCommit || 'unavailable'}`,
+                `- Failed or unverified requirements: ${report.failedRequirements.length}`,
+                `- Existing repository suite: ${process.env.REGRESSION_RESULT || 'not-run'}`,
+                `- Build: ${process.env.BUILD_RESULT || 'not-run'}`,
+                `- Browser gate: ${process.env.BROWSER_RESULT || 'not-run'}`,
+                `- Engineering discipline(s): ${domains.join(', ') || 'quality-assurance'}`,
+                `- Run evidence: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+                '',
+                ...report.failedRequirements.map((failure) => `- ${failure.type}${failure.checkId ? ` (${failure.checkId})` : ''}: ${failure.reason}`),
+                '',
+                'Autonomous repair agent: **not configured or executable in this repository workflow**. This ticket is a deduplicated repair handoff, not a claim that code repair ran. Assign the responsible engineering owner, make a safe fix on an isolated branch, add regression evidence, and rerun certification. Production review and approval remain required.',
+              ].join('\n');
+              const open = await github.rest.issues.listForRepo({ owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100 });
+              const existing = open.data.find((issue) => !issue.pull_request && issue.title === title);
+              if (existing) {
+                const comments = await github.rest.issues.listComments({ owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, per_page: 100 });
+                const runMarker = `<!-- launch-certification-run:${context.runId} -->`;
+                if (!comments.data.some((comment) => comment.body.includes(runMarker))) {
+                  await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, body: `${runMarker}\n${body}` });
+                }
+              } else {
+                await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title, body, labels: [] });
+              }
+            }

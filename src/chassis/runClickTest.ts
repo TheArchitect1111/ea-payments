@@ -16,6 +16,7 @@ import { amazonAdapter } from './adapters/amazon.adapter';
 import { previewAdapter } from './adapters/preview.adapter';
 import { productionGateAdapter } from './adapters/production-gate.adapter';
 import { chassisCertAdapter } from './adapters/chassis-cert.adapter';
+import { launchCertificationAdapter } from './adapters/launch-certification.adapter';
 
 export interface ClientConfig {
   id: string;
@@ -34,7 +35,7 @@ export async function runClickTest(clientConfig: ClientConfig, mode: 'live' | 'c
     createCatalogAdapter(clientConfig.catalogSource), menuAdapter,
     checkoutAdapter, welcomeAdapter, emailAdapter, entitlementAdapter,
     createJaneAdapter(clientConfig), amazonAdapter, previewAdapter,
-    productionGateAdapter, chassisCertAdapter,
+    productionGateAdapter, chassisCertAdapter, launchCertificationAdapter,
   ];
   const checkedBricks = mode === 'contract' ? await createStagingAdapters(clientConfig, bricks) : bricks;
   const result = await clickTest(checkedBricks, courseId, 'stripe-test');
@@ -56,7 +57,7 @@ async function main() {
   if (modeArg !== 'live' && modeArg !== 'contract') throw Error('Mode must be live or contract');
   const result = await runClickTest(configModule.clientConfig as ClientConfig, modeArg);
   console.log(JSON.stringify(result, null, 2));
-  if (result.passed) console.log('14/14 CLICK PASS: ' + clientId + ' — ' + result.verificationType + (result.productionEligible ? '' : ' — NOT LIVE; production blocked'));
+  if (result.passed) console.log(result.click + ' CLICK PASS: ' + clientId + ' — ' + result.verificationType + (result.productionEligible ? '' : ' — NOT LIVE; production blocked'));
   else process.exitCode = 1;
 }
 
