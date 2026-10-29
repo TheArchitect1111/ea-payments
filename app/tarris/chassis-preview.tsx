@@ -2,13 +2,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-type Model = { cents: number; payment: { sessionId: string; entitlement: string }; delivery: { successPage: string; accessLink: string; emailId: string; receiptPdf: string; nextSteps: string } };
+type Model = { available: true; cents: number; payment: { sessionId: string; entitlement: string }; delivery: { successPage: string; accessLink: string; emailId: string; receiptPdf: string; nextSteps: string } };
 export function ChassisPreview() {
   const [model, setModel] = useState<Model | null>(null);
   const [step, setStep] = useState(0);
   useEffect(() => {
     let active = true;
-    fetch('/api/chassis/tarris/contract').then(async response => response.ok ? response.json() : null).then(data => { if (active) setModel(data); }).catch(() => {});
+    fetch('/api/chassis/tarris/contract').then(async response => response.ok ? response.json() : null).then(data => { if (active && data?.available === true) setModel(data); }).catch(() => {});
     return () => { active = false; };
   }, []);
   if (!model) return null;

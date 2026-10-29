@@ -127,7 +127,7 @@
     "test:final-nine-http": "node --import tsx --test tests/final-nine-http.test.mts",
     "test:tb3-bonfire": "node --import tsx --test tests/tb3-bonfire.test.mts",
     "test:brick-registrar": "node --import tsx --test tests/brick-registrar.test.mts",
-    "test:tb3-brick-wire": "node --import tsx --test tests/tb3-brick-auto-wire.test.mts",
+    "test:tb3-brick-wire": "node --import tsx --test tests/tb3-brick-auto-wire.test.mts && node --import tsx --test tests/tb3-staging-preview.test.mts",
     "test:tb3-merch-registrar": "node --import tsx --test tests/tb3-merch-registrar.test.mts",
     "test:brick-chassis-guard": "node scripts/guard-brick-chassis.mjs",
     "test:client-factory": "node --import tsx --test tests/client-factory.test.mts",
