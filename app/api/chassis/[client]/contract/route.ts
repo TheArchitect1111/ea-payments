@@ -16,9 +16,9 @@ export async function GET(_request: Request, context: { params: Promise<{ client
   const adapters = await createStagingAdapters(config, sockets);
   const checkout = adapters.find(brick => brick.id === 'checkout')!;
   const health = await checkout.health();
-  if (health.status !== 200) return NextResponse.json({ error: health.evidence }, { status: 422 });
+  if (health.status !== 200) return NextResponse.json({ available: false }, { headers: { 'Cache-Control': 'no-store' } });
   const courseId = Object.keys(config.prices)[0];
   const payment = await checkout.checkout({ type: 'stripe-test', courseId });
   const delivery = await checkout.welcome(payment);
-  return NextResponse.json({ verificationType: 'CONTRACT ONLY', productionEligible: false, client, cents: config.prices[courseId], portal: '/tarris/future', payment, delivery }, { headers: { 'Cache-Control': 'no-store' } });
+  return NextResponse.json({ available: true, verificationType: 'CONTRACT ONLY', productionEligible: false, client, cents: config.prices[courseId], portal: '/tarris/future', payment, delivery }, { headers: { 'Cache-Control': 'no-store' } });
 }
