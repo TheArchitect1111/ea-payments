@@ -50,3 +50,13 @@ test('unauthenticated TB3 visitors reach the real portal login instead of a publ
   assert.match(layout, /redirect\('\/portal\/login\?next=%2Ftarris%2Ffuture'\)/);
   assert.doesNotMatch(layout, /redirect\('\/tarris\?hq=private'\)/);
 });
+
+
+test('TB3 Stripe registration requires merchant authorization before account binding', () => {
+  const route = read('app/api/portal/[slug]/payments/stripe/route.ts');
+  const post = route.slice(route.indexOf('export async function POST('));
+  assert.match(post, /if \(slug === 'tarris'\) \{\s*const merchantSession = await authorize\(slug\);\s*if \(!merchantSession\) return respond\(\{error:'Not authorized'\},403\);\s*return tb3DirectOnboard\(req\);/);
+  assert.match(route, /if \(slug === 'tarris'\) return requireTb3MerchantSession\(\)/);
+  assert.match(route, /if \(!approvedTb3Code\(input\.approvalCode\)\)/);
+  assert.match(route, /if \(req\.headers\.get\('origin'\) !== req\.nextUrl\.origin\)/);
+});
