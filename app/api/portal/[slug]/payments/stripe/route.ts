@@ -140,7 +140,11 @@ export async function POST(req:NextRequest,{params}:{params:Promise<{slug:string
   const {slug} = await params;
   if (req.headers.get('origin') !== req.nextUrl.origin)
     return respond({error:'Origin mismatch'},403);
-  if (slug === 'tarris') return tb3DirectOnboard(req);
+  if (slug === 'tarris') {
+    const merchantSession = await authorize(slug);
+    if (!merchantSession) return respond({error:'Not authorized'},403);
+    return tb3DirectOnboard(req);
+  }
 
   let ownerEmail: string;
   let sandbox = false;
