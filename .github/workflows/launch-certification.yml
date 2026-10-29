@@ -45,6 +45,7 @@ permissions:
   checks: read
   contents: read
   issues: write
+  statuses: read
 
 concurrency:
   group: launch-certification-${{ github.repository }}
