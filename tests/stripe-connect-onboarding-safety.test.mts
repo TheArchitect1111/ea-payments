@@ -56,7 +56,7 @@ test('TB3 public status does not disclose merchant account identifiers',()=>{
 });
 
 test('non-TB3 tenants retain authorized Connect onboarding',()=>{
-  assert.ok(api.includes("if (slug === 'tarris') return tb3DirectOnboard(req);"));
+  assert.match(api, /if \(slug === 'tarris'\) \{\s*const merchantSession = await authorize\(slug\);\s*if \(!merchantSession\) return respond\(\{error:'Not authorized'\},403\);\s*return tb3DirectOnboard\(req\);/);;
   assert.ok(api.includes("if (slug !== 'tarris' && !await authorize(slug)"));
   assert.ok(api.includes('const linked = await startStripeOnboarding({'));
 });
