@@ -50,11 +50,11 @@ permissions:
   statuses: read
 
 concurrency:
-  # Keep PR preview checks separate from post-deployment checks. A deployment
-  # status event must not replace the queued PR run that resolves the exact READY
-  # preview for the same commit.
-  group: launch-certification-${{ github.repository }}-${{ github.event_name }}
-  cancel-in-progress: false
+  # Isolate pull-request runs so this PR is not queued behind unrelated client
+  # certifications. Deployment-status checks stay in a different group and are
+  # never canceled by a newer preview run.
+  group: launch-certification-${{ github.repository }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   certify:
