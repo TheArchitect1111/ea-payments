@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {build} from 'esbuild';
-import {writeFileSync,unlinkSync,readFileSync} from 'node:fs';
+import {writeFileSync,unlinkSync,readFileSync,existsSync} from 'node:fs';
 const events:any[]=[];
 (globalThis as any).__tb3MerchRegistrar=events;
 const mock:Record<string,string>={
@@ -45,13 +45,11 @@ test('signed Bonfire paid callback produces matching trusted proof before paymen
  assert.equal(events[1].proof.registration_id,events[0].e.registration_id);
  assert.equal(events[1].proof.client_id,'tarris');
 });
-test('signed webhooks and seller CSV only reach tracker through TB3 helper and universal registrar',()=>{
- const webhook=readFileSync('app/api/tb3/bonfire/webhook/route.ts','utf8');
+test('unsigned Bonfire webhook is absent and seller CSV only uses the universal registrar',()=>{
+ assert.equal(existsSync('app/api/tb3/bonfire/webhook/route.ts'),false);
  const csv=readFileSync('app/api/bricks/bonfire-csv-import/route.ts','utf8');
- for(const source of [webhook,csv]){
-  assert.match(source,/trackTb3MerchSale\(/);
-  assert.doesNotMatch(source,/pushToTrackingPortal\(|confirmTrackingPayment\(|storeTrackingPayment\(/);
- }
+ assert.match(csv,/trackTb3MerchSale\(/);
+ assert.doesNotMatch(csv,/pushToTrackingPortal\(|confirmTrackingPayment\(|storeTrackingPayment\(/);
  const adapter=readFileSync('lib/tb3/brick-events.ts','utf8');
  assert.match(adapter,/registerBrickEvent\(/);
 });

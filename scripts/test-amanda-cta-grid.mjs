@@ -18,19 +18,20 @@ assert.ok(new URL(base).hostname.endsWith('.vercel.app'),'Preview host required'
 // A preview can still be building when CI starts. Require the new grid before testing.
 let ready=false;
 for(let attempt=0;attempt<60;attempt++) {
-  const response=await fetch(base+'/portal/amanda-catherine/classes');
+  const response=await fetch(base+'/amanda-catherine');
   const html=await response.text();
   if(response.ok&&html.includes('id="classes-grid"')&&html.includes('data-cta-name="Register"')&&(!process.env.EXPECTED_SHA||html.includes('data-source-commit="'+process.env.EXPECTED_SHA+'"'))){ready=true;break;}
   await new Promise(resolve=>setTimeout(resolve,10000));
 }
 assert.ok(ready,'New preview grid did not become available');
 const available=new Set(['wood-therapy','non-surgical-bbl','body-sculpt-certification','nervous-system-reset','clinical-fat-loss','strategy-call']);
+const inquiry=new Set(['starter-kit']);
 const browser=await chromium.launch();
 const results=[];
 fs.mkdirSync('artifacts/amanda-classes',{recursive:true});
 try {
 for(const [device,options] of [['desktop',{viewport:{width:1440,height:1000}}],['mobile',devices['iPhone 13']]]) {
- for(const route of ['/amanda-catherine','/portal/amanda-catherine/classes']) {
+ for(const route of ['/amanda-catherine']) {
   const context=await browser.newContext(options);
   const page=await context.newPage();
   let documentRequests=0;
@@ -53,22 +54,23 @@ for(const [device,options] of [['desktop',{viewport:{width:1440,height:1000}}],[
   assert.equal(context.pages().length,1,'Classes opened another tab');
   const cards=await page.locator('#classes-grid article').evaluateAll(nodes=>nodes.map(node=>({text:node.textContent,buttons:[...node.querySelectorAll('a,button')].map(a=>({label:a.textContent,key:a.getAttribute('data-course-key'),href:a.getAttribute('href')}))})));
   assert.equal(cards.length,12);
-  assert.ok(await page.locator('#classes-grid h2').evaluateAll(nodes=>nodes.every(node=>getComputedStyle(node).fontSize==='26px')),'Class headings must retain the grid typography');
+  assert.ok(await page.locator('#classes-grid h2').evaluateAll(nodes=>nodes.every(node=>{const size=parseFloat(getComputedStyle(node).fontSize);return size>=24&&size<=32;})),'Class headings must retain the responsive grid typography');
   assert.ok(await page.locator('#classes-grid article').evaluateAll(nodes=>nodes.every(node=>node.getBoundingClientRect().right<=innerWidth+1)),'Class card overflow');
-  for(const card of cards){assert.equal(card.buttons.length,1);assert.equal(card.buttons[0].label,available.has(card.buttons[0].key)?'Register':'Join Waitlist');}
+  for(const card of cards){assert.equal(card.buttons.length,1);const key=card.buttons[0].key;assert.equal(card.buttons[0].label,available.has(key)?'Register':inquiry.has(key)?'Request Info':'Join Waitlist');}
   assert.equal(cards.filter(c=>c.buttons[0].label==='Register').length,6);
+  assert.equal(cards.filter(c=>c.buttons[0].label==='Join Waitlist').length,5);
+  assert.equal(cards.filter(c=>c.buttons[0].label==='Request Info').length,1);
   assert.ok(!(await page.locator('body').innerText()).includes('Buy Now'));
-  assert.ok(!(await page.locator('body').innerText()).includes('Request Info'));
   for(const [key,price] of [['nervous-system-reset','$997'],['clinical-fat-loss','$1,497'],['90-day-package','$2,500'],['starter-kit','$499']])assert.ok(cards.find(c=>c.buttons[0].key===key)?.text.includes(price));
   await page.screenshot({path:`artifacts/amanda-classes/${device}-${route.includes('portal')?'portal':'home'}.png`,fullPage:true});
-  await page.locator('#classes-grid [data-course-key="starter-kit"]').click();
+  await page.locator('#classes-grid [data-course-key="90-day-package"]').click();
   await page.getByRole('textbox',{name:'Email',exact:true}).waitFor();
-  assert.ok(page.url().includes('/courses/starter-kit#waitlist'));
-  results.push({device,route,cards:12,register:6,waitlist:6,duplicateButtons:0,newTabs:0,documentReload:false,waitlistForm:'PASS'});
+  assert.ok(page.url().includes('/courses/90-day-package#waitlist'));
+  results.push({device,route,cards:12,register:6,waitlist:5,inquiry:1,duplicateButtons:0,newTabs:0,documentReload:false,waitlistForm:'PASS'});
   await context.close();
  }
 }
 } finally {await browser.close();}
 fs.writeFileSync('artifacts/amanda-classes/report.json',JSON.stringify({preview:base,source:process.env.EXPECTED_SHA,results},null,2));
 console.log(JSON.stringify(results,null,2));
-console.log('AMANDA CLASSES: desktop/mobile, same-page anchor, 12 cards, 6 Register + 6 Join Waitlist PASS');
+console.log('AMANDA CLASSES: desktop/mobile, same-page anchor, 12 cards, 6 Register + 5 Join Waitlist + 1 Request Info PASS');

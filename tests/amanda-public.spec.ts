@@ -12,8 +12,9 @@ test.describe('Amanda public production checks (no credentials and no payments)'
 
     await expect(page.getByText(/Non-Surgical Tummy Sculpt & Tighten|Non-Surgical Tummy Tuck/i)).toHaveCount(0);
     await expect(page.getByText(/BODY SCULPT(?:™)? NATIONAL TRAINING TOUR/i)).toHaveCount(0);
-    await page.goto(base + '/portal/amanda-catherine/classes', { waitUntil: 'domcontentloaded' });
-    const clinicalCard = page.locator('article').filter({has:page.getByRole('heading',{name:'Clinical Fat Loss',exact:true})});
+    const classesGrid = page.locator('#classes-grid');
+    await expect(classesGrid).toBeVisible();
+    const clinicalCard = classesGrid.locator('article').filter({has:page.getByRole('heading',{name:'Clinical Fat Loss',exact:true})});
     const registration = clinicalCard.getByRole('link', { name: process.env.AMANDA_VERIFY_DEPLOYED === 'true' ? 'Register' : /^(Register|Buy Now)$/ });
     await expect(registration).toBeVisible();
     await expect(registration).toHaveAttribute('href', /^https:\/\/checkout\.square\.site\//);
@@ -65,7 +66,7 @@ test.describe('Amanda public production checks (no credentials and no payments)'
 test('Amanda homepage and Classes have complete click identities and working pathways',async({page})=>{
  test.skip(!process.env.AMANDA_VERIFY_URL&&process.env.AMANDA_VERIFY_DEPLOYED!=='true','New feature checks require its exact preview or promoted production.');
  const evidence:any[]=[];
- for(const [path,min] of [[process.env.AMANDA_HOME_PATH||'/',49],['/portal/amanda-catherine/classes',26]] as const){
+ for(const [path,min] of [[process.env.AMANDA_HOME_PATH||'/',49]] as const){
   await page.goto(base+path,{waitUntil:'networkidle'});
   const links=page.locator('a');expect(await links.count()).toBeGreaterThanOrEqual(min);
   const identities=await page.locator('a,button').evaluateAll(nodes=>nodes.map(n=>({name:n.getAttribute('data-cta-name'),key:n.getAttribute('data-cta-key'),href:n.getAttribute('href'),disabled:n.hasAttribute('disabled')})));

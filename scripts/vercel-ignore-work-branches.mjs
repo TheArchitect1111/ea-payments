@@ -1,21 +1,27 @@
 #!/usr/bin/env node
-// Vercel ignoreCommand — fail-closed but report correctly
+// Vercel ignoreCommand: exit 0 skips a deployment; exit 1 allows the build.
 import { execSync } from 'child_process';
-try{
-  const branch = process.env.VERCEL_GIT_COMMIT_REF || '';
-  const msg = execSync('git log -1 --pretty=%B').toString();
-  // If gate failed, skip deploy but report as skipped not success
-  if(msg.includes('EA-LIVE-CANDIDATE') && process.env.VERCEL_ENV==='production'){
-    console.log('EA-LIVE-CANDIDATE — checking gate...');
-    // Let build proceed to gate check
-    process.exit(1); // 1 = don't ignore, build it
-  }
-  if(branch.startsWith('fix/') || branch.startsWith('feat/')) {
-    console.log(`Skipping preview for work branch ${branch} — report as SKIPPED not SUCCESS`);
+
+const branch = process.env.VERCEL_GIT_COMMIT_REF || '';
+const target = process.env.VERCEL_TARGET_ENV || process.env.VERCEL_ENV || '';
+const isProduction = target === 'production' || process.env.VERCEL_ENV === 'production';
+
+if (branch === 'master' && target === 'production') {
+  console.log('Master production deployment requires the EA promotion gate.');
+}
+
+if (isProduction) {
+  try {
+    execSync('node scripts/verify-production-gate.mjs', { stdio: 'inherit' });
+  } catch (error) {
+    console.error('[EA Production Gate] Blocking production build because verification failed.');
     process.exit(0);
   }
-  process.exit(1); // Build everything else
-}catch(e){
-  console.log('Ignore check failed, building to be safe:', e.message);
-  process.exit(1);
 }
+
+if (branch.startsWith('fix/') || branch.startsWith('feat/')) {
+  console.log(`Skipping preview for work branch ${branch} — report as SKIPPED not SUCCESS`);
+  process.exit(0);
+}
+
+process.exit(1); // Build everything else

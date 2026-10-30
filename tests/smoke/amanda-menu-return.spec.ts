@@ -1,11 +1,7 @@
 import { test, expect } from '@playwright/test';
 const original = '/portal/amanda-catherine/learning/body-sculpt-practitioner-certification?view=progress';
 test('logged-out course portal link preserves original return URL', async ({ page }) => {
-  await page.goto('/amanda-catherine');
-  await page.evaluate((href) => {
-    const link = document.createElement('a'); link.href = href; link.textContent = 'QA purchased course'; document.body.append(link);
-  }, original);
-  await page.getByRole('link', { name: 'QA purchased course' }).click();
+  await page.goto(original);
   await expect(page).toHaveURL(/\/portal\/login\?/);
   expect(new URL(page.url()).searchParams.get('next')).toBe(original);
 });

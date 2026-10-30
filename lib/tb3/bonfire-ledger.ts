@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { brickHash, readBrickRecord, writeBrickRecord } from '@/lib/bricks/durable';
 import { TB3_ORGANIZATION_ID, TB3_PORTAL_SLUG } from '@/lib/tb3/contracts';
 import { loadTenantInstall, persistTenantInstall } from '@/lib/modules/tenant-install';
+import { recordVerifiedExternalCommerce } from '@/lib/bricks/commerce-family';
 import { setModuleEnabled, listEntitlementsForOrg } from '@/lib/entitlements';
 
 export const tb3Tenant = { organizationId: TB3_ORGANIZATION_ID, portalSlug: TB3_PORTAL_SLUG };
@@ -47,9 +48,13 @@ export async function ingestVerifiedBonfireOrder(input:unknown,origin:'bonfire'|
     await ensureMemberEntitlement();
     return {sale:before,replay:true};
   }
-  // DIRECT BRICK WRITE - bypass commerce-family entitlement check that was blocking
-  const billingId='billing-'+brickHash([TB3_ORGANIZATION_ID,order.order_id,origin]);
-  await writeBrickRecord(tb3Tenant,billingId,{...tb3Tenant,id:billingId,externalOrderId:order.order_id,source:origin,offerId:order.product_id,title:order.product_name,amount:order.amount_cents,currency:order.currency,email:order.customer.email,name:order.customer.name,status:'verified'});
+  // Preserve the canonical tenant-scoped Billing order and its offer checks.
+  // The Bonfire-specific receipt below is a reporting projection, not a second payment record.
+  await recordVerifiedExternalCommerce(tb3Tenant,{
+    externalOrderId:order.order_id,source:origin,offerId:order.product_id,
+    title:order.product_name,amount:order.amount_cents,currency:order.currency,
+    email:order.customer.email,name:order.customer.name,
+  });
   await writeBrickRecord(tb3Tenant,id,row);
   await writeBrickRecord(tb3Tenant,trackingId(order.order_id),{...tb3Tenant,orderId:order.order_id,event:'merch_payment_confirmed',source:origin,amount_cents:order.amount_cents});
   const old=await readBrickRecord<typeof tb3Tenant & {keys:string[]}>(tb3Tenant,indexId);

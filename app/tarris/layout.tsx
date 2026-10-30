@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "TB3 Official | Tarris Bouie | Alabama Basketball - WEAR THE VISION",
   description: "Official TB3 merch - 12 pieces including signature collage tees. Shop now at Bonfire official store. Different On Purpose.",
+  alternates: { canonical: "https://tb3.online/tarris" },
   keywords: ["TB3", "Tarris Bouie", "Alabama Basketball", "NIL", "Official Merch", "WEAR THE VISION"],
   openGraph: {
     title: "TB3 Official - WEAR THE VISION",

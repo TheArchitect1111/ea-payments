@@ -7,13 +7,14 @@ import { spawn } from 'node:child_process';
 const previewUrl = process.env.EA_PREVIEW_URL || process.env.VERCEL_URL || process.env.VERCEL_PREVIEW_URL || '';
 const routePath = process.env.EA_GATE_PATH || '/';
 const sourceCommit = process.env.EA_SOURCE_COMMIT || process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA || '';
+const certificationEnvironment = (process.env.EA_CERTIFICATION_ENVIRONMENT || process.env.VERCEL_ENV || 'unknown').trim().toLowerCase();
 const tb3Placeholders = process.env.EA_RELEASE_PROFILE === 'tb3-approved-placeholders';
 const placeholderProof = tb3Placeholders ? (await import('./production-certification.js')).default.certifyTB3() : null;
 if (tb3Placeholders && routePath !== '/tarris/future') throw new Error('TB3 placeholder profile is restricted to /tarris/future');
 const minVisuals = tb3Placeholders ? 0 : Number(process.env.EA_MIN_VISUALS || 1);
 const outDir = path.resolve(process.env.EA_GATE_OUTPUT || 'artifacts/ea-gate');
 const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET || '';
-const bypassHeaders = bypassSecret ? {
+const bypassHeaders = certificationEnvironment === 'preview' && bypassSecret ? {
   'x-vercel-protection-bypass': bypassSecret,
   'x-vercel-set-bypass-cookie': 'true',
 } : {};
@@ -32,6 +33,8 @@ const results = {
   previewUrl: cleanPreview.toString(),
   target,
   completedAt: new Date().toISOString(),
+  environment: certificationEnvironment,
+  evidenceRef: path.join(outDir, 'gate-result.json'),
   status: 'FAIL',
   gates: {
     sourceIdentity: { status: 'FAIL', proof: '' },
@@ -166,7 +169,7 @@ async function inspectViewport(browser, name, viewport, isMobile = false, pageTa
   const overflow = Math.max(0, dom.scrollWidth - dom.clientWidth);
   const status = response?.status() || 0;
   return {
-    name, httpStatus: status, screenshot, screenshotSha256: sha256(screenshot), consoleErrors,
+    name, httpStatus: status, finalUrl: page.url(), screenshot, screenshotSha256: sha256(screenshot), consoleErrors,
     pageErrors, failedRequests, badImageResponses, networkResponses, brokenImgs, brokenBackgrounds, renderedVisuals,
     overflow, bodyTextLength: dom.bodyTextLength, scrollHeight: dom.scrollHeight, viewport,
     placeholderSlots: dom.placeholderSlots, publicBackground: dom.publicBackground,

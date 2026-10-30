@@ -13,6 +13,7 @@ export const metadata: Metadata = {
   title: 'Amanda Catherine | Restore · Learn · Create',
   description:
     'Amanda Catherine brings together AesthetiKine care, practitioner education, creative leadership, media, and founder support through Restore, Learn, and Create.',
+  alternates: { canonical: 'https://amandacatherine.ca/amanda-catherine' },
 };
 
 export default function AmandaCatherineLayout({ children }: { children: ReactNode }) {

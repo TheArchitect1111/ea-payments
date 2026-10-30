@@ -12,7 +12,7 @@ export type WelcomeResult = { successPage: string; emailId: string; receiptPdf: 
 /** Socket defaults preserve existing payment adapters and their narrow results. */
 export interface Brick<
   PriceResponse extends { amountCad: number; contractId: string } | NonPaymentPriceContract = { amountCad: number; contractId: string },
-  CheckoutResponse extends CheckoutSocketResult = CheckoutResult,
+  CheckoutResponse extends CheckoutSocketResult = CheckoutSocketResult,
   WelcomeArguments extends unknown[] = [payment: WelcomeRequest],
   WelcomeResponse = WelcomeResult
 > {
@@ -24,5 +24,5 @@ export interface Brick<
   /** Only true after the chassis has recorded a successful integration test. */
   attach(): boolean;
 }
-export const BRICK_IDS = ['auth','lms','billing','catalog','menu','checkout','welcome','email','entitlement','jane','amazon','preview','production-gate','chassis-cert'] as const;
+export const BRICK_IDS = ['auth','lms','billing','catalog','menu','checkout','welcome','email','entitlement','jane','amazon','preview','production-gate','chassis-cert','launch-certification'] as const;
 export type BrickId = typeof BRICK_IDS[number];

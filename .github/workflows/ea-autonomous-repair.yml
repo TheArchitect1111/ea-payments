@@ -1,0 +1,244 @@
+name: EA Autonomous Launch Repair
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Open launch-certification issue number
+        required: true
+        type: number
+
+permissions: {}
+
+concurrency:
+  group: ea-autonomous-repair-${{ inputs.issue_number }}
+  cancel-in-progress: false
+
+jobs:
+  prepare_issue:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: read
+    steps:
+      - name: Validate launch-certification issue and extract safe findings
+        uses: actions/github-script@v7
+        env:
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require('node:fs');
+            const issueNumber = Number(process.env.ISSUE_NUMBER);
+            if (!Number.isSafeInteger(issueNumber) || issueNumber < 1) {
+              throw new Error('issue_number must be a positive integer');
+            }
+
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+            });
+            if (issue.pull_request) throw new Error('Pull requests are not repair inputs.');
+            if (issue.state !== 'open') throw new Error('Only open issues may be repaired.');
+            if (!issue.title.startsWith('[Launch Certification]')) {
+              throw new Error('This workflow accepts launch-certification issues only.');
+            }
+
+            const body = String(issue.body || '');
+            if (!/Autonomous repair agent:\s+\*\*not configured or executable in this repository workflow\*\*/i.test(body)) {
+              throw new Error('This issue is not an eligible autonomous-repair handoff.');
+            }
+
+            const findings = [];
+            for (const line of body.split(/\r?\n/)) {
+              const match = line.match(/^-\s+(missing|unverified|pending-approval|unverified-live)(?:\s+\(([^)]+)\))?:\s*(.+)$/i);
+              if (!match) continue;
+              const detail = match[3]
+                .replace(/https?:\/\/\S+/gi, '[URL omitted]')
+                .replace(/\b[a-f0-9]{40}\b/gi, '[commit omitted]')
+                .replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, '[email omitted]')
+                .slice(0, 700);
+              findings.push({
+                status: match[1].toLowerCase(),
+                requirement: (match[2] || 'general').slice(0, 160),
+                detail,
+              });
+              if (findings.length === 40) break;
+            }
+            if (!findings.length) throw new Error('No structured certification findings were found.');
+
+            fs.writeFileSync('repair-input.json', JSON.stringify({
+              issueNumber,
+              findings,
+            }, null, 2));
+      - name: Upload sanitized issue findings
+        uses: actions/upload-artifact@v4
+        with:
+          name: repair-input-${{ github.run_id }}
+          path: repair-input.json
+          if-no-files-found: error
+          retention-days: 1
+
+  generate_patch:
+    needs: prepare_issue
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    outputs:
+      has_patch: ${{ steps.patch.outputs.has_patch }}
+    steps:
+      - name: Check out selected base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install project dependencies before the agent starts
+        run: |
+          if [ -f package-lock.json ]; then npm ci; fi
+      - name: Download sanitized issue findings
+        uses: actions/download-artifact@v4
+        with:
+          name: repair-input-${{ github.run_id }}
+          path: .repair-input
+      - name: Run Codex in the repository workspace
+        id: codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt-file: .github/codex/prompts/launch-repair.md
+          permission-profile: ":workspace"
+          safety-strategy: drop-sudo
+          output-file: repair-agent-summary.md
+      - name: Capture only eligible source and test changes
+        id: patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          for root in app lib src tests test; do
+            if [ -d "$root" ]; then git add -N -- "$root"; fi
+          done
+          git diff --binary --no-ext-diff --no-color --diff-filter=ACM HEAD -- app lib src tests test > "$RUNNER_TEMP/ea-repair.patch"
+          if [ -s "$RUNNER_TEMP/ea-repair.patch" ]; then
+            echo "has_patch=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_patch=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "## Autonomous repair"
+              echo
+              echo "Codex found no safe, eligible source-code patch for this issue. No branch or pull request was created."
+              echo "Evidence gaps, provider approvals, live-account setup, and missing client credentials require their own owner or evidence workflow."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload repair patch
+        if: steps.patch.outputs.has_patch == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: repair-patch-${{ github.run_id }}
+          path: ${{ runner.temp }}/ea-repair.patch
+          if-no-files-found: error
+          retention-days: 1
+
+  open_draft_pr:
+    needs: generate_patch
+    if: needs.generate_patch.outputs.has_patch == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Check out selected base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Download generated patch
+        uses: actions/download-artifact@v4
+        with:
+          name: repair-patch-${{ github.run_id }}
+          path: ${{ runner.temp }}
+      - name: Validate and apply the patch without running its code
+        shell: bash
+        env:
+          PATCH_FILE: ${{ runner.temp }}/ea-repair.patch
+        run: |
+          set -euo pipefail
+          test -s "$PATCH_FILE"
+          test "$(wc -c < "$PATCH_FILE")" -le 1048576
+          git apply --check "$PATCH_FILE"
+          git apply --index "$PATCH_FILE"
+          node --input-type=module <<'NODE'
+          import { execFileSync } from 'node:child_process';
+          import { lstatSync } from 'node:fs';
+
+          const names = execFileSync('git', ['diff', '--cached', '--name-only', '-z'])
+            .toString('utf8').split('\0').filter(Boolean);
+          if (!names.length || names.length > 20) throw new Error('Patch must change 1–20 files.');
+
+          let additions = 0;
+          let deletions = 0;
+          for (const name of names) {
+            if (!/^(app|lib|src|tests|test)\//.test(name)) {
+              throw new Error(`Protected path rejected: ${name}`);
+            }
+            if (
+              name.startsWith('lib/agents/') ||
+              name.startsWith('lib/launch-certification/') ||
+              name === 'lib/ai/security.ts' ||
+              name.startsWith('app/api/ops/') ||
+              /^tests\/(launch-certification|launch-browser-audit|launch-build-info)/.test(name)
+            ) {
+              throw new Error(`Certification/security path rejected: ${name}`);
+            }
+            const stat = lstatSync(name);
+            if (!stat.isFile() || stat.isSymbolicLink()) {
+              throw new Error(`Only regular source/test files are allowed: ${name}`);
+            }
+          }
+
+          const rows = execFileSync('git', ['diff', '--cached', '--numstat']).toString('utf8').trim().split('\n');
+          for (const row of rows) {
+            const [added, removed] = row.split('\t');
+            if (added === '-' || removed === '-') throw new Error('Binary files are not allowed.');
+            additions += Number(added || 0);
+            deletions += Number(removed || 0);
+          }
+          if (additions > 800 || deletions > 800) throw new Error('Patch exceeds the 800-line change limit.');
+          NODE
+      - name: Create a draft repair pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          BASE_REF: ${{ github.ref_name }}
+          RUN_ID: ${{ github.run_id }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="codex/launch-repair-${ISSUE_NUMBER}-${RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git commit -m "Propose launch repair for issue #${ISSUE_NUMBER}"
+          gh auth setup-git
+          git push origin "$branch"
+          {
+            echo "Automated draft from launch-certification issue #${ISSUE_NUMBER}."
+            echo
+            echo "Codex created this patch on an isolated branch. Review the diff and required checks before merging."
+            echo "This workflow never merges, deploys, or changes certification requirements or evidence."
+          } > "$RUNNER_TEMP/repair-pr-body.md"
+          pr_url="$(gh pr create --draft --base "$BASE_REF" --head "$branch" --title "Proposed launch repair for issue #${ISSUE_NUMBER}" --body-file "$RUNNER_TEMP/repair-pr-body.md")"
+          {
+            echo "## Autonomous repair"
+            echo
+            echo "Draft pull request: $pr_url"
+          } >> "$GITHUB_STEP_SUMMARY"

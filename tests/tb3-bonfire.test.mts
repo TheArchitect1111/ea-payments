@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import {build} from 'esbuild';
 import {writeFileSync,unlinkSync} from 'node:fs';
 import {createHmac} from 'node:crypto';
-const state={rows:new Map<string,any>(),writes:new Map<string,number>(),entitlements:new Map<string,any>(),persist:true};
+const state={rows:new Map<string,any>(),writes:new Map<string,number>(),entitlements:new Map<string,any>(),install:null as any,persist:true};
 (globalThis as any).__bonfireTest=state;
 const mocks:Record<string,string>={
- '@/lib/modules/tenant-install':"export async function loadTenantInstall(org){return {organizationId:org,portalSlug:'tarris',state:'installed',admitted:['billing','member','dashboard','reports']};}",
+ '@/lib/modules/tenant-install':`export async function loadTenantInstall(org){const s=globalThis.__bonfireTest;const row=s.install||{organizationId:org,portalSlug:'tarris',version:1,admitted:['billing','member','dashboard','reports'],requested:['billing','member'],brickIds:[],state:'installed'};if(row.organizationId!==org)throw Error('tenant mismatch');return structuredClone(row);}export async function persistTenantInstall(row){const s=globalThis.__bonfireTest;if(!s.persist)throw Error('durable unavailable');s.install=structuredClone(row);const actual=await loadTenantInstall(row.organizationId);if(JSON.stringify(actual)!==JSON.stringify(row))throw Error('Admitted entitlement read-back mismatch');return actual;}`,
  '@/lib/entitlements':"export async function setModuleEnabled(org,kind){const s=globalThis.__bonfireTest,row={organizationId:org,moduleId:kind,status:'active'};s.entitlements.set(org+':'+kind,row);return row;}export async function listEntitlementsForOrg(org){return [...globalThis.__bonfireTest.entitlements.values()].filter(x=>x.organizationId===org);}",
  '@/lib/bricks/durable':`import {createHash} from 'node:crypto';
  export const brickHash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
@@ -32,7 +32,7 @@ test('valid HMAC only, rejects malformed, wrong secret and unsigned input',()=>{
  assert.equal(api.bonfireSignatureValid(raw,null,secret),false);
 });
 test('TB3 $1: same-row canonical Billing paid order, tracking, Member entitlement, dashboard/report and replay',async()=>{
- state.rows.clear();state.writes.clear();state.entitlements.clear();state.persist=true;
+ state.rows.clear();state.writes.clear();state.entitlements.clear();state.install=null;state.persist=true;
  await api.installCommerce(tenant,'billing',{offers:[{id:'tb3-tee',title:'TB3 T-Shirt',amount:100,currency:'usd'}],
   confirmationSubject:'Merch order',confirmationHtml:'Thank you'});
  const first=await api.ingestVerifiedBonfireOrder(order('order-1'));
@@ -63,7 +63,7 @@ test('fail-closed storage and offer matching',async()=>{
 });
 
 test('Bonfire seller CSV: 2 x $1 paid records, Member, Dashboard/Reports readback and duplicate reimport',async()=>{
- state.rows.clear();state.writes.clear();state.entitlements.clear();state.persist=true;
+ state.rows.clear();state.writes.clear();state.entitlements.clear();state.install=null;state.persist=true;
  await api.installCommerce(tenant,'billing',{offers:[{id:'tb3-tee',title:'TB3 T-Shirt',amount:100,currency:'usd'}],
   confirmationSubject:'Merch sale',confirmationHtml:'Thank you'});
  const csv='Order ID,Product ID,Product,Amount,Customer,Email,Date\n'+

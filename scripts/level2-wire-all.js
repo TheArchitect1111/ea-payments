@@ -14,7 +14,7 @@ const MODULES = [
 
 const ADAPTERS = [
   'auth','lms','billing','catalog','menu','checkout','welcome','email',
-  'entitlement','jane','amazon','preview','production-gate','chassis-cert',
+  'entitlement','jane','amazon','preview','production-gate','chassis-cert','launch-certification',
   'source','staging','subportal','ea-comms'
 ];
 
@@ -35,6 +35,7 @@ const PROVIDER_MAP = {
   'preview': 'storage',
   'production-gate': 'airtable',
   'chassis-cert': 'airtable',
+  'launch-certification': 'github-actions',
   'source': 'github',
   'staging': 'vercel',
   'subportal': 'supabase',

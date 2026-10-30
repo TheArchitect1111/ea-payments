@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "evidenceMaxAgeHours": 168,
+  "capabilities": {
+    "website": ["public-routes", "links-navigation", "forms", "media", "responsive-ui", "accessibility", "seo", "performance"],
+    "portal": ["authenticated-session", "role-permissions", "tenant-isolation", "navigation", "uploads", "durable-persistence", "responsive-ui", "accessibility"],
+    "commerce": ["catalog-checkout", "webhook-verification", "fulfillment", "refund-policy", "purchase-confirmation"],
+    "integrations": ["provider-authorization", "api-contract", "failure-retry", "data-synchronization"],
+    "communications": ["email-delivery", "sms-delivery", "notification-triggers-retries"],
+    "security": ["secret-hygiene", "authorization-boundaries", "exposed-endpoints", "cross-tenant-denial"],
+    "operations": ["monitoring-logs", "backup-recovery", "deployment-integrity"],
+    "business-workflows": ["client-journey-e2e"],
+    "instagram-commerce": ["channel-linkage", "catalog-sync", "order-attribution"]
+  },
+  "evidenceStatuses": ["passed", "failed", "pending-approval", "unverified", "missing"]
+}

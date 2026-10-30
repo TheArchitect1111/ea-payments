@@ -33,7 +33,7 @@ export default async function AmandaCatherinePortalPage() {
     >
       <div className="amanda-portal">
         <nav className="amanda-nav" aria-label="Amanda classes navigation">
-          <div className="amanda-nav__links"><ClassesAnchor /><Link href="/portal/amanda-catherine/eva#portal-help">Eva Portal Help</Link></div>
+          <div className="amanda-nav__links"><ClassesAnchor /><Link data-cta-name="Eva Portal Help" data-cta-key="eva-portal-help" href="/portal/amanda-catherine/eva#portal-help">Eva Portal Help</Link></div>
         </nav>
         <AmandaMemberHome
           slug={SLUG}

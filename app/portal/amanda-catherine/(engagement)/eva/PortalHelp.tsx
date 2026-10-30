@@ -37,16 +37,16 @@ export default function PortalHelp() {
       <label htmlFor="eva-portal-help-question">What would you like to do?</label>
       <input id="eva-portal-help-question" value={question} maxLength={500}
         onChange={e => setQuestion(e.target.value)} placeholder="How do I download my certificate?" required />
-      <button className="amanda-button" type="submit" disabled={busy}>{busy ? 'Checking…' : 'Show me'}</button>
+      <button data-cta-name="Show me" data-cta-key="portal-help-show-me" className="amanda-button" type="submit" disabled={busy}>{busy ? 'Checking…' : 'Show me'}</button>
     </form>
     {error && <p role="alert">{error}</p>}
     {answer && <div role="status" aria-live="polite">
       {answer.ok ? <>
         <h3>{answer.label}</h3>
         <p><strong>Step {answer.stepNumber} of {answer.totalSteps}:</strong> {answer.step}</p>
-        <a className="amanda-button" href={answer.link}>Open this page</a>
+        <a data-cta-name="Open this page" data-cta-key="portal-help-open-page" className="amanda-button" href={answer.link}>Open this page</a>
         {answer.nextStepIndex != null &&
-          <button type="button" className="amanda-button" disabled={busy}
+          <button data-cta-name="Next step" data-cta-key="portal-help-next-step" type="button" className="amanda-button" disabled={busy}
             onClick={() => void requestHelp(asked, answer.entryKey, answer.nextStepIndex!)}>
             Next step
           </button>}
