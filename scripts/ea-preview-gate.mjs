@@ -169,7 +169,7 @@ async function inspectViewport(browser, name, viewport, isMobile = false, pageTa
   const overflow = Math.max(0, dom.scrollWidth - dom.clientWidth);
   const status = response?.status() || 0;
   return {
-    name, httpStatus: status, screenshot, screenshotSha256: sha256(screenshot), consoleErrors,
+    name, httpStatus: status, finalUrl: page.url(), screenshot, screenshotSha256: sha256(screenshot), consoleErrors,
     pageErrors, failedRequests, badImageResponses, networkResponses, brokenImgs, brokenBackgrounds, renderedVisuals,
     overflow, bodyTextLength: dom.bodyTextLength, scrollHeight: dom.scrollHeight, viewport,
     placeholderSlots: dom.placeholderSlots, publicBackground: dom.publicBackground,

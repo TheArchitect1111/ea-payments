@@ -89,7 +89,8 @@
     "launch:readiness": "node scripts/launch-readiness.mjs",
     "launch:preflight": "node scripts/launch-preflight.mjs",
     "launch:certification": "node scripts/launch-certification.mjs",
-    "test:launch-certification": "node --test tests/launch-certification.test.mjs && node --import tsx --test tests/launch-build-info.test.mts",
+    "test:launch-certification": "node --test tests/launch-certification.test.mjs && node --import tsx --test tests/launch-build-info.test.mts && node --test tests/launch-browser-audit.test.mjs",
+    "test:launch-browser-audit": "node --test tests/launch-browser-audit.test.mjs",
     "repo:readiness": "node scripts/repo-readiness.mjs",
     "ops:report": "node scripts/ops-report.mjs",
     "backup:verify": "node scripts/backup-verify.mjs",
@@ -175,6 +176,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.61.0",
+    "axe-core": "^4.12.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.6",

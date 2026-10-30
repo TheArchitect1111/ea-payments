@@ -50,3 +50,28 @@ test('build identity route rejects a non-fingerprint value instead of reflecting
     else process.env.EA_CRITICAL_CONFIG_FINGERPRINT = original;
   }
 });
+
+test('build identity route never fabricates a deployment ID from a commit', async () => {
+  const original = {
+    deploymentId: process.env.VERCEL_DEPLOYMENT_ID,
+    commit: process.env.VERCEL_GIT_COMMIT_SHA,
+    environment: process.env.VERCEL_ENV,
+  };
+  delete process.env.VERCEL_DEPLOYMENT_ID;
+  process.env.VERCEL_GIT_COMMIT_SHA = 'a'.repeat(40);
+  process.env.VERCEL_ENV = 'preview';
+  try {
+    const response = await GET();
+    const body = await response.json();
+    assert.equal(body.commitSha, 'a'.repeat(40));
+    assert.equal(body.deploymentId, null);
+  } finally {
+    for (const [key, value] of Object.entries({
+      VERCEL_DEPLOYMENT_ID: original.deploymentId,
+      VERCEL_GIT_COMMIT_SHA: original.commit,
+      VERCEL_ENV: original.environment,
+    })) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
+  }
+});

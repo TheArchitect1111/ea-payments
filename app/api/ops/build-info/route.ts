@@ -11,7 +11,7 @@ export async function GET() {
   const criticalConfigurationFingerprint = /^[a-f0-9]{64}$/i.test(configurationFingerprint)
     ? configurationFingerprint.toLowerCase()
     : null;
-  const deploymentId = process.env.VERCEL_DEPLOYMENT_ID || (commitSha ? `${environment}:${commitSha}` : null);
+  const deploymentId = process.env.VERCEL_DEPLOYMENT_ID || null;
 
   return NextResponse.json({
     commitSha,

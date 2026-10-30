@@ -10,11 +10,13 @@ on:
       - 'app/api/ops/build-info/route.ts'
       - 'lib/**'
       - 'scripts/launch-certification.mjs'
+      - 'scripts/launch-browser-audit.mjs'
       - 'scripts/resolve-github-preview.mjs'
       - 'lib/launch-certification/github-preview-check.mjs'
       - 'scripts/ea-preview-gate.mjs'
       - 'src/**'
       - 'tests/launch-certification.test.mjs'
+      - 'tests/launch-browser-audit.test.mjs'
       - 'tests/launch-build-info.test.mts'
       - 'package.json'
       - 'package-lock.json'
@@ -79,8 +81,10 @@ jobs:
           EA_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.event.deployment.sha || github.sha }}
         run: node scripts/resolve-github-preview.mjs
       - name: Test certification decisions and multi-client manifests
+        id: launch_contract_tests
         run: npm run test:launch-certification
       - name: Verify the existing LEGO certification evidence contract
+        id: lego_contract
         run: node scripts/test-lego-certification-contract.mjs
       - name: Run the existing module evidence runner
         id: existing_evidence
@@ -130,12 +134,33 @@ jobs:
           EA_PREVIEW_URL="$tb3_base" EA_GATE_PATH=/tarris/future EA_GATE_OUTPUT=artifacts/ea-gate/tb3-hq node scripts/ea-preview-gate.mjs
           EA_PREVIEW_URL="$amanda_base" EA_GATE_PATH=/amanda-catherine EA_GATE_OUTPUT=artifacts/ea-gate/amanda-public node scripts/ea-preview-gate.mjs
           EA_PREVIEW_URL="$amanda_base" EA_GATE_PATH=/portal/amanda-catherine EA_GATE_OUTPUT=artifacts/ea-gate/amanda-portal node scripts/ea-preview-gate.mjs
+      - name: Audit public website navigation, forms, accessibility, SEO, and performance
+        id: website_audit
+        if: always() && steps.build.outcome == 'success'
+        continue-on-error: true
+        env:
+          EA_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.event.deployment.sha || github.sha }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: |
+          client='${{ github.event.inputs.client || 'all' }}'
+          node scripts/launch-browser-audit.mjs --client="$client" --environment="$EA_CERTIFICATION_ENVIRONMENT" --base-url="$EA_CERTIFICATION_BASE_URL"
       - name: Certify configured clients against exact deployment evidence
         id: certification
         if: always()
         env:
           EA_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.event.deployment.sha || github.sha }}
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          EA_CERTIFICATION_EVIDENCE_FILE: artifacts/launch-certification/website-evidence.json
+          EA_TEST_RESULT_LAUNCH_CONTRACT_TESTS: ${{ steps.launch_contract_tests.outcome }}
+          EA_TEST_RESULT_LEGO_EVIDENCE_CONTRACT: ${{ steps.lego_contract.outcome }}
+          EA_TEST_RESULT_EXISTING_MODULE_EVIDENCE: ${{ steps.existing_evidence.outcome }}
+          EA_TEST_RESULT_CHASSIS_GUARD: ${{ steps.chassis_guard.outcome }}
+          EA_TEST_RESULT_TB3_COMMERCE_REGRESSION: ${{ steps.tb3_commerce.outcome }}
+          EA_TEST_RESULT_FULL_REPOSITORY_SUITE: ${{ steps.regression.outcome }}
+          EA_TEST_RESULT_APPLICATION_BUILD: ${{ steps.build.outcome }}
+          EA_TEST_RESULT_DESKTOP_MOBILE_BROWSER_GATE: ${{ steps.visual.outcome }}
+          EA_TEST_RESULT_PUBLIC_WEBSITE_AUDIT: ${{ steps.website_audit.outcome }}
+          EA_TEST_RESULT_EXACT_PREVIEW_RESOLUTION: ${{ steps.resolve_preview.outcome }}
         run: |
           client='${{ github.event.inputs.client || 'all' }}'
           npm run launch:certification -- --client="$client" --environment="$EA_CERTIFICATION_ENVIRONMENT" --base-url="$EA_CERTIFICATION_BASE_URL"
@@ -151,12 +176,13 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
       - name: Create or update one repair issue per blocked client
-        if: always() && (steps.resolve_preview.outcome == 'failure' || steps.chassis_guard.outcome == 'failure' || steps.tb3_commerce.outcome == 'failure' || steps.regression.outcome == 'failure' || steps.build.outcome == 'failure' || steps.visual.outcome == 'failure' || steps.certification.outcome == 'failure')
+        if: always() && (steps.resolve_preview.outcome == 'failure' || steps.chassis_guard.outcome == 'failure' || steps.tb3_commerce.outcome == 'failure' || steps.regression.outcome == 'failure' || steps.build.outcome == 'failure' || steps.visual.outcome == 'failure' || steps.website_audit.outcome == 'failure' || steps.certification.outcome == 'failure')
         uses: actions/github-script@v7
         env:
           REGRESSION_RESULT: ${{ steps.regression.outcome }}
           BUILD_RESULT: ${{ steps.build.outcome }}
           BROWSER_RESULT: ${{ steps.visual.outcome }}
+          WEBSITE_AUDIT_RESULT: ${{ steps.website_audit.outcome }}
           PREVIEW_RESOLVE_RESULT: ${{ steps.resolve_preview.outcome }}
         with:
           script: |
@@ -167,6 +193,7 @@ jobs:
             const files = fs.readdirSync(dir).filter((file) => file.endsWith('.json'));
             for (const file of files) {
               const report = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8'));
+              if (!report.client?.id || !Array.isArray(report.failedRequirements)) continue;
               if (report.decision === 'CERTIFIED') continue;
               const title = `[Launch Certification] ${report.client.id} NOT CERTIFIED`;
               const domains = [...new Set(report.failedRequirements.map((failure) => {
@@ -190,6 +217,7 @@ jobs:
                 `- Existing repository suite: ${process.env.REGRESSION_RESULT || 'not-run'}`,
                 `- Build: ${process.env.BUILD_RESULT || 'not-run'}`,
                 `- Browser gate: ${process.env.BROWSER_RESULT || 'not-run'}`,
+                `- Public website audit: ${process.env.WEBSITE_AUDIT_RESULT || 'not-run'}`,
                 `- Exact preview URL resolution: ${process.env.PREVIEW_RESOLVE_RESULT || 'not-needed-or-not-run'}`,
                 `- Engineering discipline(s): ${domains.join(', ') || 'quality-assurance'}`,
                 `- Run evidence: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
@@ -198,11 +226,14 @@ jobs:
                 '',
                 'Autonomous repair agent: **not configured or executable in this repository workflow**. This ticket is a deduplicated repair handoff, not a claim that code repair ran. Assign the responsible engineering owner, make a safe fix on an isolated branch, add regression evidence, and rerun certification. Production review and approval remain required.',
               ].join('\n');
-              const open = await github.rest.issues.listForRepo({ owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100 });
-              const existing = open.data.find((issue) => !issue.pull_request && issue.title === title);
+              const knownIssues = await github.paginate(github.rest.issues.listForRepo, { owner: context.repo.owner, repo: context.repo.repo, state: 'all', per_page: 100 });
+              const existing = knownIssues.find((issue) => !issue.pull_request && issue.title === title);
               if (existing) {
+                if (existing.state === 'closed') {
+                  await github.rest.issues.update({ owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, state: 'open' });
+                }
                 const comments = await github.rest.issues.listComments({ owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, per_page: 100 });
-                const runMarker = `<!-- launch-certification-run:${context.runId} -->`;
+                const runMarker = `<!-- launch-certification-run:${context.runId}:attempt:${context.runAttempt} -->`;
                 if (!comments.data.some((comment) => comment.body.includes(runMarker))) {
                   await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, body: `${runMarker}\n${body}` });
                 }

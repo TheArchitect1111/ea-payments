@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { mkdtempSync, readFileSync as read, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { classifyFailureDomain, discoverClients, evaluateCertification, evidenceFromBrowserGates, renderMarkdown, writeCertificationReports } from '../lib/launch-certification/engine.mjs';
+import { classifyFailureDomain, discoverClients, evaluateCertification, evidenceFromBrowserGates, renderMarkdown, validateClientManifest, verifyCertificateBinding, writeCertificationReports } from '../lib/launch-certification/engine.mjs';
 import { previewUrlFromCheckRuns, resolveGithubPreview } from '../lib/launch-certification/github-preview-check.mjs';
 
 const root = process.cwd();
@@ -33,6 +33,12 @@ test('discovers configured clients from one shared registry', () => {
   assert.equal(discoverClients(clients, 'tarris')[0].deployment.publicBaseUrl, 'https://tb3.online');
   assert.equal(discoverClients(clients, 'amanda')[0].sourceOfTruth[0], 'src/clients/amanda/chassis.config.ts');
   assert.throws(() => discoverClients(clients, 'missing'), /Unknown certification client/);
+  for (const client of clients.clients) {
+    const portalRoute = client.deployment.routes.find((route) => route.capability === 'portal');
+    assert.equal(client.unauthenticatedAccessProbe?.route, portalRoute?.path, `${client.id} must configure an unauthenticated portal probe`);
+    assert.ok(client.unauthenticatedAccessProbe.deniedPath);
+    assert.deepEqual(validateClientManifest({ ...client, deployment: { ...client.deployment, publicBaseUrl: 'http://insecure.example' } }, capabilities, root).filter((error) => error === 'production-deployment-url-must-use-https').length, 1);
+  }
 });
 
 test('preview discovery reads a successful Vercel check bound to the exact source commit', async () => {
@@ -102,13 +108,16 @@ test('missing mandatory evidence blocks certification', () => {
 test('certification requires complete, fresh evidence bound to the same commit and environment', () => {
   const client = readyClient();
   const evidence = completeEvidence(client);
-  const record = evaluateCertification({ client, capabilityRegistry: capabilities, evidence, sourceCommit, runnerCommit: sourceCommit, environment: 'preview', now: time, root });
+  const record = evaluateCertification({ client, capabilityRegistry: capabilities, evidence, sourceCommit, runnerCommit: sourceCommit, environment: 'preview', deploymentId: 'preview-deployment-a', deploymentBaseUrl: 'https://preview.example', now: time, root });
   assert.equal(record.decision, 'CERTIFIED');
   assert.ok(record.checks.every((item) => item.status === 'passed' && item.evidence?.ref));
 
   const stale = evaluateCertification({ client, capabilityRegistry: capabilities, evidence: completeEvidence(client, 'preview', '2026-10-01T00:00:00.000Z'), sourceCommit, environment: 'preview', now: time, root });
   assert.equal(stale.decision, 'NOT CERTIFIED');
   assert.ok(stale.checks.some((item) => item.status === 'unverified' && /stale/.test(item.reason)));
+  const staleWithEvidence = stale.checks.find((item) => item.status === 'unverified' && /stale/.test(item.reason));
+  assert.match(staleWithEvidence.evidence.ref, /evidence\.example/);
+  assert.match(staleWithEvidence.evidence.verificationReason, /stale/);
 
   const wrongSource = completeEvidence(client).map((item) => ({ ...item, sourceCommit: 'b'.repeat(40) }));
   const mismatched = evaluateCertification({ client, capabilityRegistry: capabilities, evidence: wrongSource, sourceCommit, environment: 'preview', now: time, root });
@@ -119,13 +128,30 @@ test('certification requires complete, fresh evidence bound to the same commit a
 test('production certification requires deployment and critical-configuration identities', () => {
   const client = readyClient('amanda');
   const evidence = completeEvidence(client, 'production');
-  const missingIdentity = evaluateCertification({ client, capabilityRegistry: capabilities, evidence, sourceCommit, environment: 'production', now: time, root });
+  const missingIdentity = evaluateCertification({ client, capabilityRegistry: capabilities, evidence, sourceCommit, environment: 'production', deploymentBaseUrl: client.deployment.publicBaseUrl, now: time, root });
   assert.equal(missingIdentity.decision, 'NOT CERTIFIED');
   assert.ok(missingIdentity.failedRequirements.some((item) => /configuration fingerprint/.test(item.reason)));
-  const one = evaluateCertification({ client, capabilityRegistry: capabilities, evidence, sourceCommit, environment: 'production', deploymentId: 'deployment-a', configurationFingerprint: 'cfg-a', now: time, root });
-  const two = evaluateCertification({ client, capabilityRegistry: capabilities, evidence, sourceCommit, environment: 'production', deploymentId: 'deployment-a', configurationFingerprint: 'cfg-b', now: time, root });
+  const fingerprintA = 'a'.repeat(64);
+  const fingerprintB = 'b'.repeat(64);
+  const one = evaluateCertification({ client, capabilityRegistry: capabilities, evidence, sourceCommit, environment: 'production', deploymentId: 'deployment-a', deploymentBaseUrl: client.deployment.publicBaseUrl, configurationFingerprint: fingerprintA, now: time, root });
+  const two = evaluateCertification({ client, capabilityRegistry: capabilities, evidence, sourceCommit, environment: 'production', deploymentId: 'deployment-a', deploymentBaseUrl: client.deployment.publicBaseUrl, configurationFingerprint: fingerprintB, now: time, root });
   assert.equal(one.decision, 'CERTIFIED');
   assert.notEqual(one.validity.bindingFingerprint, two.validity.bindingFingerprint);
+  const binding = {
+    clientId: one.client.id,
+    deploymentIdentity: one.deployment.identity,
+    deploymentId: one.deploymentId,
+    sourceCommit: one.sourceCommit,
+    configurationFingerprint: fingerprintA,
+    capabilities: one.installedCapabilities,
+  };
+  assert.deepEqual(verifyCertificateBinding(one, binding, time), { valid: true, status: 'valid', reason: '' });
+  assert.equal(verifyCertificateBinding(one, { ...binding, deploymentId: 'deployment-b' }, time).status, 'invalidated');
+  assert.equal(verifyCertificateBinding(one, { ...binding, configurationFingerprint: fingerprintB }, time).status, 'invalidated');
+  assert.equal(verifyCertificateBinding(one, binding, new Date('2026-11-06T18:00:00.000Z')).status, 'expired');
+  const invalidFingerprint = evaluateCertification({ client, capabilityRegistry: capabilities, evidence, sourceCommit, environment: 'production', deploymentId: 'deployment-a', deploymentBaseUrl: client.deployment.publicBaseUrl, configurationFingerprint: 'not-a-fingerprint', now: time, root });
+  assert.equal(invalidFingerprint.decision, 'NOT CERTIFIED');
+  assert.ok(invalidFingerprint.failedRequirements.some((item) => /fingerprint is unavailable or invalid/.test(item.reason)));
 });
 
 test('external authorization and live integration gaps cannot be labeled as software failures or certification', () => {
@@ -158,7 +184,7 @@ test('browser gate evidence covers only media and responsive checks for the exac
     completedAt: time.toISOString(),
     evidenceRef: 'artifacts/ea-gate/tb3-public/gate-result.json',
     status: 'PASS',
-    details: {},
+    details: { desktop: { finalUrl: 'https://tb3.online/tarris' }, mobile: { finalUrl: 'https://tb3.online/tarris' } },
     gates: {
       functional: { status: 'PASS' }, assets: { status: 'PASS' },
       desktopVisual: { status: 'PASS' }, mobileVisual: { status: 'PASS' },
@@ -172,6 +198,13 @@ test('browser gate evidence covers only media and responsive checks for the exac
   assert.ok(record.checks.find((item) => item.checkId === 'website:responsive-ui').status === 'passed');
   assert.ok(record.checks.find((item) => item.checkId === 'website:media').status === 'passed');
   assert.equal(record.checks.find((item) => item.checkId === 'website:accessibility').status, 'missing');
+
+  const redirectedPortal = evidenceFromBrowserGates(client, [{
+    ...gate,
+    target: 'https://tb3.online/tarris/future',
+    details: { desktop: { finalUrl: 'https://tb3.online/tarris?hq=private' }, mobile: { finalUrl: 'https://tb3.online/tarris?hq=private' } },
+  }], { environment: 'preview', deploymentBaseUrl: 'https://tb3.online' });
+  assert.ok(redirectedPortal.every((item) => item.status === 'unverified' && /redirect away/.test(item.reason)));
 
   const localOnly = evidenceFromBrowserGates(client, [{ ...gate, previewUrl: 'http://127.0.0.1:3000', details: { certificationTransport: 'exact-built-checkout-local' } }], { environment: 'preview', deploymentBaseUrl: 'https://tb3.online' });
   assert.ok(localOnly.every((item) => item.status === 'unverified'));
@@ -190,6 +223,7 @@ test('failure domains route to concrete engineering disciplines', () => {
 test('machine and human reports preserve blockers and deployment observations', () => {
   const client = readyClient();
   const record = evaluateCertification({ client, capabilityRegistry: capabilities, sourceCommit, environment: 'preview', now: time, root,
+    testsExecuted: [{ name: 'full-repository-suite', result: 'success', executedAt: time.toISOString() }],
     observations: [{ route: '/tarris', status: 200, result: 'reachable; authenticated behavior not inferred' }] });
   const directory = mkdtempSync(resolve(tmpdir(), 'ea-launch-cert-'));
   try {
@@ -197,7 +231,9 @@ test('machine and human reports preserve blockers and deployment observations', 
     const json = JSON.parse(read(paths.jsonPath, 'utf8'));
     const markdown = read(paths.markdownPath, 'utf8');
     assert.equal(json.decision, 'NOT CERTIFIED');
+    assert.equal(json.testsExecuted[0].result, 'success');
     assert.match(markdown, /## Blockers/);
+    assert.match(markdown, /full-repository-suite: success/);
     assert.match(markdown, /authenticated behavior not inferred/);
     assert.match(renderMarkdown(record), /source commit/i);
   } finally {

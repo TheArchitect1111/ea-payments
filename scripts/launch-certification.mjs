@@ -14,6 +14,10 @@ const baseUrlOverride = arg('base-url', process.env.EA_CERTIFICATION_BASE_URL ||
 const outputDirectory = resolve(root, arg('output', 'artifacts/launch-certification'));
 const evidenceFile = arg('evidence-file', process.env.EA_CERTIFICATION_EVIDENCE_FILE || '');
 const browserGateDirectory = resolve(root, arg('browser-gate-dir', 'artifacts/ea-gate'));
+const testsExecuted = Object.entries(process.env)
+  .filter(([name]) => name.startsWith('EA_TEST_RESULT_'))
+  .map(([name, result]) => ({ name: name.slice('EA_TEST_RESULT_'.length).toLowerCase().replaceAll('_', '-'), result, executedAt: new Date().toISOString() }))
+  .sort((a, b) => a.name.localeCompare(b.name));
 let runnerCommit = process.env.EA_SOURCE_COMMIT || process.env.GITHUB_SHA || '';
 if (!runnerCommit) {
   try { runnerCommit = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(); } catch { /* manifest validation reports missing identity */ }
@@ -21,7 +25,12 @@ if (!runnerCommit) {
 
 function readEvidenceRecords() {
   if (!evidenceFile) return [];
-  const parsed = JSON.parse(readFileSync(resolve(root, evidenceFile), 'utf8'));
+  const path = resolve(root, evidenceFile);
+  if (!existsSync(path)) {
+    console.warn(`Evidence file is missing and supplies no passing checks: ${evidenceFile}`);
+    return [];
+  }
+  const parsed = JSON.parse(readFileSync(path, 'utf8'));
   const records = Array.isArray(parsed) ? parsed : parsed.records;
   if (!Array.isArray(records)) throw new Error('Evidence file must contain an array or { records: [] }');
   return records;
@@ -71,18 +80,31 @@ async function inspect(client) {
   }
   const deployedCommit = /^[a-f0-9]{40}$/i.test(buildInfo?.commitSha || '') ? buildInfo.commitSha : null;
   const environmentMatches = Boolean(buildInfo?.environment) && buildInfo.environment === environment;
-  const routeObservations = observations.filter((item) => item.route !== '*');
-  const publicRoutesReachable = Boolean(base) && routeObservations.length === client.deployment.routes.length && routeObservations.every((item) => item.result.startsWith('reachable with HTML'));
-  const routeIdentityVerified = publicRoutesReachable && Boolean(deployedCommit) && environmentMatches;
+  const deploymentIdentityVerified = Boolean(deployedCommit) && deployedCommit === runnerCommit && environmentMatches && typeof buildInfo?.deploymentId === 'string' && buildInfo.deploymentId.length > 0;
+  const websiteRoutes = client.deployment.routes.filter((route) => route.capability === 'website');
+  const websiteObservations = observations.filter((item) => item.capability === 'website');
+  const publicRoutesReachable = websiteRoutes.length > 0 && websiteObservations.length === websiteRoutes.length && websiteObservations.every((item) => item.result.startsWith('reachable with HTML'));
+  const routeIdentityVerified = publicRoutesReachable && deploymentIdentityVerified;
   const evidence = client.installedCapabilities.includes('website') ? [{
     checkId: 'website:public-routes', status: routeIdentityVerified ? 'passed' : 'unverified',
     reason: routeIdentityVerified ? '' : 'Route response did not prove the requested deployment identity and environment',
     sourceCommit: deployedCommit || runnerCommit, environment,
     timestamp: new Date().toISOString(), evidenceRef: base ? `${client.deployment.routes.map((route) => `${base}${route.path}`).join(', ')}; build-info=${buildInfo?.commitSha || 'unavailable'}` : `deployment URL unavailable for ${environment}`,
   }] : [];
+  if (client.installedCapabilities.includes('operations')) evidence.push({
+    checkId: 'operations:deployment-integrity',
+    status: deploymentIdentityVerified ? 'passed' : 'unverified',
+    reason: deploymentIdentityVerified ? '' : 'Build identity did not prove the exact requested source commit, environment, and deployment ID',
+    sourceCommit: deployedCommit || runnerCommit,
+    environment,
+    timestamp: new Date().toISOString(),
+    evidenceRef: base ? `${base}/api/ops/build-info; deploymentId=${buildInfo?.deploymentId || 'unavailable'}` : `deployment URL unavailable for ${environment}`,
+    evidenceType: 'deployment-identity',
+    ...(buildInfo?.deploymentId ? { deploymentId: buildInfo.deploymentId } : {}),
+  });
   return {
     sourceCommit: deployedCommit || runnerCommit,
-    deploymentId: buildInfo?.deploymentId || (deployedCommit ? `${base}@${deployedCommit}` : null),
+    deploymentId: buildInfo?.deploymentId || null,
     configurationFingerprint: buildInfo?.criticalConfigurationFingerprint || process.env.EA_CRITICAL_CONFIG_FINGERPRINT || null,
     observations,
     evidence,
@@ -96,7 +118,7 @@ for (const client of clients) {
   const deploymentBaseUrl = baseUrlOverride || (environment === 'production' ? client.deployment.publicBaseUrl : '');
   const browserEvidence = evidenceFromBrowserGates(client, browserGateReports, { environment, deploymentBaseUrl });
   const record = evaluateCertification({
-    client, capabilityRegistry, evidence: [...suppliedEvidence, ...browserEvidence, ...live.evidence],
+    client, capabilityRegistry, evidence: [...suppliedEvidence, ...browserEvidence, ...live.evidence], testsExecuted,
     sourceCommit: live.sourceCommit, runnerCommit,
     environment,
     deploymentId: live.deploymentId,

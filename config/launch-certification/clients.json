@@ -7,6 +7,7 @@
       "sourceOfTruth": ["src/clients/tarris/chassis.config.ts", "app/tarris", "config/capability-inventory.json"],
       "deployment": { "environment": "production", "publicBaseUrl": "https://tb3.online", "routes": [{ "path": "/tarris", "capability": "website" }, { "path": "/tarris/future", "capability": "portal" }] },
       "installedCapabilities": ["website", "portal", "commerce", "integrations", "communications", "security", "operations", "business-workflows", "instagram-commerce"],
+      "unauthenticatedAccessProbe": { "route": "/tarris/future", "deniedPath": "/tarris", "query": { "hq": "private" } },
       "externalApprovals": ["TB3 Stripe account authorization", "Printful billing/funding", "Instagram commerce owner setup"],
       "liveVerificationRequired": ["Stripe live/test account connection", "Printful fulfillment and shipping synchronization", "purchase confirmation email delivery", "Instagram product/order synchronization"],
       "relatedEvidence": ["https://github.com/TheArchitect1111/ea-payments/pull/608", "https://github.com/TheArchitect1111/ea-payments/pull/610", "https://github.com/TheArchitect1111/ea-payments/actions/runs/40959455231", "scripts/ea-preview-gate.mjs", "scripts/production-certification.js"]
@@ -17,6 +18,7 @@
       "sourceOfTruth": ["src/clients/amanda/chassis.config.ts", "config/amanda-portal-manifest.json", "config/capability-inventory.json"],
       "deployment": { "environment": "production", "publicBaseUrl": "https://amandacatherine.ca", "routes": [{ "path": "/amanda-catherine", "capability": "website" }, { "path": "/portal/amanda-catherine", "capability": "portal" }] },
       "installedCapabilities": ["website", "portal", "commerce", "communications", "security", "operations", "business-workflows"],
+      "unauthenticatedAccessProbe": { "route": "/portal/amanda-catherine", "deniedPath": "/portal/login", "query": { "next": "/portal/amanda-catherine" } },
       "externalApprovals": [],
       "liveVerificationRequired": ["authenticated role matrix", "cross-tenant denial", "live purchase-to-entitlement workflow", "email delivery and recovery evidence"],
       "relatedEvidence": ["scripts/launch-preflight.mjs", "scripts/ea-preview-gate.mjs", "config/amanda-portal-manifest.json"]
