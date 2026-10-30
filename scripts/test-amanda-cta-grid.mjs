@@ -18,7 +18,7 @@ assert.ok(new URL(base).hostname.endsWith('.vercel.app'),'Preview host required'
 // A preview can still be building when CI starts. Require the new grid before testing.
 let ready=false;
 for(let attempt=0;attempt<60;attempt++) {
-  const response=await fetch(base+'/portal/amanda-catherine/classes');
+  const response=await fetch(base+'/amanda-catherine');
   const html=await response.text();
   if(response.ok&&html.includes('id="classes-grid"')&&html.includes('data-cta-name="Register"')&&(!process.env.EXPECTED_SHA||html.includes('data-source-commit="'+process.env.EXPECTED_SHA+'"'))){ready=true;break;}
   await new Promise(resolve=>setTimeout(resolve,10000));
@@ -30,7 +30,7 @@ const results=[];
 fs.mkdirSync('artifacts/amanda-classes',{recursive:true});
 try {
 for(const [device,options] of [['desktop',{viewport:{width:1440,height:1000}}],['mobile',devices['iPhone 13']]]) {
- for(const route of ['/amanda-catherine','/portal/amanda-catherine/classes']) {
+ for(const route of ['/amanda-catherine']) {
   const context=await browser.newContext(options);
   const page=await context.newPage();
   let documentRequests=0;
