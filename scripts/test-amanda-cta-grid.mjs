@@ -65,7 +65,7 @@ for(const [device,options] of [['desktop',{viewport:{width:1440,height:1000}}],[
   await page.screenshot({path:`artifacts/amanda-classes/${device}-${route.includes('portal')?'portal':'home'}.png`,fullPage:true});
   await page.locator('#classes-grid [data-course-key="90-day-package"]').click();
   await page.getByRole('textbox',{name:'Email',exact:true}).waitFor();
-  assert.ok(page.url().includes('/courses/starter-kit#waitlist'));
+  assert.ok(page.url().includes('/courses/90-day-package#waitlist'));
   results.push({device,route,cards:12,register:6,waitlist:5,inquiry:1,duplicateButtons:0,newTabs:0,documentReload:false,waitlistForm:'PASS'});
   await context.close();
  }
