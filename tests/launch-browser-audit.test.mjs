@@ -32,7 +32,9 @@ test('automated accessibility violations fail and clean axe results pass', () =>
   const result = evaluateAccessibilityAudit([{ id: 'color-contrast', impact: 'serious', help: 'Elements must have sufficient color contrast', nodes: [{}, {}] }]);
   assert.equal(result.status, 'failed');
   assert.match(result.reason, /1 violation/);
-  assert.equal(result.details.violations[0].nodes, 2);
+  assert.equal(result.details.violations[0].nodes.length, 2);
+  const detailed = evaluateAccessibilityAudit([{ id: 'color-contrast', nodes: [{ target: ['.hero-copy'], failureSummary: 'Fix contrast' }] }]);
+  assert.deepEqual(detailed.details.violations[0].nodes[0], { target: ['.hero-copy'], failureSummary: 'Fix contrast' });
 });
 
 test('anonymous portal denial can pass only for a configured denial route and cannot imply roles or tenant isolation', () => {

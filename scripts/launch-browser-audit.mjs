@@ -102,6 +102,8 @@ async function inspectRoute(browser, client, route, base, expectedBuild, timesta
         && normalizedPath(new URL(pageUrl).pathname) === normalizedPath(new URL(target).pathname);
       const facts = await page.evaluate(() => {
         const visible = (el) => {
+          if (el.closest('details:not([open])')) return false;
+          if (typeof el.checkVisibility === 'function' && !el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) return false;
           const style = getComputedStyle(el);
           const rect = el.getBoundingClientRect();
           return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
@@ -247,6 +249,72 @@ async function inspectRoute(browser, client, route, base, expectedBuild, timesta
   return results;
 }
 
+async function inspectPublicFormRoutes(browser, client, base, identityValid, timestamp) {
+  const configuredRoutes = client.publicFormRoutes || [];
+  const results = [];
+  for (const path of configuredRoutes) {
+    const target = new URL(path, `${base.replace(/\/$/, '')}/`).toString();
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, extraHTTPHeaders: headers });
+    try {
+      const page = await context.newPage();
+      const response = await page.goto(target, { waitUntil: 'domcontentloaded', timeout: 45000 });
+      const finalUrl = page.url();
+      const exactRoute = (() => {
+        try {
+          const expected = new URL(target);
+          const final = new URL(finalUrl);
+          return final.origin === expected.origin
+            && normalizedPath(final.pathname) === normalizedPath(expected.pathname)
+            && final.search === expected.search;
+        } catch { return false; }
+      })();
+      await page.waitForTimeout(300);
+      const forms = await page.evaluate(() => {
+        const visible = (el) => {
+          if (el.closest('details:not([open])')) return false;
+          if (typeof el.checkVisibility === 'function' && !el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) return false;
+          const style = getComputedStyle(el);
+          const rect = el.getBoundingClientRect();
+          return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
+        };
+        return [...document.querySelectorAll('form')].filter(visible).map((form) => ({
+          hasSubmitControl: Boolean(form.querySelector('button[type="submit"],button:not([type]),input[type="submit"]')),
+          fields: [...form.querySelectorAll('input,select,textarea')]
+            .filter((field) => !['button', 'submit', 'reset', 'hidden', 'image'].includes((field.getAttribute('type') || '').toLowerCase()))
+            .map((field) => ({
+              name: (field.getAttribute('name') || '').trim(),
+              type: (field.getAttribute('type') || field.tagName.toLowerCase()).toLowerCase(),
+              hasAccessibleName: Boolean(field.labels?.length || (field.getAttribute('aria-label') || '').trim() || (field.getAttribute('aria-labelledby') || '').trim()),
+              required: field.required === true,
+              currentlyValid: field.checkValidity(),
+            })),
+        }));
+      });
+      const status = response?.status() || 0;
+      const result = !identityValid
+        ? { status: 'unverified', reason: 'The deployed build did not verify the requested source commit and environment', details: {} }
+        : status < 200 || status >= 300 || !exactRoute
+          ? { status: 'failed', reason: `Configured public form route did not return an exact in-origin success response (HTTP ${status})`, details: { target, finalUrl } }
+          : evaluateFormAudit(forms);
+      results.push({ route: path, target, finalUrl, responseStatus: status, ...result, timestamp });
+    } catch (error) {
+      results.push({ route: path, target, status: 'unverified', reason: `Configured public form route could not be audited: ${error instanceof Error ? error.message : String(error)}`, details: { timestamp } });
+    } finally {
+      await context.close();
+    }
+  }
+  return results;
+}
+
+function combinePublicFormAudits(results) {
+  if (!results.length) return { status: 'unverified', reason: 'No public form routes were configured', details: {} };
+  const failed = results.filter((result) => result.status === 'failed');
+  if (failed.length) return { status: 'failed', reason: failed.map((result) => result.reason).join('; '), details: { routes: results } };
+  const unverified = results.filter((result) => result.status === 'unverified');
+  if (unverified.length) return { status: 'unverified', reason: unverified.map((result) => result.reason).join('; '), details: { routes: results } };
+  return { status: 'passed', reason: '', details: { routes: results } };
+}
+
 async function inspectAnonymousPortal(browser, client, base, timestamp) {
   const probe = client.unauthenticatedAccessProbe;
   if (!probe?.route || !probe?.deniedPath) {
@@ -308,10 +376,11 @@ async function run() {
       const identityValid = build?.commitSha === sourceCommit && build?.environment === environment && typeof build?.deploymentId === 'string' && build.deploymentId.length > 0;
       const auditResults = [];
       for (const route of websiteRoutes) auditResults.push(await inspectRoute(browser, client, route, baseUrl.toString(), { commitSha: build?.commitSha || null, environment: build?.environment || null, deploymentId: build?.deploymentId || null }, reportTimestamp));
+      const publicFormResults = await inspectPublicFormRoutes(browser, client, baseUrl.toString(), identityValid, reportTimestamp);
       const portalProbe = client.installedCapabilities.includes('portal')
         ? await inspectAnonymousPortal(browser, client, baseUrl.toString(), reportTimestamp)
         : null;
-      clientReports.push({ clientId: client.id, displayName: client.displayName, baseUrl: baseUrl.origin, sourceCommit, environment, buildInfo: build, identityValid, routes: auditResults, portalAnonymousAccess: portalProbe });
+      clientReports.push({ clientId: client.id, displayName: client.displayName, baseUrl: baseUrl.origin, sourceCommit, environment, buildInfo: build, identityValid, routes: auditResults, publicForms: publicFormResults, portalAnonymousAccess: portalProbe });
 
       const routeResults = auditResults;
       const noAuditErrors = identityValid;
@@ -332,7 +401,7 @@ async function run() {
       const allPerformance = routeResults.flatMap((route) => route.viewportResults.map((view) => view.performance));
       const checks = {
         'website:links-navigation': combine('linkResult'),
-        'website:forms': combine('formResult'),
+        'website:forms': combinePublicFormAudits(publicFormResults),
         'website:seo': combine('seoResult'),
         'website:accessibility': identityValid
           ? allAccessibility.some((item) => item.status === 'failed')

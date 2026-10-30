@@ -13,7 +13,7 @@ Turn observable public website quality into fresh, deployment-bound evidence whi
 
 ### In scope
 - [x] Reuse configured client routes and installed-capability manifests.
-- [x] Generate link/navigation, form-structure, accessibility, SEO, and desktop/mobile performance evidence for public website routes.
+- [x] Generate link/navigation, form-structure on manifest-configured public-form routes, accessibility, SEO, and desktop/mobile performance evidence for public website routes.
 - [x] Bind evidence to exact deployment build identity, source commit, environment, timestamp, and report artifact.
 - [x] Require HTTPS, a full source SHA, and a real deployment ID; require a validated configuration fingerprint in production.
 - [x] Record test names/results and fail closed when a browser redirects away from a configured private portal route.

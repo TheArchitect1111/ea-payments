@@ -30,6 +30,8 @@ function readyClient(id = 'tarris') {
 
 test('discovers configured clients from one shared registry', () => {
   assert.deepEqual(discoverClients(clients).map((client) => client.id), ['tarris', 'amanda']);
+  assert.deepEqual(discoverClients(clients, 'tarris')[0].publicFormRoutes, ['/tarris']);
+  assert.deepEqual(discoverClients(clients, 'amanda')[0].publicFormRoutes, ['/portal/amanda-catherine/apply?form=founder-advisory']);
   assert.equal(discoverClients(clients, 'tarris')[0].deployment.publicBaseUrl, 'https://tb3.online');
   assert.equal(discoverClients(clients, 'amanda')[0].sourceOfTruth[0], 'src/clients/amanda/chassis.config.ts');
   assert.throws(() => discoverClients(clients, 'missing'), /Unknown certification client/);

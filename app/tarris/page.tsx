@@ -141,6 +141,7 @@ export default function TarrisPublicPage() {
       </header>
       <a id="book-tarris-sticky" href="#book-tarris-form" className="fixed right-4 top-20 z-50 rounded-lg bg-[#C41E3A] px-4 py-3 text-xs font-bold text-white">BOOK TARRIS / PARTNER WITH TB3</a>
       <main className="mx-auto max-w-[1440px] px-5 lg:px-10">
+        <h1 className="sr-only">Tarris Bouie III — Basketball, NIL partnerships, community, and merchandise</h1>
         <section id="original-hero" style={{ height: "92vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#070707" }}>
           <img src="/images/tb3-official/OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png" alt="Tarris Bouie Logo" style={{ maxWidth: "560px", width: "82vw", height: "auto" }} />
         </section>
@@ -160,7 +161,7 @@ export default function TarrisPublicPage() {
         <section id="future" aria-label="Enterprise and future" className="grid scroll-mt-5 gap-6 border-b border-black/20 py-10 md:grid-cols-3">
           <article><ImageSlot id="enterprise-only" asset="OFFICIAL_15_PODIUM_SPEAKING.png" alt="Tarris speaking at a podium" ratio="aspect-[4/3]" /><h2 className="mt-4 text-2xl font-black">ENTERPRISE</h2><p className="mt-2 text-xs leading-6 text-black/65">A vision that reaches beyond the court.</p><ActionLink className="mt-4 text-[9px] font-bold tracking-widest text-[#A51C30]">LEARN MORE →</ActionLink></article>
           <article className="flex min-h-[300px] flex-col justify-center bg-[#EAE7E2] p-7"><p className="text-[9px] tracking-[0.3em] text-[#A51C30]">THE FUTURE</p><h2 className="mt-4 text-3xl font-black">PLAN. PREPARE.<br />PERFORM. BUILD.</h2><p className="mt-3 text-xs leading-6 text-black/65">The next chapter starts with the work you do today.</p><ActionLink href="/tarris/future" className="mt-4 self-start text-[9px] font-bold tracking-widest text-[#A51C30]">LEARN MORE →</ActionLink></article>
-          <article className="flex flex-col justify-between bg-[#141414] p-7 text-white"><div><p className="text-[9px] tracking-[0.3em] text-white/60">THE NEXT CHAPTER</p><h2 className="mt-6 text-4xl font-black leading-none tracking-tight">PLAYER<br /><span className="text-[#A51C30]">ONE.</span></h2><p className="mt-5 text-xs leading-6 text-white/70">Same vision. Higher purpose.<br />Build what comes next.</p></div><div className="mt-8"><HQLink dark /></div></article>
+          <article className="flex flex-col justify-between bg-[#141414] p-7 text-white"><div><p className="text-[9px] tracking-[0.3em] text-white/60">THE NEXT CHAPTER</p><h2 className="mt-6 text-4xl font-black leading-none tracking-tight">PLAYER<br /><span className="text-[#FF8696]">ONE.</span></h2><p className="mt-5 text-xs leading-6 text-white/70">Same vision. Higher purpose.<br />Build what comes next.</p></div><div className="mt-8"><HQLink dark /></div></article>
         </section>
         <section id="merch" className="scroll-mt-5 py-10">
           <div className="mb-6"><p className="text-[9px] tracking-[0.25em] text-[#A51C30]">TB3 STORE</p><h2 className="mt-2 text-3xl font-black tracking-tight">WEAR THE VISION.</h2></div>
