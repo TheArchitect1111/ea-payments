@@ -16,6 +16,6 @@ assert.ok(publicPage.includes('<AmandaClassesGrid courses={courses}/>'), 'public
 assert.ok(grid.includes('id="classes-grid"'), 'shared classes grid must provide the public anchor');
 const policy=readFileSync('lib/amanda-catherine/class-cta-policy.ts','utf8');
 assert.ok(policy.includes("label:'Join Waitlist'"));
-assert.ok(!policy.includes('Request Info'));
+assert.ok(policy.includes("label:'Request Info'"), 'inquiry status must retain its contact pathway');
 assert.ok(policy.includes("action:'/courses/'+encodeURIComponent(course.key)+'#waitlist'"));
 console.log('Amanda practitioner kit: shared waitlist route and canonical public classes grid verified.');
