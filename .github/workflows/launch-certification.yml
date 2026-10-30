@@ -150,6 +150,7 @@ jobs:
       - name: Certify configured clients against exact deployment evidence
         id: certification
         if: always()
+        continue-on-error: ${{ github.event_name == 'pull_request' }}
         env:
           EA_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.event.deployment.sha || github.sha }}
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
@@ -167,6 +168,43 @@ jobs:
         run: |
           client='${{ github.event.inputs.client || 'all' }}'
           npm run launch:certification -- --client="$client" --environment="$EA_CERTIFICATION_ENVIRONMENT" --base-url="$EA_CERTIFICATION_BASE_URL"
+      - name: Enforce implementation checks independently of client launch readiness
+        id: implementation_gate
+        if: always() && github.event_name == 'pull_request'
+        env:
+          PREVIEW_RESOLUTION_RESULT: ${{ steps.resolve_preview.outcome }}
+          CERTIFICATION_BASE_URL: ${{ env.EA_CERTIFICATION_BASE_URL }}
+          LAUNCH_CONTRACT_RESULT: ${{ steps.launch_contract_tests.outcome }}
+          LEGO_CONTRACT_RESULT: ${{ steps.lego_contract.outcome }}
+          EXISTING_EVIDENCE_RESULT: ${{ steps.existing_evidence.outcome }}
+          CHASSIS_GUARD_RESULT: ${{ steps.chassis_guard.outcome }}
+          TB3_COMMERCE_RESULT: ${{ steps.tb3_commerce.outcome }}
+          REPOSITORY_SUITE_RESULT: ${{ steps.regression.outcome }}
+          BUILD_RESULT: ${{ steps.build.outcome }}
+          BROWSER_GATE_RESULT: ${{ steps.visual.outcome }}
+          WEBSITE_AUDIT_RESULT: ${{ steps.website_audit.outcome }}
+        run: |
+          set -euo pipefail
+          failures=()
+          if [ "$PREVIEW_RESOLUTION_RESULT" = "failure" ]; then failures+=("exact preview resolution: failure"); fi
+          if [ -z "$CERTIFICATION_BASE_URL" ]; then failures+=("exact preview URL: missing"); fi
+          for check in \
+            "launch contract tests:$LAUNCH_CONTRACT_RESULT" \
+            "LEGO evidence contract:$LEGO_CONTRACT_RESULT" \
+            "existing module evidence:$EXISTING_EVIDENCE_RESULT" \
+            "chassis guard:$CHASSIS_GUARD_RESULT" \
+            "TB3 commerce regression:$TB3_COMMERCE_RESULT" \
+            "full repository suite:$REPOSITORY_SUITE_RESULT" \
+            "application build:$BUILD_RESULT" \
+            "desktop/mobile browser gate:$BROWSER_GATE_RESULT" \
+            "public website audit:$WEBSITE_AUDIT_RESULT"; do
+            if [ "${check##*:}" != "success" ]; then failures+=("$check"); fi
+          done
+          if [ "${#failures[@]}" -gt 0 ]; then
+            printf 'Implementation gate failed: %s\\n' "${failures[@]}"
+            exit 1
+          fi
+          echo "Implementation gate passed. Client launch decisions remain in the uploaded certification reports; NOT CERTIFIED does not authorize deployment."
       - name: Upload machine and human-readable certification reports
         if: always()
         uses: actions/upload-artifact@v4
