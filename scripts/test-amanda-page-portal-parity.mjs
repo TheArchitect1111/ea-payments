@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 const read = (pathname) => readFileSync(new URL(`../${pathname}`, import.meta.url), 'utf8');
 const publicPage = `${read('app/amanda-catherine/page.tsx')}\n${read('app/amanda-catherine/ClientRequestedUpdates.tsx')}`;
 const ownerLayout = read('app/portal/amanda-catherine/owner/layout.tsx');
+const ownerNav = JSON.parse(read('knowledge/eva-menu-sources/amanda-owner.json'));
 const ownerDashboard = read('app/portal/amanda-catherine/owner/page.tsx');
 const ownerSections = read('app/portal/amanda-catherine/owner/[section]/page.tsx');
 
@@ -21,11 +22,11 @@ const ownerDestinations = [
   ['Reviews & Testimonials', 'reviews'],
 ];
 
+assert.ok(ownerLayout.includes("from '@/knowledge/eva-menu-sources/amanda-owner.json'"), 'owner layout must use the canonical menu source');
+assert.ok(ownerLayout.includes('ownerNav.items.map'), 'owner layout must render the canonical menu items');
 for (const [label, slug] of ownerDestinations) {
-  assert.ok(ownerLayout.includes(label), `owner navigation is missing ${label}`);
-  assert.ok(ownerLayout.includes(`/portal/amanda-catherine/owner/${slug}`), `owner navigation is missing ${slug}`);
   const destination = `/portal/amanda-catherine/owner/${slug}`;
-  assert.ok(ownerLayout.includes(destination), `owner navigation is missing connected destination ${slug}`);
+  assert.ok(ownerNav.items.some((item) => item.label === label && item.href === destination), `owner menu source is missing ${label}`);
   assert.ok(ownerSections.includes(`${slug.includes('-') ? `'${slug}'` : slug}:`), `owner section registry is missing ${slug}`);
 }
 
