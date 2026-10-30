@@ -76,7 +76,7 @@ jobs:
       - name: Resolve the exact READY Vercel preview for this pull request commit
         id: resolve_preview
         if: >-
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && vars.EA_PREVIEW_URL == '') ||
+          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
           (github.event_name == 'workflow_dispatch' && inputs.environment == 'preview' && inputs.base_url == '' && vars.EA_PREVIEW_URL == '')
         continue-on-error: true
         env:
