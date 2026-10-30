@@ -173,7 +173,6 @@ jobs:
         if: always() && github.event_name == 'pull_request'
         env:
           PREVIEW_RESOLUTION_RESULT: ${{ steps.resolve_preview.outcome }}
-          CERTIFICATION_BASE_URL: ${{ env.EA_CERTIFICATION_BASE_URL }}
           LAUNCH_CONTRACT_RESULT: ${{ steps.launch_contract_tests.outcome }}
           LEGO_CONTRACT_RESULT: ${{ steps.lego_contract.outcome }}
           EXISTING_EVIDENCE_RESULT: ${{ steps.existing_evidence.outcome }}
@@ -187,7 +186,7 @@ jobs:
           set -euo pipefail
           failures=()
           if [ "$PREVIEW_RESOLUTION_RESULT" = "failure" ]; then failures+=("exact preview resolution: failure"); fi
-          if [ -z "$CERTIFICATION_BASE_URL" ]; then failures+=("exact preview URL: missing"); fi
+          if [ -z "$EA_CERTIFICATION_BASE_URL" ]; then failures+=("exact preview URL: missing"); fi
           for check in \
             "launch contract tests:$LAUNCH_CONTRACT_RESULT" \
             "LEGO evidence contract:$LEGO_CONTRACT_RESULT" \
