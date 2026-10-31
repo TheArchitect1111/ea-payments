@@ -1,35 +1,31 @@
 import { notFound } from 'next/navigation';
 import { AMANDA_COURSES } from '@/lib/amanda-catherine/config';
-import AmandaLearningCenter from '@/app/portal/[slug]/learning/AmandaLearningCenter';
-import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 export const dynamic = 'force-dynamic';
-
 export default async function EnrollPage({ params, searchParams }: { params: Promise<{ courseId: string }>, searchParams: Promise<{ test?: string, success?: string }> }) {
   const { courseId } = await params; const sp = await searchParams; const isTest = sp?.test === '1'; const isSuccess = sp?.success === 'true';
   const course = AMANDA_COURSES.find(c => c.id === courseId); if (!course) notFound();
-  const portalUrl = `/portal/amanda-catherine/learning/${courseId}${isTest ? '?success=true&paid=1&test=1' : '?success=true&paid=1'}`;
-
+  const m1 = (course as any).modules?.[0] || { title: 'Module 1' }; const wb = (course as any).workbooks || []; const pr = (course as any).protocols || []; const rs = (course as any).resources || [];
   return (
-    <PortalSubpage slug="amanda-catherine" active="learning" kicker={isTest ? "TEST MODE $1 - Same path new student sees" : "Enroll"} title={course.title} lede={isTest ? "Private $1 test - Card 4242 4242 4242 4242 - Same look/feel/process as new student" : "Enroll in this course"}>
-      {isSuccess ? (
-        <div style={{ background: '#d4edda', border: '2px solid #28a745', borderRadius: 12, padding: 24, marginBottom: 24 }}>
-          <h3 style={{ color: '#155724' }}>✅ Paid {isTest ? '$1' : ''} - Page Changed! Module 1 Below</h3>
-          <p style={{ color: '#155724' }}>Same success page new students see - Module 1 + workbooks/protocols/resources below</p>
-          <a href={portalUrl} style={{ display: 'inline-block', background: '#1a2a4a', color: 'white', padding: '12px 24px', borderRadius: 8, textDecoration: 'none', marginTop: 12 }}>Open Learning Portal - Module 1</a>
-        </div>
+    <div style={{ maxWidth: 900, margin: '0 auto', padding: 24 }}>
+      <h1>{course.title} - {isTest ? 'TEST $1 - Same as student' : 'Enroll'}</h1>
+      {!isSuccess ? (
+        <form action="/api/portal/amanda/checkout" method="POST" style={{ border: '2px solid #1a2a4a', padding: 24, borderRadius: 12, margin: '24px 0' }}>
+          <input type="hidden" name="courseId" value={courseId} /><input type="hidden" name="paymentOption" value={isTest?'test':'full'} />
+          <p>{isTest ? 'Card 4242 4242 4242 4242 Exp 12/28 CVC 123 Zip 12345 - Square sandbox $1' : `CAD $${(course as any).priceCad||100}`}</p>
+          <button type="submit" style={{ background: '#1a2a4a', color: 'white', padding: '14px 32px', borderRadius: 8, width: '100%' }}>Buy {isTest ? '$1 - Same workflow as student - Square' : `for CAD $${(course as any).priceCad}`}</button>
+        </form>
       ) : (
-        <div style={{ background: 'white', border: '2px solid #1a2a4a', borderRadius: 12, padding: 24, marginBottom: 24 }}>
-          <h3>Buy {isTest ? 'TEST $1' : ''} - {course.title}</h3>
-          <p>{isTest ? 'Card: 4242 4242 4242 4242 Exp 12/28 CVC 123 Zip 12345' : `Price: CAD $${(course.priceCad||100).toString()}`}</p>
-          <form action="/api/portal/amanda/checkout" method="POST">
-            <input type="hidden" name="courseId" value={courseId} />
-            <input type="hidden" name="amandaCourseId" value={courseId} />
-            <input type="hidden" name="paymentOption" value={isTest ? 'test' : 'full'} />
-            <button type="submit" style={{ background: '#1a2a4a', color: 'white', padding: '14px 32px', borderRadius: 8, border: 'none', width: '100%', fontSize: 16, fontWeight: 600 }}>Buy {isTest ? 'TEST for CAD $1 - Card 4242' : `for CAD $${course.priceCad}`}</button>
-          </form>
+        <div style={{ background: '#d4edda', border: '2px solid #28a745', padding: 24, borderRadius: 12, margin: '24px 0' }}>
+          <h3>✅ Paid {isTest?'$1':''} - Module 1 Below - Same as student sees</h3>
+          <p>Email sent: Receipt + Payment confirmation + Welcome with "Open learning portal" link</p>
         </div>
       )}
-      <AmandaLearningCenter audience="student-trainee" assignedCourseIds={[courseId]} isAdmin={false} />
-    </PortalSubpage>
+      <div style={{ border: '1px solid #ddd', padding: 24, borderRadius: 12 }}>
+        <h2>{m1.title}</h2><p>What new student sees after Square payment - NO LOGIN - Module 1 + workbooks/protocols/resources</p>
+        <h3>Workbooks</h3><ul>{wb.map((w:any,i:number)=><li key={i}>{w.title||w}</li>)}{wb.length===0&&<li>Firm Foundation Workbook</li>}</ul>
+        <h3>Protocols</h3><ul>{pr.map((p:any,i:number)=><li key={i}>{p.title||p}</li>)}{pr.length===0&&<li>Daily Practice Protocol</li>}</ul>
+        <h3>Resources</h3><ul>{rs.map((r:any,i:number)=><li key={i}>{r.title||r}</li>)}{rs.length===0&&<li>Video + PDF Resources</li>}</ul>
+      </div>
+    </div>
   );
 }
