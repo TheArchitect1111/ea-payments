@@ -71,6 +71,7 @@ export async function POST(req: NextRequest) {
   if (!offer) return NextResponse.json({ error: 'Offer not found.' }, { status: 404 });
   if ('courseId' in offer && !amandaCourseReady(offer.courseId)) return NextResponse.json({ error: 'This course is waitlist only.' }, { status: 409 });
   const isTest = body.paymentOption === 'test';
+  if (offer.id.startsWith('test-') && !isTest) return NextResponse.json({ error: 'Test offers require the private test checkout flow.' }, { status: 409 });
   if (isTest && !offer.id.startsWith('test-')) return NextResponse.json({ error: 'Private $1 test checkout is available only for test- offers.' }, { status: 409 });
   if (isTest && (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_SECRET_KEY.startsWith('sk_test_'))) {
     throw new Error('Test checkout blocked: STRIPE_SECRET_KEY is not a test key. Will not use live key.');
