@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
-
 import type { NextRequest } from 'next/server';
-
 import { createSlugPortalMiddleware } from '@ea/portal-chassis/middleware';
-
 import { can, normalizeAdminRole } from '@/lib/rbac';
 import { EA_PORTAL_COOKIE, EA_PORTAL_SESSION } from '@/lib/chassis/ea-portal';
 import { resolveProductHostRedirect } from '@/lib/product-routes';
@@ -15,72 +12,41 @@ const EA_ADMIN_COOKIE = 'ea_admin_session';
 const AMANDA_CLIENT_TEST_COOKIE = 'amanda_v2_client_test';
 const AMANDA_CLIENT_TEST_TOKEN = 'acv2-9f3c7a61-2d84-4fe8-b615-71eacb396204';
 
-type EdgeAdminSession = {
-  role?: string;
-};
+type EdgeAdminSession = { role?: string; };
 
-function adminSessionSecret(): string {
-  return process.env.ADMIN_SESSION_SECRET ?? '';
-}
-
+function adminSessionSecret(): string { return process.env.ADMIN_SESSION_SECRET ?? ''; }
 function decodeBase64Url(value: string): string {
   const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
   const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
   return atob(padded);
 }
-
 function bytesToHex(bytes: ArrayBuffer): string {
-  return [...new Uint8Array(bytes)]
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('');
+  return [...new Uint8Array(bytes)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
 }
-
 async function signPayloadEdge(encoded: string): Promise<string> {
-  const sec = adminSessionSecret();
-  if (!sec) return '';
-  const key = await crypto.subtle.importKey(
-    'raw',
-    new TextEncoder().encode(sec),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign'],
-  );
+  const sec = adminSessionSecret(); if (!sec) return '';
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(sec), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
   const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(encoded));
   return bytesToHex(signature);
 }
-
 async function parseAdminSessionEdge(token: string | undefined): Promise<EdgeAdminSession | null> {
   if (!token || !adminSessionSecret()) return null;
-
-  const dotIdx = token.lastIndexOf('.');
-  if (dotIdx === -1) return null;
-
-  const encoded = token.slice(0, dotIdx);
-  const provided = token.slice(dotIdx + 1);
-
+  const dotIdx = token.lastIndexOf('.'); if (dotIdx === -1) return null;
+  const encoded = token.slice(0, dotIdx); const provided = token.slice(dotIdx + 1);
   try {
     const expectedSig = await signPayloadEdge(encoded);
     if (!expectedSig || provided !== expectedSig) return null;
-    const payload = JSON.parse(decodeBase64Url(encoded)) as {
-      role?: string;
-      exp?: number;
-    };
+    const payload = JSON.parse(decodeBase64Url(encoded)) as { role?: string; exp?: number; };
     if (typeof payload.exp !== 'number' || payload.exp < Date.now()) return null;
     if (typeof payload.role !== 'string' || !payload.role.trim()) return null;
     return { role: payload.role };
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 const { middleware: portalMiddleware } = createSlugPortalMiddleware({
-
   cookieName: EA_PORTAL_COOKIE,
-
   loginPath: '/portal/login',
-
   session: EA_PORTAL_SESSION,
-
 });
 
 const PUBLIC_PORTAL_AUTH_PATHS = new Set([
@@ -99,18 +65,19 @@ const PUBLIC_PORTAL_EXPERIENCE_PATHS = new Set([
   '/portal/amanda-catherine/apply',
   '/portal/amanda-catherine/expired',
   '/portal/amanda-catherine/api',
+  // AMANDA PRIVATE $1 TEST CHECKOUT - ALLOW WITHOUT LOGIN
+  '/portal/amanda-catherine/learning/test-firm-foundation',
+  '/portal/amanda-catherine/learning/test-entrepreneurial-artist',
 ]);
 
 function isPublicPortalAuthPath(pathname: string): boolean {
-  return [...PUBLIC_PORTAL_AUTH_PATHS].some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
-  );
+  return [...PUBLIC_PORTAL_AUTH_PATHS].some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
 
 function isPublicPortalExperiencePath(pathname: string): boolean {
-  return [...PUBLIC_PORTAL_EXPERIENCE_PATHS].some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
-  );
+  // Allow private $1 test checkout without login - test- routes
+  if (pathname.includes('/learning/test-')) return true;
+  return [...PUBLIC_PORTAL_EXPERIENCE_PATHS].some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
 
 const PUBLIC_ADMIN_PATHS = new Set([
@@ -122,28 +89,18 @@ const PUBLIC_ADMIN_PATHS = new Set([
 ]);
 
 function isPublicAdminPath(pathname: string): boolean {
-  return [...PUBLIC_ADMIN_PATHS].some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
-  );
+  return [...PUBLIC_ADMIN_PATHS].some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
 
-
-
 export async function middleware(request: NextRequest) {
-
   const host = request.headers.get('host');
-
   const pathname = request.nextUrl.pathname;
 
-  // TB3 public routes - bypass all portal auth (fixes 307)
   if (pathname === '/tarris' || pathname.startsWith('/tarris/')) {
-    const h = new Headers(request.headers);
-    h.set('x-pathname', pathname);
+    const h = new Headers(request.headers); h.set('x-pathname', pathname);
     return NextResponse.next({ request: { headers: h } });
   }
 
-
-  // Short Amanda app URLs resolve to their canonical portal pages only on Amanda's domain.
   const normalizedHost = host?.split(':')[0].toLowerCase();
   const amandaAliases: Record<string, string> = {
     '/classes': '/portal/amanda-catherine/classes',
@@ -155,128 +112,74 @@ export async function middleware(request: NextRequest) {
     '/calendar': '/portal/amanda-catherine/calendar',
     '/eva': '/portal/amanda-catherine/eva',
   };
-  if (
-    ['amandacatherine.ca', 'www.amandacatherine.ca'].includes(normalizedHost ?? '') &&
-    amandaAliases[pathname]
-  ) {
-    const target = request.nextUrl.clone();
-    target.pathname = amandaAliases[pathname];
+  if (['amandacatherine.ca', 'www.amandacatherine.ca'].includes(normalizedHost ?? '') && amandaAliases[pathname]) {
+    const target = request.nextUrl.clone(); target.pathname = amandaAliases[pathname];
     return NextResponse.redirect(target);
   }
 
-  // Isolated client-review access. This is active only on the dedicated preview
-  // branch and never weakens production authentication.
-  const isAmandaClientTestDeployment =
-    process.env.VERCEL_ENV === 'preview' &&
-    process.env.VERCEL_GIT_COMMIT_REF === 'client-test/amanda-v2-20260919';
+  const isAmandaClientTestDeployment = process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_GIT_COMMIT_REF === 'client-test/amanda-v2-20260919';
   const isAmandaOwnerPath = pathname.startsWith('/portal/amanda-catherine/owner');
   if (isAmandaClientTestDeployment && isAmandaOwnerPath) {
     const presentedToken = request.nextUrl.searchParams.get('client_test');
     if (presentedToken === AMANDA_CLIENT_TEST_TOKEN) {
-      const target = request.nextUrl.clone();
-      target.searchParams.delete('client_test');
+      const target = request.nextUrl.clone(); target.searchParams.delete('client_test');
       const response = NextResponse.redirect(target);
-      response.cookies.set(AMANDA_CLIENT_TEST_COOKIE, AMANDA_CLIENT_TEST_TOKEN, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: true,
-        path: '/portal/amanda-catherine/owner',
-        maxAge: 60 * 60 * 24 * 14,
-      });
+      response.cookies.set(AMANDA_CLIENT_TEST_COOKIE, AMANDA_CLIENT_TEST_TOKEN, { httpOnly: true, sameSite: 'lax', secure: true, path: '/portal/amanda-catherine/owner', maxAge: 60 * 60 * 24 * 14 });
       return response;
     }
     if (request.cookies.get(AMANDA_CLIENT_TEST_COOKIE)?.value === AMANDA_CLIENT_TEST_TOKEN) {
-      const requestHeaders = new Headers(request.headers);
-      requestHeaders.set('x-pathname', pathname);
+      const requestHeaders = new Headers(request.headers); requestHeaders.set('x-pathname', pathname);
       return NextResponse.next({ request: { headers: requestHeaders } });
     }
   }
 
-  // Canonical client aliases must resolve before portal authentication or host rewrites.
-  // This prevents old or guessed slugs from rendering a different tenant shell.
   if (pathname === '/portal/amanda') {
-    const target = request.nextUrl.clone();
-    target.pathname = '/portal/amanda-catherine';
+    const target = request.nextUrl.clone(); target.pathname = '/portal/amanda-catherine';
     return NextResponse.redirect(target, 308);
   }
   if (host?.split(':')[0].toLowerCase() === 'portal.efficiencyarchitects.online' && pathname === '/amanda') {
-    const target = request.nextUrl.clone();
-    target.pathname = '/amanda-catherine';
+    const target = request.nextUrl.clone(); target.pathname = '/amanda-catherine';
     return NextResponse.redirect(target, 308);
   }
 
   const portalHost = resolvePortalHostRewrite(host, pathname);
   if (portalHost) {
     if ('redirectPath' in portalHost) {
-      const target = new URL(portalHost.redirectPath, request.url);
-      target.search = request.nextUrl.search;
+      const target = new URL(portalHost.redirectPath, request.url); target.search = request.nextUrl.search;
       return NextResponse.redirect(target);
     }
-    const url = request.nextUrl.clone();
-    url.pathname = portalHost.rewritePath;
+    const url = request.nextUrl.clone(); url.pathname = portalHost.rewritePath;
     return NextResponse.rewrite(url);
   }
 
   const simplifiAppEntry = resolveSimplifiAppHostRedirect(host, pathname);
-
   if (simplifiAppEntry) {
-
-    const target = new URL(simplifiAppEntry, request.url);
-    target.search = request.nextUrl.search;
+    const target = new URL(simplifiAppEntry, request.url); target.search = request.nextUrl.search;
     return NextResponse.redirect(target);
-
   }
 
-
-
-  const productEntry =
-
-    resolveCustomDomainRedirect(host, pathname) ?? resolveProductHostRedirect(host, pathname);
-
-
-
+  const productEntry = resolveCustomDomainRedirect(host, pathname) ?? resolveProductHostRedirect(host, pathname);
   if (productEntry) {
-
     const target = new URL(productEntry, request.url);
-
     return NextResponse.redirect(target);
-
   }
 
-
-
-  // The synthetic Amanda catalog contains only hard-coded public test constants.
-  // Never bypass a real dashboard request or any production environment.
-  if (process.env.VERCEL_ENV === 'preview' &&
-      pathname === '/portal/amanda-catherine/learning' &&
-      request.nextUrl.searchParams.get('mode') === 'preview-synthetic') {
+  if (process.env.VERCEL_ENV === 'preview' && pathname === '/portal/amanda-catherine/learning' && request.nextUrl.searchParams.get('mode') === 'preview-synthetic') {
     return NextResponse.next();
   }
 
-  // V3.1 Preview-only: allow classroom to render its own authenticated 403.
-  // No permission is granted here; the server page verifies the EA cookie and allowlist.
-  if (pathname === '/portal/amanda-catherine/classroom-test' &&
-      process.env.VERCEL_ENV === 'preview' &&
-      process.env.VERCEL_GIT_COMMIT_REF === 'poc/amanda-v31-identity-bridge' &&
-      !!process.env.FRAPPE_BRIDGE_SECRET &&
-      process.env.FRAPPE_BRIDGE_SECRET.length >= 32) {
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-pathname', pathname);
+  if (pathname === '/portal/amanda-catherine/classroom-test' && process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_GIT_COMMIT_REF === 'poc/amanda-v31-identity-bridge' && !!process.env.FRAPPE_BRIDGE_SECRET && process.env.FRAPPE_BRIDGE_SECRET.length >= 32) {
+    const requestHeaders = new Headers(request.headers); requestHeaders.set('x-pathname', pathname);
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   if (pathname.startsWith('/portal')) {
     if (isPublicPortalAuthPath(pathname) || isPublicPortalExperiencePath(pathname)) {
-      const requestHeaders = new Headers(request.headers);
-      requestHeaders.set('x-pathname', pathname);
+      const requestHeaders = new Headers(request.headers); requestHeaders.set('x-pathname', pathname);
       return NextResponse.next({ request: { headers: requestHeaders } });
     }
-
-    const portalResponse = await (portalMiddleware as unknown as (
-      req: NextRequest,
-    ) => Promise<Response> | Response)(request);
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-pathname', pathname);
+    const portalResponse = await (portalMiddleware as unknown as (req: NextRequest) => Promise<Response> | Response)(request);
+    const requestHeaders = new Headers(request.headers); requestHeaders.set('x-pathname', pathname);
     if (portalResponse.status >= 300 && portalResponse.status < 400) {
       const location = portalResponse.headers.get('location');
       if (location) {
@@ -289,29 +192,21 @@ export async function middleware(request: NextRequest) {
       return portalResponse;
     }
     const allowed = NextResponse.next({ request: { headers: requestHeaders } });
-    portalResponse.headers.forEach((value, key) => {
-      if (key.toLowerCase() === 'set-cookie') allowed.headers.append(key, value);
-    });
+    portalResponse.headers.forEach((value, key) => { if (key.toLowerCase() === 'set-cookie') allowed.headers.append(key, value); });
     return allowed;
   }
 
   if (pathname.startsWith('/admin')) {
-    if (isPublicAdminPath(pathname)) {
-      return NextResponse.next();
-    }
-
+    if (isPublicAdminPath(pathname)) { return NextResponse.next(); }
     const adminToken = request.cookies.get(EA_ADMIN_COOKIE)?.value;
     const adminSession = await parseAdminSessionEdge(adminToken);
     if (!adminSession) {
-      const login = new URL('/admin/login', request.url);
-      login.searchParams.set('next', pathname);
+      const login = new URL('/admin/login', request.url); login.searchParams.set('next', pathname);
       return NextResponse.redirect(login);
     }
-
     const role = normalizeAdminRole(adminSession.role);
     if (!can(role, 'admin:access')) {
-      const login = new URL('/admin/login', request.url);
-      login.searchParams.set('error', 'unauthorized');
+      const login = new URL('/admin/login', request.url); login.searchParams.set('error', 'unauthorized');
       return NextResponse.redirect(login);
     }
   }
@@ -320,50 +215,24 @@ export async function middleware(request: NextRequest) {
     const adminToken = request.cookies.get(EA_ADMIN_COOKIE)?.value;
     const adminSession = await parseAdminSessionEdge(adminToken);
     if (!adminSession) {
-      const login = new URL('/admin/login', request.url);
-      login.searchParams.set('next', pathname);
+      const login = new URL('/admin/login', request.url); login.searchParams.set('next', pathname);
       return NextResponse.redirect(login);
     }
-
     const role = normalizeAdminRole(adminSession.role);
     if (!can(role, 'admin:access')) {
-      const login = new URL('/admin/login', request.url);
-      login.searchParams.set('error', 'unauthorized');
+      const login = new URL('/admin/login', request.url); login.searchParams.set('error', 'unauthorized');
       return NextResponse.redirect(login);
     }
   }
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-pathname', request.nextUrl.pathname);
-  return NextResponse.next({
-    request: { headers: requestHeaders },
-  });
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
-
-
 export const config = {
-
   matcher: [
-    '/',
-    '/capture',
-    '/app',
-    '/simplifiorb',
-    '/workspace',
-    '/login',
-    '/register',
-    '/forgot-password',
-    '/reset-password',
-    '/portal/:slug',
-    '/portal/:slug/:path*',
-    '/simplifi',
-    '/simplifi/:path*',
-    '/admin/:path*',
-    '/launch',
-    '/legal/:path*',
-    '/trust',
-    // Vanity portal host: portal.efficiencyarchitects.online/{client}
-    '/:slug',
-    '/:slug/:path*',
+    '/', '/capture', '/app', '/simplifiorb', '/workspace', '/login', '/register', '/forgot-password', '/reset-password',
+    '/portal/:slug', '/portal/:slug/:path*', '/simplifi', '/simplifi/:path*', '/admin/:path*', '/launch', '/legal/:path*', '/trust', '/:slug', '/:slug/:path*',
   ],
 };
