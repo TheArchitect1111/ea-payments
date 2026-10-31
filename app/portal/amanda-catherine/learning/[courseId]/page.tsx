@@ -6,7 +6,8 @@ import { getCourseMenuRoute } from '@/lib/amanda-catherine/menu-routing';
 import AmandaLearningCenter from '@/app/portal/[slug]/learning/AmandaLearningCenter';
 import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 export const dynamic = 'force-dynamic';
-export default async function Page({ params }: { params: Promise<{ courseId: string }> }) {
+export default async function Page({
+  const isTestCourse = String(params?.courseId||"").startsWith("test-"); params }: { params: Promise<{ courseId: string }> }) {
   const { courseId } = await params;
   const course = AMANDA_COURSES.find(c => c.id === courseId);
   if (!course) notFound();
