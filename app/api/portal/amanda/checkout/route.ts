@@ -46,13 +46,13 @@ export async function POST(req: NextRequest) {
   if (!auth.ok) return portalApiUnauthorized(auth);
   const tenant = portalTenant(auth.session);
   if (tenant.portalSlug !== 'amanda-catherine' || !auth.session.email) return NextResponse.json({ error: 'Amanda portal access required.' }, { status: 403 });
-  if (!process.env.STRIPE_SECRET_KEY) return NextResponse.json({ error: 'Secure payments are not configured yet.' }, { status: 503 });
   const body = await req.json() as { offerId?: string; membershipId?: string; paymentOption?: 'full' | 'deposit' | 'test'; testName?: string } & AmandaKitSelection;
   const membership = AMANDA_MEMBERSHIPS.find((item) => item.id === body.membershipId);
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
   const clientEmail = auth.session.email.trim().toLowerCase();
 
   if (membership) {
+    if (!process.env.STRIPE_SECRET_KEY) return NextResponse.json({ error: 'Secure payments are not configured yet.' }, { status: 503 });
     const priceId = process.env[membership.stripePriceEnvKey];
     if (!priceId) return NextResponse.json({ error: 'This membership is not available yet.' }, { status: 409 });
     const registrationId = crypto.randomUUID();
@@ -71,6 +71,10 @@ export async function POST(req: NextRequest) {
   if (!offer) return NextResponse.json({ error: 'Offer not found.' }, { status: 404 });
   if ('courseId' in offer && !amandaCourseReady(offer.courseId)) return NextResponse.json({ error: 'This course is waitlist only.' }, { status: 409 });
   const isTest = body.paymentOption === 'test';
+  if (isTest && (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_SECRET_KEY.startsWith('sk_test_'))) {
+    throw new Error('Test checkout blocked: STRIPE_SECRET_KEY is not a test key. Will not use live key.');
+  }
+  if (!isTest && !process.env.STRIPE_SECRET_KEY) return NextResponse.json({ error: 'Secure payments are not configured yet.' }, { status: 503 });
   const testName = String(body.testName || '').trim().slice(0, 120);
   if (isTest && testName.length < 2) return NextResponse.json({error:'Enter a name for the private $1 signup test.'},{status:400});
   const registrationId = crypto.randomUUID();
@@ -78,7 +82,7 @@ export async function POST(req: NextRequest) {
   if (isTest && !(await getAmandaHqTools()).testPayment) return NextResponse.json({ error: 'The private $1 test is disabled in HQ.' }, { status: 403 });
   if (isTest && !(await canUseTestCheckout(auth.session.role, tenant.portalSlug, clientEmail))) return NextResponse.json({ error: 'Private test checkout is restricted to Amanda administrators.' }, { status: 403 });
   // A private owner test must never create a real Client Records entry.
-  // Check before charging CAD $1 so access provisioning cannot discover a missing owner.
+  // Its Stripe client must be explicitly in test mode before signup tracking or session creation.
   if (isTest) {
     const existingOwner = await getClientByEmail(clientEmail);
     if (!isAmandaOwnerEmail(clientEmail) && (!existingOwner || existingOwner.portalSlug !== tenant.portalSlug)) {
