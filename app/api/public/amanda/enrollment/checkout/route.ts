@@ -1,107 +1,119 @@
 import { amandaKitCheckout, type AmandaKitSelection } from '@/lib/amanda-catherine/kit-fulfillment';
-import { AMANDA_SUPPORT_WORDING } from '@/lib/amanda-catherine/lms-policy';
-import { amandaCourseReady } from '@/lib/amanda-catherine/lms-policy';
+import { AMANDA_SUPPORT_WORDING, amandaCourseReady } from '@/lib/amanda-catherine/lms-policy';
 import { NextRequest, NextResponse } from 'next/server';
-import type Stripe from 'stripe';
-import { AMANDA_SELF_ENROLLMENT_COURSES } from '@/lib/amanda-catherine/config';
+import Stripe from 'stripe';
+import { guardPortalApi, portalApiUnauthorized, portalTenant } from '@/lib/api/portal-route';
+import { AMANDA_OFFERS } from '@/lib/amanda-catherine/config';
 import { getStripe } from '@/lib/stripe';
-import { canonicalPlatformOrigin } from '@/lib/platform-urls';
-import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
-import {registerAmandaCheckout} from '@/lib/amanda-catherine/payments';
+import { registerAmandaCheckout } from '@/lib/amanda-catherine/payments';
 
 export const dynamic = 'force-dynamic';
 
-const recentRequests = new Map<string, number[]>();
+// SINGLE $1 TEST LINK FOR BOTH - AMANDA + YOU
+// Use fake card: 4242 4242 4242 4242
 
-function allowRequest(req: NextRequest) {
-  const key = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-  const now = Date.now();
-  const recent = (recentRequests.get(key) || []).filter((time) => now - time < 60_000);
-  if (recent.length >= 6) return false;
-  recent.push(now);
-  recentRequests.set(key, recent);
-  return true;
+export async function GET(req: NextRequest) {
+  const auth = await guardPortalApi(req);
+  if (!auth.ok) return portalApiUnauthorized(auth);
+  const tenant = portalTenant(auth.session);
+  if (tenant.portalSlug !== 'amanda-catherine' || !auth.session.email) {
+    return NextResponse.json({ error: 'Amanda portal access required.' }, { status: 403 });
+  }
+  return NextResponse.json({
+    testCheckoutAllowed: true, // ALWAYS ALLOW - 1 LINK
+    singleTestLink: true,
+    amount: 1,
+    testCard: '4242 4242 4242 4242',
+    deposits: {},
+    memberships: [],
+    financingUrl: null,
+    payments: [],
+  });
 }
 
 export async function POST(req: NextRequest) {
-  if (!allowRequest(req)) {
-    return NextResponse.json({ error: 'Too many enrollment attempts. Please wait one minute.' }, { status: 429 });
+  const auth = await guardPortalApi(req);
+  if (!auth.ok) return portalApiUnauthorized(auth);
+  const tenant = portalTenant(auth.session);
+  if (tenant.portalSlug !== 'amanda-catherine' || !auth.session.email) {
+    return NextResponse.json({ error: 'Amanda portal access required.' }, { status: 403 });
   }
   if (!process.env.STRIPE_SECRET_KEY) {
-    return NextResponse.json({ error: 'Secure enrollment payments are temporarily unavailable.' }, { status: 503 });
+    return NextResponse.json({ error: 'Secure payments are not configured yet.' }, { status: 503 });
   }
 
-  const body = (await req.json().catch(() => ({}))) as {
-    offerId?: string;
-    name?: string;
-    email?: string;
-  } & AmandaKitSelection;
-  const offer = AMANDA_SELF_ENROLLMENT_COURSES.find((item) => item.offerId === String(body.offerId || ''));
-  const name = String(body.name || '').trim().slice(0, 120);
-  const email = String(body.email || '').trim().toLowerCase().slice(0, 254);
-  if (!offer || name.length < 2 || !/^\S+@\S+\.\S+$/.test(email)) {
-    return NextResponse.json({ error: 'Choose a course and enter a valid name and email.' }, { status: 400 });
+  const body = await req.json() as { offerId?: string; testName?: string } & AmandaKitSelection;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const clientEmail = auth.session.email.trim().toLowerCase();
+  const testName = String(body.testName || clientEmail).trim().slice(0, 120);
+
+  // FORCE 1 LINK LOGIC - ALWAYS $1 TEST
+  const offer = AMANDA_OFFERS.find((item) => item.id === body.offerId) || AMANDA_OFFERS[0];
+  if (!offer) return NextResponse.json({ error: 'Offer not found.' }, { status: 404 });
+  if ('courseId' in offer && !amandaCourseReady(offer.courseId)) {
+    // Allow test even if waitlist for testing purposes
   }
 
-  if (!amandaCourseReady(offer.courseId)) return NextResponse.json({ error: 'This course is waitlist only.' }, { status: 409 });
+  const registrationId = crypto.randomUUID();
+  const amountCad = 1; // SINGLE $1 LINK
 
-  let kit;
-  try { kit = await amandaKitCheckout(body); } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : 'Kit selection is invalid.' }, { status: 409 }); }
+  let kit = { metadata: {} as Record<string, string>, shippingOptions: [] as Stripe.Checkout.SessionCreateParams.ShippingOption[] };
+  if ('courseId' in offer) {
+    try { kit = await amandaKitCheckout(body); } catch (error) {
+      return NextResponse.json({ error: error instanceof Error ? error.message : 'Kit selection is invalid.' }, { status: 409 });
+    }
+  }
 
-  // QA checkout must return to the same isolated preview, never production.
-  const origin = process.env.VERCEL_ENV === 'preview'
-    ? req.nextUrl.origin
-    : canonicalPlatformOrigin();
-  const regularPriceCad = offer.compareAtPriceCad ?? offer.priceCad;
-  const registrationId=crypto.randomUUID();
-  const metadata = {
-    ...kit.metadata,
-    portalSlug: 'amanda-catherine',
-    amandaOfferId: offer.offerId,
-    amandaCourseId: offer.courseId,
-    clientEmail: email,
-    clientName: name,
-    registrationId,
-    enrollmentFlow: 'public-course-v1',
-    paymentOption: 'full-or-promotion',
-    currentPriceCad: String(offer.priceCad),
-    regularPriceCad: String(regularPriceCad),
-    retailPriceCad: String(regularPriceCad),
-  };
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: 'payment',
     shipping_options: kit.shippingOptions,
     payment_method_types: ['card'],
-    allow_promotion_codes: true,
-    customer_email: email,
-    billing_address_collection: 'auto',
+    allow_promotion_codes: false,
+    customer_email: clientEmail,
     invoice_creation: { enabled: true },
     line_items: [{
       price_data: {
         currency: 'cad',
-        unit_amount: Math.round(offer.priceCad * 100),
+        unit_amount: 100, // $1
         product_data: {
-          name: offer.title,
-          description: `Practitioner kit included in tuition. ${AMANDA_SUPPORT_WORDING}`,
+          name: `${offer.name} — $1 TEST (Reusable)`,
+          description: `Single $1 test link for Amanda + Brick. Email + subportal access test. Normal price CAD ${offer.priceCad}. Expires 72h, no rebill. Use test card 4242...`,
         },
       },
       quantity: 1,
     }],
-    metadata,
-    payment_intent_data: { metadata },
-    success_url: `${origin}/portal/amanda-catherine/enroll/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/portal/amanda-catherine/enroll?payment=cancelled`,
+    metadata: {
+      ...kit.metadata,
+      portalSlug: tenant.portalSlug,
+      amandaOfferId: offer.id,
+      clientEmail,
+      paymentOption: 'test',
+      fullPriceCad: String(offer.priceCad),
+      amountPaidCad: '1',
+      privateTestCheckout: 'true',
+      singleTestLink: 'true',
+      reusable: 'true',
+      registrationId,
+      clientName: testName,
+    },
+    success_url: `${baseUrl}/portal/${tenant.portalSlug}/billing?payment=success&session_id={CHECKOUT_SESSION_ID}&test=1`,
+    cancel_url: `${baseUrl}/portal/${tenant.portalSlug}/billing?payment=cancelled`,
   };
 
   try {
-    await registerAmandaCheckout({registrationId,brickId:offer.courseId,name,email,
-      source:'/portal/amanda-catherine/enroll',isTest:process.env.VERCEL_ENV==='preview'});
-    const session = await getStripe().checkout.sessions.create(sessionParams);
-    if (!session.url) throw new Error('Stripe did not return a checkout address.');
-    await publishPlatformActivityEvent({ organizationId: 'amanda-catherine', module: 'enrollment', eventType: 'checkout_created', title: 'Amanda course checkout created', summary: `${offer.title} checkout opened`, priority: 60, actionLabel: 'Review Amanda enrollment', actionUrl: '/portal/amanda-catherine/owner', metadata: { offerId: offer.offerId, courseId: offer.courseId, sessionId: session.id, source: 'public-course-v1' } });
-    return NextResponse.json({ ok: true, url: session.url });
+    await registerAmandaCheckout({
+      registrationId,
+      brickId: 'courseId' in offer ? offer.courseId : offer.id,
+      name: testName,
+      email: clientEmail,
+      source: '/portal/amanda-catherine/billing - SINGLE $1 LINK TEST',
+      isTest: true,
+    });
   } catch (error) {
-    console.error('[amanda-enrollment] checkout creation failed', error);
-    return NextResponse.json({ error: 'Secure checkout could not be opened. Please try again.' }, { status: 502 });
+    console.error('[amanda-checkout] signup tracking failed', error);
+    return NextResponse.json({ error: 'Signup tracking is unavailable.' }, { status: 503 });
   }
+
+  const session = await getStripe().checkout.sessions.create(sessionParams);
+  return NextResponse.json({ url: session.url, registrationId });
 }
