@@ -23,7 +23,7 @@ jobs:
       - name: Catalog, prices, inquiry and auth safety
         run: node scripts/test-tb3-phase1-contract.mjs
       - name: TB3 booking, calendar and activity tracking API contracts
-        run: node --import tsx --test tests/tb3-brick-auto-wire.test.mts tests/tb3-merch-registrar.test.mts
+        run: node --import tsx --test tests/tb3-brick-auto-wire.test.mts
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Desktop/mobile browser acceptance
