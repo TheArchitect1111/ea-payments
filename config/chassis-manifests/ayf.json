@@ -1,0 +1,14 @@
+{
+  "portalSlug": "are-you-fundable",
+  "clientName": "Are You Fundable",
+  "packagePurchased": "Website + Portal Starter",
+  "requestedModuleIds": [
+    "intake",
+    "people",
+    "messaging",
+    "documents",
+    "applications",
+    "reports",
+    "dashboard"
+  ]
+}
