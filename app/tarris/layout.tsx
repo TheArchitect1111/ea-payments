@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "TB3 Official | Tarris Bouie | Alabama Basketball - WEAR THE VISION",
-  description: "Official TB3 merch - 12 pieces including signature collage tees. Shop now at Bonfire official store. Different On Purpose.",
+  description: "Official TB3 merchandise collection. Explore 14 items and request availability. Online checkout will open after payment setup. Different On Purpose.",
   keywords: ["TB3", "Tarris Bouie", "Alabama Basketball", "NIL", "Official Merch", "WEAR THE VISION"],
   openGraph: {
     title: "TB3 Official - WEAR THE VISION",
-    description: "Official Tarris Bouie merch - 12 pieces - Shop at Bonfire",
+    description: "Official TB3 merchandise collection. Explore the 14-piece lineup.",
     url: "https://tb3.online",
     siteName: "TB3 Official",
     images: [
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "TB3 Official - WEAR THE VISION",
-    description: "Official Tarris Bouie merch - 12 pieces",
+    description: "Official TB3 merchandise collection. Explore the lineup.",
     images: ["/tb3/merch/collage-sig-black.jpg"],
   },
 };

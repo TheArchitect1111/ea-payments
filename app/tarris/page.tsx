@@ -4,8 +4,9 @@
 import Link from "next/link";
 import { ChassisPreview } from "./chassis-preview";
 import BookingForm from "./book/booking-form";
+import merchCatalog from "@/public/tb3/merch/manifest.json";
 import { Tb3FilmGrid } from "./tb3-film";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 const pillars = [
   ["ATHLETE", "Discipline in the classroom. Determination on the court.", "LEARN MORE"],
@@ -35,21 +36,7 @@ const pillarAssets: Record<string, ImageAsset[]> = {
     { id: "community-secondary", asset: "OFFICIAL_12_KIDS_ART.png", alt: "Young people working on art together", ratio: "aspect-[4/3]" },
   ],
 };
-type MerchProduct = { id: string; image: string; label: string; price: string; redImage?: string };
-const merchProducts: MerchProduct[] = [
-  { id: "merch-short-red", image: "MOCK_TEE_SHORT_RED.jpg", label: "TB3 TEE - RED", price: "$35" },
-  { id: "merch-short-white", image: "MOCK_TEE_SHORT_WHITE.jpg", label: "TB3 TEE - WHITE", price: "$35" },
-  { id: "merch-long-red", image: "MOCK_TEE_LONG_RED.jpg", label: "TB3 LONG SLEEVE - RED", price: "$45" },
-  { id: "merch-long-white", image: "MOCK_TEE_LONG_WHITE.jpg", label: "TB3 LONG SLEEVE - WHITE", price: "$45" },
-  { id: "merch-cap", image: "MOCK_HAT_WHITE.jpg", redImage: "MOCK_HAT_RED.jpg", label: "TB3 CAP - WHITE", price: "$30" },
-  { id: "merch-hoodie-red", image: "MOCK_HOODIE_RED.jpg", label: "TB3 HOODIE - RED", price: "$75" },
-  { id: "merch-hoodie-white", image: "MOCK_HOODIE_WHITE.jpg", label: "TB3 HOODIE - WHITE", price: "$75" },
-  { id: "merch-hoodie-premium", image: "MOCK_HOODIE_WHITE_LOGO_DETAIL_1.jpg", label: "TB3 HOODIE - PREMIUM LOGO", price: "$85" },
-  { id: "tb3-sig-collage-tee-black", image: "tb3/merch/collage-sig-black.jpg", label: "TB3 Collage Signature Tee - Black", price: "$65" },
-  { id: "tb3-sig-collage-hoodie-black", image: "tb3/merch/collage-sig-black.jpg", label: "TB3 Collage Signature Hoodie - Black", price: "$65" },
-  { id: "tb3-sig-collage-tee-white", image: "tb3/merch/collage-sig-white.jpg", label: "TB3 Collage Signature Tee - White", price: "$65" },
-  { id: "tb3-sig-collage-hoodie-white", image: "tb3/merch/collage-sig-white.jpg", label: "TB3 Collage Signature Hoodie - White", price: "$65" },
-];
+const merchProducts = merchCatalog;
 const nav = ["HOME", "ATHLETE", "STORY", "BRAND", "NIL", "COMMUNITY", "MEDIA", "MERCH", "FUTURE"];
 
 type ImageAsset = { id: string; asset: string; alt: string; ratio?: string };
@@ -69,20 +56,16 @@ function ImageSlot({ id, asset, alt, ratio = "aspect-[4/5]", hero = false }: Ima
     <img id={id} src={`/images/tb3-official/${asset}`} alt={alt} style={{ objectPosition }} className={`absolute inset-0 h-full w-full ${hero ? "object-contain" : "object-cover"}`} loading={hero ? "eager" : "lazy"} />
   </div>;
 }
-function MerchProductCard({ product, index }: { product: MerchProduct; index: number }) {
-  const [red, setRed] = useState(false);
-  const image = red && product.redImage ? product.redImage : product.image;
-  const label = red && product.redImage ? "TB3 CAP - RED" : product.label;
-  return <article className="min-w-0">
+function MerchProductCard({ product, index }: { product: (typeof merchProducts)[number]; index: number }) {
+  return <article className="min-w-0" data-product-id={product.id}>
     <div id={`merch-${index + 1}`} className="aspect-square overflow-hidden bg-[#E5E5E5] p-[10px]">
-      {image ? <img src={image.startsWith("tb3/") ? `/${image}` : `/merch/${image}`} alt={label} className="h-full w-full object-contain" loading="lazy" /> : <div role="img" aria-label={`${label} artwork pending`} className="flex h-full w-full items-center justify-center bg-black px-4 text-center text-sm font-bold tracking-wider text-white">TB3 SIGNATURE COLLECTION</div>}
+      <img src={product.image} alt={product.name} className="h-full w-full object-contain" loading="lazy" />
     </div>
-    <p className="mt-3 text-[9px] font-bold tracking-wider">{product.label} <span className="font-normal">{product.price}</span></p>
-    {product.redImage && <div className="mt-2 flex items-center gap-2 text-[9px]">
-      <span className="text-black/60">COLOR</span>
-      <button type="button" onClick={() => setRed(false)} aria-pressed={!red} className={`border px-2 py-1 ${!red ? "border-black" : "border-black/20"}`}>WHITE</button>
-      <button type="button" onClick={() => setRed(true)} aria-pressed={red} className={`border px-2 py-1 ${red ? "border-black" : "border-black/20"}`}>RED</button>
-    </div>}
+    <p className="mt-3 text-xs font-bold tracking-wide">{product.name} <span className="font-normal">${product.price.toFixed(2)} USD</span></p>
+    <Link href={`/tarris/book?type=merch&product=${encodeURIComponent(product.id)}`}
+      className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-[#A51C30] px-3 py-2 text-xs font-bold text-white">
+      Ask about this item
+    </Link>
   </article>;
 }
 function ActionLink({ children, className = "", href = "/tarris/future" }: { children: ReactNode; className?: string; href?: string }) {
@@ -163,7 +146,7 @@ export default function TarrisPublicPage() {
           <article className="flex flex-col justify-between bg-[#141414] p-7 text-white"><div><p className="text-[9px] tracking-[0.3em] text-white/60">THE NEXT CHAPTER</p><h2 className="mt-6 text-4xl font-black leading-none tracking-tight">PLAYER<br /><span className="text-[#A51C30]">ONE.</span></h2><p className="mt-5 text-xs leading-6 text-white/70">Same vision. Higher purpose.<br />Build what comes next.</p></div><div className="mt-8"><HQLink dark /></div></article>
         </section>
         <section id="merch" className="scroll-mt-5 py-10">
-          <div className="mb-6"><p className="text-[9px] tracking-[0.25em] text-[#A51C30]">TB3 STORE</p><h2 className="mt-2 text-3xl font-black tracking-tight">WEAR THE VISION.</h2></div>
+          <div className="mb-6"><p className="text-[9px] tracking-[0.25em] text-[#A51C30]">TB3 STORE</p><h2 className="mt-2 text-3xl font-black tracking-tight">WEAR THE VISION.</h2><p className="mt-3 text-sm text-black/70">The 14-piece collection is available to explore. Online orders will open after payment and fulfillment approval. For now, select an item to ask about availability.</p></div>
           <div id="merch-store" className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">{merchProducts.map((product, index) => <MerchProductCard key={product.id} product={product} index={index} />)}</div>
         </section>
         <BookingForm/>
