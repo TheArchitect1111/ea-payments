@@ -4,6 +4,7 @@ import { build } from 'esbuild';
 import { writeFileSync, unlinkSync } from 'node:fs';
 import { NextRequest } from 'next/server.js';
 
+process.env.AYF_CONFIRMATION_EMAIL_ENABLED = 'true';
 const state:any={ calls:[], forms:new Map(), handoffs:new Map(), relationship:null, sessionSlug:'tenant-live' };
 (globalThis as any).__captureRoutesState=state;
 const mocks:Record<string,string>={
@@ -33,13 +34,15 @@ const mocks:Record<string,string>={
  '@/lib/bricks/capture-family': "export async function progressCapture(tenant,kind,id,ports){globalThis.__captureRoutesState.calls.push(['progress',kind,id]);if(kind==='applications')await ports.confirm({email:'candidate@example.com',subject:'Application received'});return {state:'reviewed'};}",
  '@/lib/bricks/commerce-family': "export async function registerCommerce(tenant,kind,input){globalThis.__captureRoutesState.calls.push(['registerBilling',kind,input]);return {id:'billing-order-1'};}",
  '@/lib/bricks/commerce-stripe': "export async function fulfillCommerceStripePayment(tenant,kind,id,ref){globalThis.__captureRoutesState.calls.push(['verifyStripe',kind,id,ref]);return {payment_status:'paid'};}",
+ '@/lib/auth/resolve-portal-session': "export async function requirePortalSessionFromRequest(){return globalThis.__captureRoutesState.ayfSession??null;}",
  '@/lib/ea-auth-email': "export async function sendAuthEmail(message){globalThis.__captureRoutesState.calls.push(['confirmation',message.to]);return {ok:true};}"
 };
 const bundle=await build({stdin:{contents:
  "export {POST as simplifiPOST} from './app/api/portal/captures/analyze/route';"+
  "export {POST as connectPOST} from './app/api/connect/relationships/route';"+
  "export {POST as formsPOST} from './app/api/portal/forms/submit/route';"+
- "export {POST as statusPOST} from './app/api/portal/forms/status/route';",
+ "export {POST as statusPOST} from './app/api/portal/forms/status/route';"+
+  "export {GET as ayfHandoffGET} from './app/api/portal/ayf/handoff/[submissionId]/route';"+"export {readAyfClientHandoff as ayfRead} from './lib/ayf/handoff';",
  resolveDir:process.cwd()},bundle:true,write:false,platform:'node',format:'esm',packages:'external',
  plugins:[{name:'ports',setup(b){
   b.onResolve({filter:/.*/},a=>Object.hasOwn(mocks,a.path)?{path:a.path,namespace:'ports'}:undefined);
@@ -101,7 +104,7 @@ test('P/apply and P/applications reviewed/accepted route into Billing verifier w
 
 test('AYF intake creates lead-linked handoff',async()=>{
  reset();
- const original=globalThis.__captureRoutesState;
+
  const body={slug:'are-you-fundable',kind:'intake',name:'Synthetic AYF Client',email:'ayf@example.test',payload:{business:'Test Business',goal:'Funding readiness'}};
  const response=await api.formsPOST(request('/api/portal/forms/submit',body));
  assert.equal(response.status,200);
@@ -115,6 +118,124 @@ test('AYF intake creates lead-linked handoff',async()=>{
  assert.equal(handoff.organizationId,'recAYFTEST123');
  assert.equal(handoff.portalSlug,'are-you-fundable');
  assert.equal(handoff.email,body.email);
- assert.equal(handoff.delivery,'pending');
+ assert.equal(handoff.delivery,'sent');
  assert.equal(handoff.portalAccess,'pending');
+
+ // AYF_EMAIL_DELIVERY_ASSERTIONS
+ assert.equal(
+   state.calls.filter(v=>v[0]==='confirmation').length,
+   1
+ );
+
+ // AYF_REPLAY_ASSERTIONS
+ const replay = await api.formsPOST(request('/api/portal/forms/submit',body));
+ assert.equal(replay.status,200);
+ const replayLead=(await replay.json()).submission;
+ assert.equal(replayLead.id,lead.id);
+ assert.equal(
+   state.calls.filter(v=>v[0]==='confirmation').length,
+   1
+ );
+
+ assert.equal(state.handoffs.size,1);
+ assert.equal([...state.handoffs.values()][0].submissionId,lead.id);
+
+});
+
+test('AYF client authorization boundaries',async()=>{
+ reset();
+ const tenant={organizationId:'recAYFTEST123',portalSlug:'are-you-fundable'};
+ const submissionId='synthetic-lead-123';
+ const {ayfRead}=api;
+
+ const missing=()=>ayfRead(tenant,submissionId,{
+   orgId:tenant.organizationId,slug:tenant.portalSlug,email:'client@example.test'
+ });
+ await assert.rejects(missing,/Portal access denied/);
+
+ state.handoffs.set(
+   'ayf-handoff-'+(await import('node:crypto')).createHash('sha256')
+     .update(JSON.stringify([tenant.organizationId,submissionId]))
+     .digest('hex'),
+   {...tenant,submissionId,email:'client@example.test',
+     delivery:'pending',portalAccess:'pending'}
+ );
+
+ const valid={orgId:tenant.organizationId,slug:tenant.portalSlug,email:'client@example.test'};
+ assert.equal((await ayfRead(tenant,submissionId,valid)).submissionId,submissionId);
+
+ await assert.rejects(
+   ayfRead(tenant,submissionId,{...valid,email:'other@example.test'}),
+   /Portal access denied/
+ );
+ await assert.rejects(
+   ayfRead(tenant,submissionId,{...valid,orgId:'other-org'}),
+   /Portal access denied/
+ );
+ await assert.rejects(
+   ayfRead(tenant,submissionId,{...valid,slug:'other-portal'}),
+   /Portal access denied/
+ );
+ await assert.rejects(
+   ayfRead(tenant,submissionId,{...valid,email:undefined}),
+   /Portal access denied/
+ );
+});
+
+test('AYF_PROTECTED_ROUTE_TEST',async()=>{
+  reset();
+
+  const tenant={organizationId:'recAYFTEST123',portalSlug:'are-you-fundable'};
+  const body={
+    slug:'are-you-fundable',
+    kind:'intake',
+    name:'Synthetic Protected Client',
+    email:'protected@example.test'
+  };
+
+  const submitted=await api.formsPOST(
+    request('/api/portal/forms/submit',body)
+  );
+  assert.equal(submitted.status,200);
+
+  const lead=(await submitted.json()).submission;
+  const url='https://example.test/api/portal/ayf/handoff/'+lead.id;
+
+  const get=()=>api.ayfHandoffGET(
+    new NextRequest(url),
+    {params:Promise.resolve({submissionId:lead.id})}
+  );
+
+  state.ayfSession=null;
+  assert.equal((await get()).status,401);
+
+  state.ayfSession={
+    orgId:'wrong-org',
+    slug:'are-you-fundable',
+    email:body.email
+  };
+  assert.equal((await get()).status,404);
+
+  state.ayfSession={
+    orgId:tenant.organizationId,
+    slug:tenant.portalSlug,
+    email:'stranger@example.test'
+  };
+  assert.equal((await get()).status,404);
+
+  state.ayfSession={
+    orgId:tenant.organizationId,
+    slug:tenant.portalSlug,
+    email:body.email
+  };
+  assert.equal((await get()).status,403);
+
+  const row=[...state.handoffs.values()][0];
+  row.portalAccess='verified';
+
+  const allowed=await get();
+  assert.equal(allowed.status,200);
+  assert.equal((await allowed.json()).submissionId,lead.id);
+
+  state.ayfSession=null;
 });

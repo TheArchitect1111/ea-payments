@@ -11,7 +11,7 @@ import { checkRateLimit } from '@/lib/ai/rate-limit';
 import { amandaApplicationRoute } from '@/lib/amanda-catherine/application-routing';
 import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
 import { sendAuthEmail } from '@/lib/ea-auth-email';
-import { saveAyfHandoff } from '@/lib/ayf/handoff';
+import { saveAyfHandoff, markAyfEmailResult } from '@/lib/ayf/handoff';
 
 export const dynamic = 'force-dynamic';
 
@@ -155,7 +155,41 @@ export async function POST(req: NextRequest) {
   // AYF_HANDOFF_TRACKING: preserve the server-issued submission ID.
   if (slug === 'are-you-fundable' && certifiedTenant) {
     try {
-      await saveAyfHandoff(certifiedTenant, submission.id, email);
+
+      const handoff = await saveAyfHandoff(
+        certifiedTenant, submission.id, email
+      );
+
+      // AYF_EMAIL_CONFIRMATION
+      // Send only for a newly pending handoff.
+      if (handoff.delivery === 'pending' && process.env.AYF_CONFIRMATION_EMAIL_ENABLED === 'true') {
+        const firstName = name.split(/\s+/)[0] || 'there';
+        const result = await sendAuthEmail({
+          to: email,
+          subject: 'Are You Fundable | We received your request',
+          title: 'Your Funding Status Check',
+          bodyHtml:
+            '<p>Hello,</p>' +
+            '<p>Thank you for taking the first step.</p>' +
+            '<p>Are You Fundable has received your request for review.</p>' +
+            '<p>Watch your inbox for next steps and information about accessing your secure client portal.</p>' +
+            '<p>Your reference number is: <strong>' +
+            submission.id +
+            '</strong>.</p>',
+          text:
+            'Hi ' + firstName +
+            ', Are You Fundable received your request. ' +
+            'Watch your inbox for next steps and secure portal access. ' +
+            'Reference: ' + submission.id,
+          brandLabel: 'Are You Fundable',
+          brandColor: '#071b31'
+        });
+
+        await markAyfEmailResult(
+          certifiedTenant, submission.id, result.ok
+        );
+      }
+
     } catch {
       return NextResponse.json(
         { error: 'AYF handoff storage is temporarily unavailable.' },
