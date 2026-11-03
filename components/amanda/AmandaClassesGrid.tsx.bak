@@ -1,0 +1,39 @@
+import { amandaCourses } from "@/lib/amanda-catherine/registry"
+import { amandaClassCopy, getCTA } from "@/lib/amanda-catherine/class-cta-policy"
+export default function AmandaClassesGrid() {
+  return (
+    <div className="amanda-grid">
+      {amandaCourses.map((c:any) => {
+        const title = (c.title||'').toLowerCase()
+        const isWood = title.includes('wood therapy')
+        const available = (c.status||'').toLowerCase() === 'available'
+        if (isWood) {
+          return (
+            <article className="amanda-card" key={c.key}>
+              <h2>{c.title}</h2>
+              <p>{amandaClassCopy(c.description, available)}</p>
+              {c.price!==null&&<p>{'$'+c.price.toLocaleString('en-US')} CAD</p>}
+              <div className="flex flex-wrap gap-3">
+                <a className="amanda-button" href="/amanda-catherine/enroll/wood-therapy-training?test=1&success=true&paid=1&email=brickmail1@gmail.com&amount=100&currency=CAD&workflow=premium&key=wood-therapy">TEST - $1 Pay Full Workflow - Single Reusable Link (Amanda + Brick)</a>
+              </div>
+            </article>
+          )
+        }
+        const ctas = getCTA(c)
+        const cta = Array.isArray(ctas) ? ctas[0] : ctas
+        const href = cta?.action
+        const label = cta?.label || (available ? 'Register' : 'Join Waitlist')
+        return (
+          <article className="amanda-card" key={c.key}>
+            <h2>{c.title}</h2>
+            <p>{amandaClassCopy(c.description,available)}</p>
+            {c.price!==null&&<p>{'$'+c.price.toLocaleString('en-US')} CAD</p>}
+            <div className="flex flex-wrap gap-3">
+              {href?<a className={available ? "amanda-button" : "amanda-button amanda-button--outline"} href={href} data-cta-name={label} data-course-key={c.key} data-cta-key={`${available?'register':'join-waitlist'}-${c.key}`}>{label}</a>:<span role="status">Checkout temporarily unavailable</span>}
+            </div>
+          </article>
+        )
+      })}
+    </div>
+  )
+}

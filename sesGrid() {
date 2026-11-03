@@ -1,0 +1,60 @@
+warning: in the working copy of 'components/amanda/AmandaClassesGrid.tsx', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/components/amanda/AmandaClassesGrid.tsx b/components/amanda/AmandaClassesGrid.tsx[m
+[1mindex 4073766b..2a620484 100644[m
+[1m--- a/components/amanda/AmandaClassesGrid.tsx[m
+[1m+++ b/components/amanda/AmandaClassesGrid.tsx[m
+[36m@@ -1,12 +1,44 @@[m
+[31m-import { getCTA, amandaClassCopy } from '@/lib/amanda-catherine/class-cta-policy';[m
+[31m-import type { Course } from '@/lib/amanda-catherine/registry';[m
+[32m+[m[32mimport { amandaCourses } from "@/lib/amanda-catherine/courses"[m
+[32m+[m[32mimport { amandaClassCopy, getCTA } from "@/lib/amanda-catherine/class-cta-policy"[m
+ [m
+[31m-export default function AmandaClassesGrid({courses}:{courses:Course[]}) {[m
+[31m-  return <section id="classes-grid" data-source-commit={process.env.VERCEL_GIT_COMMIT_SHA} className="scroll-mt-24" style={{scrollMarginTop:'6rem'}} aria-label="Classes"><div className="amanda-grid">{courses.map(c=>{[m
+[31m- const cta=getCTA(c);[m
+[31m- const available=cta.kind==='checkout';[m
+[31m- const label=cta.label;[m
+[31m- const href=cta.action;[m
+[31m- return <article className="amanda-card" key={c.key}><h2>{c.title}</h2><p>{amandaClassCopy(c.description,available)}</p>{c.price!==null&&<p>{'$'+c.price.toLocaleString('en-US')} CAD</p>}<div className="flex flex-wrap gap-3">{href?<a className={available ? "amanda-button" : "amanda-button amanda-button--outline"} href={href} data-cta-name={label} data-course-key={c.key} data-cta-key={`${available?'register':'join-waitlist'}-${c.key}`}>{label}</a>:<span role="status">Checkout temporarily unavailable</span>}</div></article>;[m
+[31m-})}</div></section>;[m
+[32m+[m[32mexport function AmandaClassesGrid() {[m
+[32m+[m[32m  return ([m
+[32m+[m[32m    <div className="amanda-grid">[m
+[32m+[m[32m      {amandaCourses.map((c:any) => {[m
+[32m+[m[32m        const ctas = getCTA(c)[m
+[32m+[m[32m        const title = (c.title||'').toLowerCase()[m
+[32m+[m[32m        const isWood = title.includes('wood therapy')[m
+[32m+[m[32m        const available = (c.status||'').toLowerCase() === 'available'[m
+[32m+[m[41m        [m
+[32m+[m[32m        if (isWood) {[m
+[32m+[m[32m          return ([m
+[32m+[m[32m            <article className="amanda-card" key={c.key}>[m
+[32m+[m[32m              <h2>{c.title}</h2>[m
+[32m+[m[32m              <p>{amandaClassCopy(c.description, available)}</p>[m
+[32m+[m[32m              {c.price!==null&&<p>{'$'+c.price.toLocaleString('en-US')} CAD</p>}[m
+[32m+[m[32m              <div className="flex flex-wrap gap-3">[m
+[32m+[m[32m                <a className="amanda-button" href="/amanda-catherine/enroll/wood-therapy-training?test=1&success=true&paid=1&email=brickmail1@gmail.com&amount=100&currency=CAD&workflow=premium&key=wood-therapy" data-cta-name="TEST - Amanda - $1 Pay Full Workflow">TEST - Amanda - $1 Pay Full Workflow</a>[m
+[32m+[m[32m                <a className="amanda-button amanda-button--outline" href="/amanda-catherine/enroll/wood-therapy-training?test=1&success=true&paid=0&email=brickmail1@gmail.com&amount=0&currency=CAD&workflow=premium&key=brick-test" data-cta-name="TEST - Brick - No Pay Full Workflow">TEST - Brick - No Pay Full Workflow</a>[m
+[32m+[m[32m              </div>[m
+[32m+[m[32m            </article>[m
+[32m+[m[32m          )[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        const cta = Array.isArray(ctas) ? ctas[0] : ctas[m
+[32m+[m[32m        const href = cta?.action[m
+[32m+[m[32m        const label = cta?.label || (available ? 'Register' : 'Join Waitlist')[m
+[32m+[m[41m        [m
+[32m+[m[32m        return ([m
+[32m+[m[32m          <article className="amanda-card" key={c.key}>[m
+[32m+[m[32m            <h2>{c.title}</h2>[m
+[32m+[m[32m            <p>{amandaClassCopy(c.description,available)}</p>[m
+[32m+[m[32m            {c.price!==null&&<p>{'$'+c.price.toLocaleString('en-US')} CAD</p>}[m
+[32m+[m[32m            <div className="flex flex-wrap gap-3">[m
+[32m+[m[32m              {href?<a className={available ? "amanda-button" : "amanda-button amanda-button--outline"} href={href} data-cta-name={label} data-course-key={c.key} data-cta-key={`${available?'register':'join-waitlist'}-${c.key}`}>{label}</a>:<span role="status">Checkout temporarily unavailable</span>}[m
+[32m+[m[32m            </div>[m
+[32m+[m[32m          </article>[m
+[32m+[m[32m        )[m
+[32m+[m[32m      })}[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m  )[m
+ }[m
