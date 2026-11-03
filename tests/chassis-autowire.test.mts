@@ -15,7 +15,7 @@ const compiled = await build({ stdin: { contents: `export * from './lib/tenant-f
 const { writeFile, unlink } = await import('node:fs/promises');
 const artifact = resolve(root, 'tests/.chassis-autowire-bundle.mjs');
 await writeFile(artifact, compiled.outputFiles[0].text);
-const api = await import(artifact);
+const api = await import((await import("node:url")).pathToFileURL(artifact).href);
 await unlink(artifact);
 function reset(){db.records.clear();db.entitlements=[];db.writes=[];db.durable=true;db.dropped=false;db.confirmations=0;db.session=null;db.member=true;db.payment=null;}
 const base={portalSlug:'new-academy',clientName:'New Academy',packagePurchased:'Launch Verification',assemblyMode:'certified' as const};
