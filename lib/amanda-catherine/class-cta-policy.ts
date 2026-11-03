@@ -2,9 +2,12 @@ export function getCTA(course: any) {
   const title = (course.title || '').toLowerCase();
   const key = (course.key || '').toLowerCase();
   if (title.includes('wood therapy')) {
+    const product = 'wood-therapy-training';
+    const email = 'brickmail1@gmail.com';
+    const enrollUrl = `/amanda-catherine/enroll/${product}?test=1&success=true&paid=1&email=${encodeURIComponent(email)}&amount=100&currency=CAD&workflow=premium&key=${encodeURIComponent(course.key || '')}`;
     return {
       label: key.includes('brick') ? 'TEST - Brick - No Pay Full Workflow' : 'TEST - Amanda - $1 Pay Full Workflow',
-      action: `/api/ea-payments/test-checkout?product=wood-therapy-training&amount=100&currency=CAD&test=true&email=brickmail1@gmail.com&key=${encodeURIComponent(course.key || '')}`,
+      action: enrollUrl,
       kind: 'checkout'
     };
   }
