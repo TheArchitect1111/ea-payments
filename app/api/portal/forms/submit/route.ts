@@ -11,6 +11,7 @@ import { checkRateLimit } from '@/lib/ai/rate-limit';
 import { amandaApplicationRoute } from '@/lib/amanda-catherine/application-routing';
 import { publishPlatformActivityEvent } from '@/lib/activity-events-store';
 import { sendAuthEmail } from '@/lib/ea-auth-email';
+import { saveAyfHandoff } from '@/lib/ayf/handoff';
 
 export const dynamic = 'force-dynamic';
 
@@ -151,6 +152,18 @@ export async function POST(req: NextRequest) {
     console.error('[portal-forms] canonical capture failed',error);
     return NextResponse.json({error:'Durable capture storage is temporarily unavailable.'},{status:503});
   }
+  // AYF_HANDOFF_TRACKING: preserve the server-issued submission ID.
+  if (slug === 'are-you-fundable' && certifiedTenant) {
+    try {
+      await saveAyfHandoff(certifiedTenant, submission.id, email);
+    } catch {
+      return NextResponse.json(
+        { error: 'AYF handoff storage is temporarily unavailable.' },
+        { status: 503 },
+      );
+    }
+  }
+
   const pulseEvent = {
     product: 'ea-platform' as const,
     type: 'portal.form.submitted' as const,

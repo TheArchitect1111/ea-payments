@@ -4,7 +4,7 @@ import { build } from 'esbuild';
 import { writeFileSync, unlinkSync } from 'node:fs';
 import { NextRequest } from 'next/server.js';
 
-const state:any={ calls:[], forms:new Map(), relationship:null, sessionSlug:'tenant-live' };
+const state:any={ calls:[], forms:new Map(), handoffs:new Map(), relationship:null, sessionSlug:'tenant-live' };
 (globalThis as any).__captureRoutesState=state;
 const mocks:Record<string,string>={
  '@/lib/api/portal-route': "export async function guardPortalApiCookie(){return {ok:true,session:{slug:'tenant-live',email:'owner@example.com',role:'staff'}};}export async function guardPortalApi(){const s=globalThis.__captureRoutesState;return {ok:true,session:{slug:s.sessionSlug,email:'owner@example.com',role:'staff'}};}export function portalTenant(s){return {portalSlug:s.slug,organizationId:'recTENANT123'};}export function portalApiUnauthorized(){return Response.json({error:'Unauthorized'},{status:401});}",
@@ -14,13 +14,13 @@ const mocks:Record<string,string>={
  '@/lib/capture-response': "export function sanitizeCaptureClientError(v){return v;}",
  '@/lib/modules/portal-modules': "export async function isModuleEnabled(){return true;}",
  '@/lib/capture-upload-limits': "export const MAX_CAPTURE_UPLOAD_BYTES=1000000;export function captureUploadTooLargeMessage(){return 'too big';}",
- '@/lib/bricks/capture-entry-bridge': "export async function resolveCaptureTenant(slug){return slug==='tenant-live'?{organizationId:'recTENANT123',portalSlug:slug}:null;}export async function bridgeCapturedRecord(input){globalThis.__captureRoutesState.calls.push(['bridge',input]);return input;}",
+ '@/lib/bricks/capture-entry-bridge': "export async function resolveCaptureTenant(slug){return ['tenant-live','are-you-fundable'].includes(slug)?{organizationId:slug==='are-you-fundable'?'recAYFTEST123':'recTENANT123',portalSlug:slug}:null;}export async function bridgeCapturedRecord(input){globalThis.__captureRoutesState.calls.push(['bridge',input]);return input;}",
  '@/lib/connect-store': "export async function getConnectOrg(){return {name:'Test Org',offer:{resourceTitle:'Guide'},sequence:[],resources:[],redirectDestination:'/next'};}export async function listConnectRelationships(){const r=globalThis.__captureRoutesState.relationship;return r?[r]:[];}export async function createConnectRelationship(input){const s=globalThis.__captureRoutesState;s.calls.push(['createRelationship',input]);const r={...input,id:'relationship-live-1',source:input.source||'QR',status:'New',aiProfile:{opportunityScore:50,recommendedAction:'Follow up'},tags:[]};s.relationship=r;return r;}export async function recordConnectEngagement(){return true;}export async function updateConnectRelationshipHandoff(){return true;}export async function markSequenceStepSent(){return true;}",
  '@/lib/connect-pipeline': "export async function handoffConnectRelationship(){return {simplifi:{},amplifi:{}};}",
  '@/lib/connect-delivery-log': "export async function logConnectChannelDelivery(){return true;}",
  '@/lib/email': "export async function sendConnectSms(){return {ok:true};}export async function sendConnectWelcomeEmail(){globalThis.__captureRoutesState.calls.push(['welcome']);return {ok:true};}export async function sendInternalNotification(){return {ok:true};}",
  '@/lib/admin-session-guard': "export async function requireAdminSessionFromRequest(){return {ok:true};}export function adminAuthJsonError(){return Response.json({error:'Admin required'},{status:401});}",
- '@/lib/bricks/durable': "import {createHash} from 'node:crypto';export function brickHash(data){return createHash('sha256').update(JSON.stringify(data)).digest('hex');}",
+ '@/lib/bricks/durable': "import {createHash} from 'node:crypto';export function brickHash(data){return createHash('sha256').update(JSON.stringify(data)).digest('hex');}export async function readBrickRecord(t,id){return globalThis.__captureRoutesState.handoffs.get(id)||null;}export async function writeBrickRecord(t,id,row){if(t.organizationId!==row.organizationId||t.portalSlug!==row.portalSlug)throw Error('Tenant mismatch');globalThis.__captureRoutesState.handoffs.set(id,row);return row;}",
  '@/lib/portal-forms/store': "export async function createPortalFormSubmission(input){const s=globalThis.__captureRoutesState;const id=input.idempotencyId||('legacy-'+s.forms.size);const row=s.forms.get(id)||{id,portalSlug:input.portalSlug,kind:input.kind,name:input.name,email:input.email,payload:input.payload,status:'submitted'};s.forms.set(id,row);s.calls.push(['saveForm',input]);return row;}export async function updatePortalFormSubmissionStatus(input){const s=globalThis.__captureRoutesState;const row=s.forms.get(input.submissionId);if(!row||row.portalSlug!==input.portalSlug)return null;const next={...row,status:input.status};s.forms.set(row.id,next);return next;}",
  '@/lib/portal-notify': "export async function notifyPortal(){return true;}",
  '@/lib/platform-store': "export function syntheticOrgId(slug){return 'org_'+slug;}",
@@ -50,7 +50,7 @@ writeFileSync(name,bundle.outputFiles[0].text);
 const api=await import('../'+name);unlinkSync(name);
 const request=(path:string,body:unknown)=>new NextRequest('https://example.test'+path,{
  method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-const reset=()=>{state.calls=[];state.forms.clear();state.relationship=null;state.sessionSlug='tenant-live';};
+const reset=()=>{state.calls=[];state.forms.clear();state.handoffs.clear();state.relationship=null;state.sessionSlug='tenant-live';};
 test('Simplifi live analyze POST invokes durable outcome bridge',async()=>{
  reset();
  const res=await api.simplifiPOST(request('/api/portal/captures/analyze',{url:'https://example.org'}));
@@ -97,4 +97,24 @@ test('P/apply and P/applications reviewed/accepted route into Billing verifier w
  state.sessionSlug='another-tenant';
  const denied=await api.statusPOST(request('/api/portal/forms/status',{submissionId:row.id,status:'rejected'}));
  assert.equal(denied.status,404);
+});
+
+test('AYF intake creates lead-linked handoff',async()=>{
+ reset();
+ const original=globalThis.__captureRoutesState;
+ const body={slug:'are-you-fundable',kind:'intake',name:'Synthetic AYF Client',email:'ayf@example.test',payload:{business:'Test Business',goal:'Funding readiness'}};
+ const response=await api.formsPOST(request('/api/portal/forms/submit',body));
+ assert.equal(response.status,200);
+ const lead=(await response.json()).submission;
+ assert.ok(lead.id);
+ assert.equal(lead.portalSlug,'are-you-fundable');
+ assert.equal(state.forms.size,1);
+ assert.equal(state.handoffs.size,1);
+ const handoff=[...state.handoffs.values()][0];
+ assert.equal(handoff.submissionId,lead.id);
+ assert.equal(handoff.organizationId,'recAYFTEST123');
+ assert.equal(handoff.portalSlug,'are-you-fundable');
+ assert.equal(handoff.email,body.email);
+ assert.equal(handoff.delivery,'pending');
+ assert.equal(handoff.portalAccess,'pending');
 });
