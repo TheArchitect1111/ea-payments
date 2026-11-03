@@ -1,0 +1,38 @@
+name: TB3 Phase 2 Browser Acceptance
+on:
+  pull_request:
+    paths:
+      - 'app/tarris/**'
+      - 'tests/tb3-phase2.spec.ts'
+      - 'playwright.tb3-phase2.config.ts'
+      - '.github/workflows/tb3-phase2-e2e.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Catalog, prices, inquiry and auth safety
+        run: node scripts/test-tb3-phase1-contract.mjs
+      - name: TB3 booking, calendar and activity tracking API contracts
+        run: node --import tsx --test tests/tb3-brick-auto-wire.test.mts
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Desktop/mobile browser acceptance
+        run: npx playwright test --config=playwright.tb3-phase2.config.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tb3-phase2-browser-evidence
+          path: |
+            playwright-tb3-phase2-report
+            test-results
+          if-no-files-found: ignore
