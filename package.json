@@ -132,7 +132,10 @@
     "test:brick-chassis-guard": "node scripts/guard-brick-chassis.mjs",
     "test:client-factory": "node --import tsx --test tests/client-factory.test.mts",
     "test:amanda-wiring": "node --import tsx --test tests/amanda-wiring.test.mts",
-    "test:comms-brick": "node --import tsx --test src/chassis/ea-comms-brick/__tests__/comms.brick.test.ts"
+    "test:comms-brick": "node --import tsx --test src/chassis/ea-comms-brick/__tests__/comms.brick.test.ts",
+    "bricks:qa": "tsx lib/bricks/qa-runner.ts",
+    "bricks:list": "tsx -e \"import(\"./lib/bricks/index.ts\").then(m=>console.log(m.listBricks()))\"",
+    "bricks:test": "tsx -e \"import(\"./lib/bricks/class/index.ts\").then(async m=>{const o=await m.ClassBrick.create({owner:\"Amanda\",goal:\"Launch\",classes:12,payment:\"Square\",workflow:\"direct-vs-waitlist\"}); console.log(JSON.stringify(o,null,2))})\""
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.9",

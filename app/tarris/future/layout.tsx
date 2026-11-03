@@ -40,6 +40,13 @@ export default async function TarrisFutureLayout({ children }: { children: React
     Boolean(cookieStore.get('_vercel_jwt')?.value);
 
   if (!verifiedPreviewShare && !(await hasApplicationAccess())) {
+    const [portalSession, adminSession] = await Promise.all([
+      resolvePortalSession({ realm: 'portal' }),
+      resolvePortalSession({ realm: 'admin' }),
+    ]);
+    if (!portalSession && !adminSession) {
+      redirect('/portal/login?next=%2Ftarris%2Ffuture');
+    }
     redirect('/tarris?hq=private');
   }
 

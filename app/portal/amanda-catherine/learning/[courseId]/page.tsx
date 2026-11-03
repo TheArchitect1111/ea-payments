@@ -8,6 +8,17 @@ import { PortalSubpage } from '@/app/portal/components/PortalSubpage';
 export const dynamic = 'force-dynamic';
 export default async function Page({ params }: { params: Promise<{ courseId: string }> }) {
   const { courseId } = await params;
+  
+  // PRIVATE $1 TEST CHECKOUT - NO LOGIN REQUIRED FOR test- ROUTES
+  const isTestCourse = String(courseId||"").startsWith("test-");
+  if (isTestCourse) {
+    const realId = courseId.replace('test-','');
+    const realCourse = AMANDA_COURSES.find(c => c.id === realId) || AMANDA_COURSES[0];
+    if (!realCourse) notFound();
+    const mockCourse = { ...realCourse, id: courseId, title: `TEST - ${realCourse.title}` } as any;
+    return <PortalSubpage slug="amanda-catherine" active="learning" kicker="AesthetiKine Academy - TEST MODE" title={mockCourse.title} lede="Private $1 test checkout - CAD $1 - Use card 4242 4242 4242 4242"><AmandaLearningCenter audience="student-trainee" assignedCourseIds={[courseId]} isAdmin={false} /></PortalSubpage>;
+  }
+
   const course = AMANDA_COURSES.find(c => c.id === courseId);
   if (!course) notFound();
   const { client, session } = await requirePortalModule('amanda-catherine', 'dashboard');
