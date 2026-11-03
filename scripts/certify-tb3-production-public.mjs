@@ -20,7 +20,7 @@ async function check(name,task) {
   catch(error){failures.push({name,error:String(error)});console.error('FAIL '+name+' '+error);}
 }
 function assertStatus(result, statuses) {
-  assert.ok(statuses.includes(result.res.status),result.url+' returned '+result.res.status+' (expected '+statuses.join(','))+': '+result.body.slice(0,200));
+  assert.ok(statuses.includes(result.res.status),result.url+' returned '+result.res.status+' (expected '+statuses.join(',')+'): '+result.body.slice(0,200));
 }
 
 await check('root redirects or renders TB3 brand',async()=>{
