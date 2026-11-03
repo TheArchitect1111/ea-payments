@@ -174,3 +174,14 @@ test('immutable-version-fingerprint: all three module certificates have exact ve
  for(const id of ['calendar','people','discovery']){const m=inventory.modules.find((x:any)=>x.id===id);const c=ledger.certificates.find((x:any)=>x.moduleId===id);assert.equal(m.version,2);assert.equal(c.moduleVersion,2);assert.equal(Object.keys(c.evidence).length,10);assert.ok(c.sourceFiles.length);}
 });
 process.on('exit',()=>{globalThis.fetch=originalFetch;});
+
+test('AYF certified manifest installs with mocked PostgreSQL',async()=>{
+ reset();
+ const m=JSON.parse(readFileSync('config/chassis-manifests/ayf.json','utf8'));
+ const r=await api.ensureTenantFoundation({...m,assemblyMode:'certified'});
+ assert.equal(r.assemblyEvidence.portalSlug,m.portalSlug);
+ assert.equal(r.assemblyEvidence.admitted.length,20);
+ assert.equal(api.getPeopleRepository().kind,'postgres');
+ assert.deepEqual(new Set(r.assemblyEvidence.admitted),new Set(db.entitlements.filter(x=>x.status==='active').map(x=>x.moduleId)));
+ assert.ok([...db.records.values()].some((x:any)=>x.state==='installed'&&x.portalSlug===m.portalSlug));
+});

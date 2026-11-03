@@ -59,3 +59,14 @@ test('Member grant reaches platform entitlement writer, readback and selected ba
  // An individual revoke does not turn off the entire tenant's Member module.
  assert.ok(db.entitlements.some(e=>e.moduleId==='member'&&e.status==='active'));
 });
+
+test('AYF manifest installs with tenant isolation and durable evidence',async()=>{
+  reset();
+  const manifest=JSON.parse(readFileSync('config/chassis-manifests/ayf.json','utf8'));
+  const result=await api.ensureTenantFoundation({...manifest,assemblyMode:'certified'});
+  const plan=api.requireClientFactoryAssembly(manifest);
+  assert.deepEqual(new Set(result.assemblyEvidence.admitted),new Set(plan.admitted));
+  assert.equal(result.assemblyEvidence.portalSlug,manifest.portalSlug);
+  assert.ok(db.writes.some(x=>x.startsWith('assembly-evidence-')));
+  assert.equal([...db.records.values()].find(x=>x.portalSlug===manifest.portalSlug&&x.brickIds)?.state,'installed');
+});
