@@ -1,0 +1,20 @@
+name: TB3 Live Production Read-Only Certification
+on:
+  pull_request:
+    paths:
+      - 'scripts/certify-tb3-production-public.mjs'
+      - '.github/workflows/tb3-production-live-cert.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify production TB3 public routes, media, redirects and payment disabled
+        run: node scripts/certify-tb3-production-public.mjs
