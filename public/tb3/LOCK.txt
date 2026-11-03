@@ -1,0 +1,2 @@
+# TB3 Launch - 12 items live - Wed Oct 21 14:14:14 EDT 2026
+f9afa5e3 tb3-final-launch - EA-GUARD allow TB3 paths public/tb3/ app/api/tb3/

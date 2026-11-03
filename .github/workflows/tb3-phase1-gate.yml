@@ -1,0 +1,21 @@
+name: TB3 Phase 1 Safety
+on:
+  pull_request:
+    paths:
+      - 'app/tarris/**'
+      - 'scripts/test-tb3-phase1-contract.mjs'
+      - 'specs/tb3-phase1-20261103.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify unchanged catalog, links, private access and payments disabled
+        run: node scripts/test-tb3-phase1-contract.mjs
