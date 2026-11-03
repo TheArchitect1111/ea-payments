@@ -9,7 +9,7 @@ type State =
   | { status: 'error'; message: string }
   | { status: 'ready'; email: string; loginUrl: string; welcomeSent: boolean };
 
-export default function AmandaEnrollmentSuccess() {
+export default function AmandaEnrollmentSuccess({ testCheckout = false }: { testCheckout?: boolean }) {
   const params = useSearchParams();
   const sessionId = params.get('session_id') || '';
   const [state, setState] = useState<State>({ status: 'loading' });
@@ -20,7 +20,7 @@ export default function AmandaEnrollmentSuccess() {
       setState({ status: 'error', message: 'The enrollment confirmation link is incomplete.' });
       return () => { active = false; };
     }
-    fetch('/api/public/amanda/enrollment/verify', {
+    fetch(testCheckout ? '/api/public/amanda/wood-test/verify' : '/api/public/amanda/enrollment/verify', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ sessionId }),
@@ -33,7 +33,7 @@ export default function AmandaEnrollmentSuccess() {
       .then((data) => { if (active) setState({ status: 'ready', email: data.email!, loginUrl: data.loginUrl!, welcomeSent: Boolean(data.welcomeSent) }); })
       .catch((error) => { if (active) setState({ status: 'error', message: error instanceof Error ? error.message : 'Enrollment could not be verified.' }); });
     return () => { active = false; };
-  }, [sessionId]);
+  }, [sessionId, testCheckout]);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#102018] px-5 py-12 text-[#17130f]">
@@ -47,7 +47,7 @@ export default function AmandaEnrollmentSuccess() {
           <>
             <h1 className="mt-5 font-serif text-5xl">You’re enrolled.</h1>
             <p className="mt-5 text-lg leading-8">Your course has been assigned to <strong>{state.email}</strong>.</p>
-            <p className="mt-3 leading-7">{state.welcomeSent ? 'Check your email for your temporary password and sign-in instructions.' : 'Your existing Amanda Catherine sign-in now includes this course.'}</p>
+            <p className="mt-3 leading-7">{state.welcomeSent ? 'Check your email for your sign-in instructions.' : 'Your existing Amanda Catherine sign-in now includes this course.'}</p>
             <a data-cta-name="Open Courses & Learning" data-cta-key="open-courses-learning" href={state.loginUrl} className="mt-7 inline-flex min-h-14 items-center justify-center rounded-full bg-[#c39851] px-8 text-lg font-black">Open Courses & Learning</a>
           </>
         )}

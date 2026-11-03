@@ -1,3 +1,4 @@
+import { requestPortalPasswordReset } from '@/lib/ea-portal-password-reset';
 import { amandaCourseReady } from './lms-policy';
 import crypto from 'node:crypto';
 import {
@@ -46,6 +47,7 @@ const AmandaAccessProfileSchema = z.object({
     status: z.enum(['active','expired']).optional(),
     expiryNotifiedAt: z.string().optional(),
   })).optional(),
+  testWelcomeSentAt: z.string().optional(),
   updatedAt: z.string().min(1),
 });
 
@@ -158,6 +160,7 @@ export async function provisionAmandaClientAccess(input: {
   testPaidAt?: string | null;
   expiresAt?: string | null;
   stripeSessionId?: string;
+  reusableTest?: boolean;
 }) {
   if ((input.courseIds || []).some((id) => !amandaCourseReady(id))) return { ok: false as const, error: 'This course is waitlist only.' };
   if (input.isTestAccess && (!input.testPaidAt || !input.expiresAt || !input.stripeSessionId)) return { ok: false as const, error: 'Verified test payment dates and Stripe session ID are required.' };
@@ -169,8 +172,8 @@ export async function provisionAmandaClientAccess(input: {
 
   let created = false;
   if (!record) {
-    if (input.isTestAccess && !isAmandaOwnerEmail(email)) return { ok: false as const, error: 'Private test access requires an existing Amanda owner identity.' };
-    if (!input.isTestAccess) {
+    if (input.isTestAccess && !input.reusableTest && !isAmandaOwnerEmail(email)) return { ok: false as const, error: 'Private test access requires an existing Amanda owner identity.' };
+    if (!input.isTestAccess || input.reusableTest) {
     const result = await createOrUpdateClientRecord({
       clientName: name,
       organization: 'Amanda Catherine',
@@ -193,15 +196,19 @@ export async function provisionAmandaClientAccess(input: {
 
   let tempPassword = record?.tempPassword || '';
   const needsCredentials = Boolean(record && !belongsToAnotherPortal && (!record.portalSlug || (!record.passwordChanged && !record.tempPassword)));
-  if (input.isTestAccess && needsCredentials) return { ok: false as const, error: 'Owner portal credentials must already be active before a private test.' };
-  if (needsCredentials && record) {
+  if (input.isTestAccess && !input.reusableTest && needsCredentials) return { ok: false as const, error: 'Owner portal credentials must already be active before a private test.' };
+  if (needsCredentials && record && input.reusableTest) {
+    const credentials = await setPortalCredentials(record.id, AMANDA_PORTAL_SLUG, '', email);
+    if (!credentials.ok) return { ok: false as const, error: credentials.error };
+  }
+  if (needsCredentials && record && !input.reusableTest) {
     tempPassword = temporaryPassword();
     const credentials = await setPortalCredentials(record.id, AMANDA_PORTAL_SLUG, tempPassword, email);
     if (!credentials.ok) return { ok: false as const, error: credentials.error || 'Portal credentials could not be created.' };
     created = true;
   }
 
-  if (!input.isTestAccess) {
+  if (!input.isTestAccess || input.reusableTest) {
     const { orgId } = await ensureOrganizationForPortal({
       portalSlug: AMANDA_PORTAL_SLUG,
       name: 'Amanda Catherine',
@@ -223,7 +230,9 @@ export async function provisionAmandaClientAccess(input: {
     const purchase: AmandaEntitlement = input.isTestAccess
       ? { isTestAccess: true, testPaidAt: input.testPaidAt!, expiresAt: input.expiresAt!, stripeSessionId: input.stripeSessionId, status: 'active' }
       : { isTestAccess: false, testPaidAt: null, expiresAt: null, stripeSessionId: input.stripeSessionId, status: 'active' };
-    const resolved = resolveAmandaEntitlement(prior, purchase, Boolean(input.isTestAccess && priorCourseIds.includes(id) && !prior));
+    const renewed = input.reusableTest && prior?.isTestAccess && prior.stripeSessionId !== purchase.stripeSessionId
+      && Date.parse(purchase.testPaidAt || '') > Date.parse(prior.testPaidAt || '') ? purchase : undefined;
+    const resolved = renewed || resolveAmandaEntitlement(prior, purchase, Boolean(input.isTestAccess && priorCourseIds.includes(id) && !prior));
     if (resolved) entitlements[id] = resolved;
   }
   const accessChanged = !existingProfile || courseIds.some((courseId) => !priorCourseIds.includes(courseId))
@@ -237,7 +246,8 @@ export async function provisionAmandaClientAccess(input: {
       portalSlug: AMANDA_PORTAL_SLUG,
       email,
       name,
-      audience: input.audience,
+      audience: input.reusableTest ? (existingProfile?.audience || input.audience) : input.audience,
+      testWelcomeSentAt: existingProfile?.testWelcomeSentAt,
       courseIds,
       entitlements,
       updatedAt: new Date().toISOString(),
@@ -248,6 +258,27 @@ export async function provisionAmandaClientAccess(input: {
   }
 
   let welcomeSent = false;
+  if (input.reusableTest && !existingProfile?.testWelcomeSentAt) {
+    const origin = 'https://amandacatherine.ca';
+    const loginUrl = origin + '/portal/login?next=%2Fportal%2Famanda-catherine%2Flearning';
+    const needsSetup = !record?.passwordChanged || !record?.passwordHash;
+    const reset = needsSetup ? await requestPortalPasswordReset(email, origin) : null;
+    if (needsSetup && !reset) return { ok: false as const, error: 'Your secure password setup link could not be created.' };
+    const sent = await sendAuthEmail({ to: email, subject: 'Your Wood Therapy test portal is ready',
+      title: 'Welcome to Wood Therapy', brandLabel: 'Amanda Catherine · AesthetiKine',
+      bodyHtml: '<p>Your CAD $1 test enrollment is confirmed.</p>' +
+        (reset ? '<p><a href="' + escapeHtml(reset.resetUrl) + '">Set your portal password</a> (expires in 30 minutes).</p>' : '<p>Use your existing portal password.</p>') +
+        '<p><a href="' + loginUrl + '">Open Wood Therapy in your learning portal</a></p>',
+      text: 'Your Wood Therapy test is ready. ' + (reset ? 'Set your password: ' + reset.resetUrl + '. ' : 'Use your existing password. ') + 'Learning: ' + loginUrl });
+    if (!sent.ok) return { ok: false as const, error: 'Your access is saved, but welcome delivery needs a retry.' };
+    const welcomeSave = await saveStudioRecord({ recordType: 'experience', id: accessProfileId(AMANDA_PORTAL_SLUG, email),
+      organizationId: syntheticOrgId(AMANDA_PORTAL_SLUG), title: 'Amanda client access: ' + email,
+      payload: { portalSlug: AMANDA_PORTAL_SLUG, email, name, audience: existingProfile?.audience || input.audience,
+        courseIds, entitlements, updatedAt: new Date().toISOString(), testWelcomeSentAt: new Date().toISOString() } });
+    if (!welcomeSave.ok) return { ok: false as const, error: 'Welcome delivery status could not be saved.' };
+    welcomeSent = true;
+  }
+
   if (!input.isTestAccess && (created || accessChanged) && (tempPassword || belongsToAnotherPortal)) {
     const welcome = await sendAmandaWelcome({
       email,
@@ -266,7 +297,7 @@ export async function provisionAmandaClientAccess(input: {
     created: created || accessChanged,
     welcomeSent,
     email,
-    loginUrl: `${canonicalPlatformOrigin()}/portal/login?next=%2Fportal%2F${AMANDA_PORTAL_SLUG}%2Flearning`,
+    loginUrl: `${input.reusableTest ? 'https://amandacatherine.ca' : canonicalPlatformOrigin()}/portal/login?next=%2Fportal%2F${AMANDA_PORTAL_SLUG}%2Flearning`,
   };
 }
 

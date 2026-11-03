@@ -1,3 +1,4 @@
+import { isVerifiedWoodTest } from './reusable-test';
 import { recordAmandaKitOrder } from './practitioner-kit-orders';
 import {recordAmandaVerifiedPayment} from './payments';
 import { getAmandaConfirmationLetter } from '@/lib/amanda-catherine/confirmation-letters';
@@ -44,6 +45,8 @@ async function persistPaymentRecord(record: AmandaPaymentRecord, title: string) 
 
 export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, source: 'webhook' | 'return-verification') {
   const meta = session.metadata ?? {};
+  let reusableTest = false;
+  try { reusableTest = isVerifiedWoodTest(session); } catch { return { ok: false as const, error: 'Invalid Wood Therapy test payment.' }; }
   const portalSlug = String(meta.portalSlug || '').trim().toLowerCase();
   const email = paymentEmail(session);
   if (portalSlug!=='amanda-catherine' || !email) return { ok: false as const, error: 'Amanda payment identity is incomplete.' };
@@ -108,7 +111,7 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
   if (notificationStateChanged) { const notificationSave = await persistPaymentRecord(record, title); if (!notificationSave.ok) console.error('[amanda-payment] notification status persistence failed', notificationSave.error); }
 
   const audience: AmandaPortalAudience = membership ? 'member-community-participant' : offer?.id === 'lifeline-artist-business-launch' ? 'media-guest' : offer?.id.includes('training') || offer?.id.includes('certification') ? 'student-trainee' : 'client';
-  const access = await provisionAmandaClientAccess({ email, name: session.customer_details?.name || String(meta.clientName || ''), audience, amountPaidCad: record.amountPaidCad, transactionId, courseIds: record.courseId ? [record.courseId] : [], isTestAccess, testPaidAt: record.testPaidAt, expiresAt: record.expiresAt, stripeSessionId: session.id });
+  const access = await provisionAmandaClientAccess({ email, name: session.customer_details?.name || String(meta.clientName || ''), audience, amountPaidCad: record.amountPaidCad, transactionId, courseIds: record.courseId ? [record.courseId] : [], isTestAccess, testPaidAt: record.testPaidAt, expiresAt: record.expiresAt, stripeSessionId: session.id, reusableTest });
   if (!access.ok) {
     console.error('[amanda-payment] client portal access provisioning failed', access.error);
     await emitPulseEvent({ product: 'ea-platform', type: 'fulfillment.review_required', title: 'Amanda client access needs attention', detail: `${email} · ${access.error}`, priority: 'high', href: `/portal/${portalSlug}/deliveries`, tenantId: portalSlug, objectId: id });
@@ -172,6 +175,7 @@ export async function fulfillAmandaCheckout(session: Stripe.Checkout.Session, so
     }catch(error){console.error('[amanda-payment] test confirmation letter failed',error);
       return {ok:false as const,error:'Confirmation letter was not delivered.',paymentRecorded:true as const};}
   }
+  if (reusableTest && (!record.customerConfirmationSentAt || !record.premiumWelcomeSentAt)) return { ok: false as const, error: 'Your payment is recorded; receipt or welcome delivery needs a retry.', paymentRecorded: true as const };
   if (!existing) {
     await publishPlatformActivityEvent({ organizationId: 'amanda-catherine', module: 'payments', eventType: 'payment_fulfilled', title: membership ? `Amanda membership activated · ${label}` : `Amanda payment fulfilled · ${label}`, summary: `CAD ${record.amountPaidCad.toFixed(2)} payment fulfilled`, priority: 90, actionLabel: 'Open Amanda billing', actionUrl: `/portal/${portalSlug}/billing`, metadata: { stripeSessionId: session.id, transactionId, offerId: offer?.id || '', membershipId: membership?.id || '', courseId: record.courseId || '', source, accessProvisioned: 'true' } });
     await emitPulseEvent({ product: 'ea-platform', type: membership ? 'subscription.started' : 'payment.received', title: membership ? `Amanda membership active — ${label}` : record.paymentOption === 'test' ? `Amanda private test payment — ${label}` : `Amanda payment received — ${label}`, detail: `CAD $${record.amountPaidCad.toFixed(2)} · ${email}`, priority: record.paymentOption === 'test' ? 'medium' : 'high', href: `/portal/${portalSlug}/billing`, tenantId: portalSlug, objectId: id, metadata: { stripeSessionId: session.id, email, source, offerId: offer?.id || '', membershipId: membership?.id || '', paymentOption: record.paymentOption || '', privateTestCheckout: record.paymentOption === 'test' ? 'true' : 'false' } });
