@@ -7,3 +7,8 @@
 - [x] Connect verified sandbox payment to full enrollment workflow in source.
 - [ ] Verify both student workflows and repeat use.
 - [ ] Release only after end-to-end evidence.
+
+- [x] Inspect deployed Square preview: normal Register and added test option present.
+- [x] Exercise actual form/API: blocked by missing sandbox configuration.
+- [x] Restore previous route-protection middleware; tenant and legacy tests pass.
+- [ ] Configure sandbox credentials and resume real payment/email/login verification.
