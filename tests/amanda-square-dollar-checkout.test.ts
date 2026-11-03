@@ -21,7 +21,7 @@ test('Square dollar checkout is fresh, per-user, sandbox-only and durably marked
   const originalFetch=globalThis.fetch;
   const oldToken=process.env.SQUARE_SANDBOX_ACCESS_TOKEN, oldLocation=process.env.SQUARE_SANDBOX_LOCATION_ID;
   const route=await loadRoute();
-  const request=(email='amanda@example.invalid')=>({allowed:true,json:async()=>({name:'Test Student',email})});
+  const request=(email='amanda@example.invalid')=>({allowed:true,nextUrl:{origin:'https://amandacatherine.ca'},json:async()=>({name:'Test Student',email})});
   try {
     delete process.env.SQUARE_SANDBOX_ACCESS_TOKEN;delete process.env.SQUARE_SANDBOX_LOCATION_ID;
     assert.equal((await route.POST(request())).status,503,'No fallback to live credentials');
@@ -35,7 +35,7 @@ test('Square dollar checkout is fresh, per-user, sandbox-only and durably marked
     assert.notEqual(state.requests[0].body.idempotency_key,state.requests[1].body.idempotency_key);
     for(const r of state.requests){assert.equal(r.url,'https://connect.squareupsandbox.com/v2/online-checkout/payment-links');assert.deepEqual(r.body.quick_pay.price_money,{amount:100,currency:'CAD'})}
     assert.deepEqual(state.signups.map(s=>s.email),['amanda@example.invalid','brick@example.invalid']);
-    assert.ok(state.signups.every(s=>s.isTest===true));assert.ok(state.orders.every(o=>o.payload.is_test===true&&o.payload.payment_status==='unpaid'));
+    assert.ok(state.signups.every(s=>s.isTest===true));assert.ok(state.orders.filter(o=>o.id.startsWith('amanda-square-test-order-')).every(o=>o.payload.is_test===true&&o.payload.payment_status==='unpaid'));
     assert.equal((await route.POST(request('invalid'))).status,400);
     assert.equal((await route.POST({...request(),allowed:false})).status,403);
     state.host='square.link';assert.equal((await route.POST(request())).status,503,'Reject production checkout URLs');

@@ -6,3 +6,6 @@ Invariants: do not modify live Square payment/webhook behavior, normal prices, o
 Acceptance: exactly one added test option; existing normal purchase uses registry Square URL; own email per attempt; fresh registration/idempotency key per attempt; fixed CAD 100 cents; sandbox-only host and credentials; test signup/order marked is_test.
 Checks: mocked Square checkout behavior (missing configuration, invalid identity, amount, fresh sessions, test records); build/targeted TypeScript; source diff.
 Rollback: revert feature commit before production release; source branch isolated from the abandoned Stripe work.
+
+## Stage 3: verified sandbox fulfillment
+Add isolated signed sandbox webhook and bearer-protected return verification. Retrieve payment from Square Sandbox; validate completed status, CAD 100 cents, configured location, and durable test-order identity before side effects. Use existing tracking/email/access stores. Never call live Square endpoints. Test grants expire after 72 hours; new verified tests can renew test grants without downgrading permanent access. New users get secure password setup; never store plaintext credentials. Persist delivery state for retries. Browser success query parameters never grant access.
