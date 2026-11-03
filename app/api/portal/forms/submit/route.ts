@@ -111,6 +111,12 @@ export async function POST(req: NextRequest) {
 
   const captureKind = kind === 'application' ? 'applications' : 'intake';
   const certifiedTenant = slug === 'amanda-catherine' ? null : await resolveCaptureTenant(slug, captureKind);
+  if (slug === 'are-you-fundable' && !certifiedTenant) {
+    return NextResponse.json(
+      { error: 'AYF secure intake is not yet available.' },
+      { status: 503 },
+    );
+  }
   const idempotencyId = certifiedTenant
     ? 'pfs_' + brickHash([slug,kind,email.toLowerCase(),name,payload ?? null])
     : undefined;
