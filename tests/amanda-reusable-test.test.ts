@@ -63,3 +63,31 @@ test('both fresh identities receive receipts, secure welcome and course access; 
   const after=[...state.records.values()].find(p=>p.email===email&&p.entitlements);assert.equal(after.entitlements[WOOD_TEST_COURSE].isTestAccess,false,'Permanent access must remain permanent');
   const denied=await app.fulfillAmandaCheckout({...session('unpaid@example.invalid'),payment_status:'unpaid'},'return-verification');assert.equal(denied.ok,false);assert.equal(state.clients.has('unpaid@example.invalid'),false);
 });
+
+
+test('checkout creates a fresh test session each time and refuses live credentials', async()=>{
+  const created: any[]=[];
+  (globalThis as any).__woodSessions=created;
+  const compiled=await build({entryPoints:['app/api/public/amanda/wood-test/checkout/route.ts'],bundle:true,platform:'node',format:'esm',write:false,
+    plugins:[{name:'stripe-transport',setup(b){
+      b.onResolve({filter:/^(stripe|next\/server)$/},a=>({path:a.path,namespace:'checkout-mock'}));
+      b.onLoad({filter:/.*/,namespace:'checkout-mock'},a=>({loader:'js',contents:a.path==='stripe'
+        ? `export default class Stripe {checkout={sessions:{create:async p=>{globalThis.__woodSessions.push(p);return {id:'cs_test_'+globalThis.__woodSessions.length,livemode:false,url:'https://checkout.stripe.com/c/pay/cs_test_'+globalThis.__woodSessions.length}}}}}`
+        : `export const NextResponse={json:(data,options={})=>({data,status:options.status||200})};`}));
+    }}]});
+  const route=await import('data:text/javascript;base64,'+Buffer.from(compiled.outputFiles[0].text).toString('base64'));
+  const prior=process.env.STRIPE_SECRET_KEY;
+  try {
+    process.env.STRIPE_SECRET_KEY='sk_live_fixture';
+    assert.equal((await route.POST({nextUrl:{origin:'https://amandacatherine.ca'}})).status,503);
+    assert.equal(created.length,0);
+    process.env.STRIPE_SECRET_KEY='sk_test_fixture';
+    const first=await route.POST({nextUrl:{origin:'https://amandacatherine.ca'}});
+    const second=await route.POST({nextUrl:{origin:'https://amandacatherine.ca'}});
+    assert.equal(first.status,200);assert.notEqual(first.data.url,second.data.url);
+    assert.equal(created[0].line_items[0].price_data.unit_amount,100);
+    assert.equal(created[0].line_items[0].price_data.currency,'cad');
+    assert.equal(created[0].customer_email,undefined,'Stripe collects each student email');
+    assert.equal(created[0].metadata.enrollmentFlow,WOOD_TEST_FLOW);
+  } finally {if(prior===undefined) delete process.env.STRIPE_SECRET_KEY;else process.env.STRIPE_SECRET_KEY=prior;}
+});

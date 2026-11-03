@@ -4,7 +4,7 @@ import { requireTestKey, isVerifiedWoodTest } from '@/lib/amanda-catherine/reusa
 import { fulfillAmandaCheckout } from '@/lib/amanda-catherine/payment-fulfillment';
 export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
-  const body = await req.json().catch(() => ({}));
+  const body = (await req.json().catch(() => null)) || {};
   if (!/^cs_test_[a-zA-Z0-9]+$/.test(String(body.sessionId || ''))) return NextResponse.json({ error: 'A Stripe TEST session is required.' }, { status: 400 });
   try {
     const session = await new Stripe(requireTestKey()).checkout.sessions.retrieve(body.sessionId);
