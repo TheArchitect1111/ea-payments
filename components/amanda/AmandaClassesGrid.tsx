@@ -7,6 +7,6 @@ export default function AmandaClassesGrid({courses}:{courses:Course[]}) {
  const available=cta.kind==='checkout';
  const label=cta.label;
  const href=cta.action;
- return <article className="amanda-card" key={c.key}><h2>{c.title}</h2><p>{amandaClassCopy(c.description,available)}</p>{c.price!==null&&<p>{'$'+c.price.toLocaleString('en-US')} CAD</p>}<div className="flex flex-wrap gap-3">{href?<a className={available ? "amanda-button" : "amanda-button amanda-button--outline"} href={href} data-cta-name={label} data-course-key={c.key} data-cta-key={`${available?'register':'join-waitlist'}-${c.key}`}>{label}</a>:<span role="status">Checkout temporarily unavailable</span>}</div></article>;
+ return <article className="amanda-card" key={c.key}><h2>{c.title}</h2><p>{amandaClassCopy(c.description,available)}</p>{c.price!==null&&<p>{'$'+c.price.toLocaleString('en-US')} CAD</p>}<div className="flex flex-wrap gap-3">{href?<a className={available ? "amanda-button" : "amanda-button amanda-button--outline"} href={href} data-cta-name={label} data-course-key={c.key} data-cta-key={`${available?'register':'join-waitlist'}-${c.key}`}>{label}</a>:<span role="status">Checkout temporarily unavailable</span>}{/wood therapy/i.test(c.title)&&<a className="amanda-button amanda-button--outline" href="/amanda-catherine/square-test" data-cta-name="TEST — $1 Full Workflow" data-cta-key="wood-therapy-dollar-test">TEST — $1 Full Workflow</a>}</div></article>;
 })}</div></section>;
 }

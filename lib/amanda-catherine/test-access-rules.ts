@@ -7,6 +7,7 @@ export type AmandaCourseEntitlement = {
   testPaidAt: string | null;
   expiresAt: string | null;
   stripeSessionId?: string;
+  squarePaymentId?: string;
   status?: 'active' | 'expired';
   expiryNotifiedAt?: string;
 };

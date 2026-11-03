@@ -43,6 +43,7 @@ const AmandaAccessProfileSchema = z.object({
     testPaidAt: z.string().nullable(),
     expiresAt: z.string().nullable(),
     stripeSessionId: z.string().optional(),
+    squarePaymentId: z.string().optional(),
     status: z.enum(['active','expired']).optional(),
     expiryNotifiedAt: z.string().optional(),
   })).optional(),
@@ -77,7 +78,7 @@ export async function getAmandaCourseAccessDecision(portalSlug: string, email: s
   const profile = parsed.success ? parsed.data : null;
   const grant = profile?.entitlements?.[courseId];
   if (amandaTrialExpired(grant)) {
-    return { authorized: false as const, reason: 'TRIAL_EXPIRED' as const, expiresAt: grant.expiresAt, redirect: `/portal/amanda-catherine/expired?courseId=${encodeURIComponent(courseId)}` };
+    return { authorized: false as const, reason: 'TRIAL_EXPIRED' as const, expiresAt: grant?.expiresAt, redirect: `/portal/amanda-catherine/expired?courseId=${encodeURIComponent(courseId)}` };
   }
   const assigned = profile ? profile.courseIds.includes(courseId) : Boolean(invitedAmandaLearner(email)?.courseIds?.includes(courseId));
   return { authorized: assigned && amandaCourseReady(courseId), reason: assigned ? undefined : 'NOT_ASSIGNED', expiresAt: grant?.expiresAt ?? null };
@@ -158,9 +159,12 @@ export async function provisionAmandaClientAccess(input: {
   testPaidAt?: string | null;
   expiresAt?: string | null;
   stripeSessionId?: string;
+  squareTest?: { paymentId: string };
 }) {
   if ((input.courseIds || []).some((id) => !amandaCourseReady(id))) return { ok: false as const, error: 'This course is waitlist only.' };
-  if (input.isTestAccess && (!input.testPaidAt || !input.expiresAt || !input.stripeSessionId)) return { ok: false as const, error: 'Verified test payment dates and Stripe session ID are required.' };
+  const squareTest = Boolean(input.squareTest?.paymentId && input.isTestAccess && input.courseIds?.length === 1 && input.courseIds[0] === 'wood-therapy-certification');
+  if (input.squareTest && !squareTest) return { ok: false as const, error: 'Invalid Square test course grant.' };
+  if (input.isTestAccess && (!input.testPaidAt || !input.expiresAt || (!input.stripeSessionId && !squareTest))) return { ok: false as const, error: 'Verified test payment dates and Stripe session ID are required.' };
   const email = input.email.trim().toLowerCase();
   if (!email || !email.includes('@')) return { ok: false as const, error: 'A valid client email is required.' };
   const name = displayName(input.name || '', email);
@@ -169,8 +173,8 @@ export async function provisionAmandaClientAccess(input: {
 
   let created = false;
   if (!record) {
-    if (input.isTestAccess && !isAmandaOwnerEmail(email)) return { ok: false as const, error: 'Private test access requires an existing Amanda owner identity.' };
-    if (!input.isTestAccess) {
+    if (input.isTestAccess && !squareTest && !isAmandaOwnerEmail(email)) return { ok: false as const, error: 'Private test access requires an existing Amanda owner identity.' };
+    if (!input.isTestAccess || squareTest) {
     const result = await createOrUpdateClientRecord({
       clientName: name,
       organization: 'Amanda Catherine',
@@ -193,22 +197,32 @@ export async function provisionAmandaClientAccess(input: {
 
   let tempPassword = record?.tempPassword || '';
   const needsCredentials = Boolean(record && !belongsToAnotherPortal && (!record.portalSlug || (!record.passwordChanged && !record.tempPassword)));
-  if (input.isTestAccess && needsCredentials) return { ok: false as const, error: 'Owner portal credentials must already be active before a private test.' };
-  if (needsCredentials && record) {
+  if (input.isTestAccess && !squareTest && needsCredentials) return { ok: false as const, error: 'Owner portal credentials must already be active before a private test.' };
+  if (needsCredentials && record && squareTest) {
+    const credentials = await setPortalCredentials(record.id, AMANDA_PORTAL_SLUG, '', email);
+    if (!credentials.ok) return { ok: false as const, error: credentials.error || 'Student identity setup failed.' };
+  }
+  if (needsCredentials && record && !squareTest) {
     tempPassword = temporaryPassword();
     const credentials = await setPortalCredentials(record.id, AMANDA_PORTAL_SLUG, tempPassword, email);
     if (!credentials.ok) return { ok: false as const, error: credentials.error || 'Portal credentials could not be created.' };
     created = true;
   }
 
-  if (!input.isTestAccess) {
+  if (!input.isTestAccess || squareTest) {
     const { orgId } = await ensureOrganizationForPortal({
       portalSlug: AMANDA_PORTAL_SLUG,
       name: 'Amanda Catherine',
       organizationName: 'Amanda Catherine',
     });
-    if (!orgId.startsWith('org_') && !(await findMembership(email, orgId))) {
-      await createMembership({ userEmail: email, organizationId: orgId, role: 'guest' });
+    if (squareTest && orgId.startsWith('org_')) return { ok: false as const, error: 'A persisted Amanda organization is required.' };
+    if (!orgId.startsWith('org_')) {
+      const membership = await findMembership(email, orgId);
+      if (squareTest && membership && membership.status !== 'active') return { ok: false as const, error: 'Student membership needs review.' };
+      if (!membership) {
+        const createdMembership = await createMembership({ userEmail: email, organizationId: orgId, role: 'guest' });
+        if (squareTest && !createdMembership) return { ok: false as const, error: 'Student membership could not be saved.' };
+      }
     }
   }
 
@@ -221,9 +235,11 @@ export async function provisionAmandaClientAccess(input: {
   for (const id of input.courseIds || []) {
     const prior = entitlements[id];
     const purchase: AmandaEntitlement = input.isTestAccess
-      ? { isTestAccess: true, testPaidAt: input.testPaidAt!, expiresAt: input.expiresAt!, stripeSessionId: input.stripeSessionId, status: 'active' }
-      : { isTestAccess: false, testPaidAt: null, expiresAt: null, stripeSessionId: input.stripeSessionId, status: 'active' };
-    const resolved = resolveAmandaEntitlement(prior, purchase, Boolean(input.isTestAccess && priorCourseIds.includes(id) && !prior));
+      ? { isTestAccess: true, testPaidAt: input.testPaidAt!, expiresAt: input.expiresAt!, stripeSessionId: input.stripeSessionId, ...(squareTest ? { squarePaymentId: input.squareTest!.paymentId } : {}), status: 'active' }
+      : { isTestAccess: false, testPaidAt: null, expiresAt: null, stripeSessionId: input.stripeSessionId, ...(squareTest ? { squarePaymentId: input.squareTest!.paymentId } : {}), status: 'active' };
+    const renewal = squareTest && prior?.isTestAccess && prior.squarePaymentId !== input.squareTest!.paymentId
+      && Date.parse(purchase.testPaidAt || '') > Date.parse(prior.testPaidAt || '') ? purchase : undefined;
+    const resolved = renewal || resolveAmandaEntitlement(prior, purchase, Boolean(input.isTestAccess && priorCourseIds.includes(id) && !prior));
     if (resolved) entitlements[id] = resolved;
   }
   const accessChanged = !existingProfile || courseIds.some((courseId) => !priorCourseIds.includes(courseId))
@@ -237,13 +253,13 @@ export async function provisionAmandaClientAccess(input: {
       portalSlug: AMANDA_PORTAL_SLUG,
       email,
       name,
-      audience: input.audience,
+      audience: squareTest ? (existingProfile?.audience || input.audience) : input.audience,
       courseIds,
       entitlements,
       updatedAt: new Date().toISOString(),
     } satisfies AmandaAccessProfile,
   });
-  if (!profileSave.ok || (process.env.VERCEL_ENV === 'production' && !profileSave.persistedToAirtable)) {
+  if (!profileSave.ok || ((process.env.VERCEL_ENV === 'production' || squareTest) && !profileSave.persistedToAirtable)) {
     return { ok: false as const, error: profileSave.error || 'Course assignment could not be saved.' };
   }
 
