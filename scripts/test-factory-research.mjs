@@ -262,7 +262,7 @@ const {
     },
   });
 
-  assert(resolveResearchUrl(ctx) === 'https://www.bgca.org', 'resolve url from seed');
+  assert(resolveResearchUrl(ctx) === 'https://bgca.org', 'resolve url from seed');
   assert(providerCanCollect('website', ctx), 'website canCollect with url');
   assert(providerCanCollect('document', ctx), 'document canCollect with pdf');
   assert(planMetadataArtifact(ctx).data.hasUrl === true, 'metadata hasUrl');

@@ -151,7 +151,7 @@ const contentPackagePayload = {
   ],
   lenses: {
     cinematic: {
-      heroHeadline: 'Harbor Light: a story still being written',
+      heroHeadline: 'Harbor Light: supporting fishing communities',
       heroSupporting: 'Member-owned fisheries with a clear next path.',
       aboutTitle: 'Who Harbor Light is',
       aboutBody:

@@ -60,7 +60,7 @@ assert.ok(
 assert.match(routeSrc, /surfaces/);
 assert.match(routeSrc, /publishSelectedFactoryConcept/);
 assert.match(routeSrc, /requireAdminActionFromRequest/);
-assert.match(routeSrc, /Session 3/);
+assert.match(routeSrc, /persistFactoryFulfillment/);
 assert.match(routeSrc, /admin:manage/);
 
 // --- Portal provision reuses EA chassis (no parallel stack) ---

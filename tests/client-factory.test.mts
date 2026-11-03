@@ -1,3 +1,4 @@
+import {pathToFileURL} from 'node:url';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {build} from 'esbuild';
@@ -13,7 +14,7 @@ async function fixture(){
  await writeFile(join(dir,'lib/clients/registry.json'),'{}\n');
  await cp(join(root,'scripts/new-client.mjs'),join(dir,'scripts/new-client.mjs'));
  await writeFile(join(dir,'scripts/guard-brick-chassis.mjs'),"console.log('fixture guard passed')\n");
- await symlink(join(root,'node_modules'),join(dir,'node_modules'),'dir');
+ await symlink(join(root,'node_modules'),join(dir,'node_modules'),process.platform === 'win32' ? 'junction' : 'dir');
  const git=(...args:string[])=>execFileSync('git',args,{cwd:dir,encoding:'utf8'}).trim();
  git('init','-b','factory-test');git('config','user.email','test@example.com');git('config','user.name','Factory Test');
  await writeFile(join(dir,'.gitignore'),'node_modules\n');git('add','.');git('commit','-m','fixture');
@@ -24,7 +25,7 @@ test('duplicate branch is rejected without overwriting client identity',async()=
 test('dirty tree and unusable names do not create branches or files',async()=>{const f=await fixture();try{assert.notEqual(f.run('!!!').status,0);await writeFile(join(f.dir,'dirty.txt'),'preserve');assert.notEqual(f.run('New Client').status,0);assert.equal(f.git('branch','--show-current'),'factory-test');assert.equal(await readFile(join(f.dir,'lib/clients/registry.json'),'utf8'),'{}\n');}finally{await f.cleanup();}});
 test('registered client event reaches canonical registrar with tenant identity and payment checks',async()=>{
  const result=await build({stdin:{contents:`export * from './lib/tb3/brick-events';`,resolveDir:root},bundle:true,write:false,platform:'node',format:'esm',packages:'external',plugins:[{name:'ports',setup(b){b.onResolve({filter:/clients\/registry.json$/},()=>({path:'registry',namespace:'mock'}));b.onLoad({filter:/registry/,namespace:'mock'},()=>({contents:'export default {"new-client":{name:"New Client",slug:"new-client",portalPath:"/portal/new-client",eventAdapter:"adapter"}}',loader:'js'}));b.onResolve({filter:/services\/trackingPortal$/},()=>({path:'transport',namespace:'transport'}));b.onLoad({filter:/.*/,namespace:'transport'},()=>({contents:`export async function pushToTrackingPortal(e){return {id:e.client_id}};export async function confirmTrackingPayment(){return {}};export async function enqueueTrackingPortalRetry(){};export async function getTestTrackingRegistration(){return null};`,loader:'js'}));}}]});
- const path=join(root,'tests/.factory-adapter.mjs');await writeFile(path,result.outputFiles[0].text);try{const api=await import(path);const event={brick_type:'forms',brick_id:'intake',registration_id:'registration-1',name:'Person',email:'person@example.com',phone:'',status:'submitted',payment_status:'unpaid',payment_reference:null,timestamp:new Date().toISOString(),source:'intake',is_test:true};assert.deepEqual(await api.registerClientEvent('new-client',event),{ok:true,id:'new-client'});assert.equal((await api.registerClientEvent('unknown',event)).ok,false);assert.equal((await api.registerClientEvent('new-client',{...event,status:'payment_confirmed',payment_status:'paid',payment_reference:'unverified'})).ok,false);}finally{await rm(path,{force:true});}
+ const path=join(root,'tests/.factory-adapter.mjs');await writeFile(path,result.outputFiles[0].text);try{const api=await import(pathToFileURL(path).href);const event={brick_type:'forms',brick_id:'intake',registration_id:'registration-1',name:'Person',email:'person@example.com',phone:'',status:'submitted',payment_status:'unpaid',payment_reference:null,timestamp:new Date().toISOString(),source:'intake',is_test:true};assert.deepEqual(await api.registerClientEvent('new-client',event),{ok:true,id:'new-client'});assert.equal((await api.registerClientEvent('unknown',event)).ok,false);assert.equal((await api.registerClientEvent('new-client',{...event,status:'payment_confirmed',payment_status:'paid',payment_reference:'unverified'})).ok,false);}finally{await rm(path,{force:true});}
 });
 test('guard scans factory client directory and rejects direct transport bypass',()=>{const s=execFileSync(process.execPath,['scripts/guard-brick-chassis.mjs','--self-test'],{cwd:root,encoding:'utf8'});assert.match(s,/PASS/);assert.match(requireSource(),/'lib\/clients'/);});
 function requireSource(){return execFileSync(process.execPath,['-e',"process.stdout.write(require('fs').readFileSync('scripts/guard-brick-chassis.mjs','utf8'))"],{cwd:root,encoding:'utf8'});}

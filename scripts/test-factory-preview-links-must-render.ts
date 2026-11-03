@@ -108,7 +108,7 @@ const composed = composeConceptPreviews({
     ],
     lenses: {
       cinematic: {
-        heroHeadline: 'Render Co: a story still being written',
+        heroHeadline: 'Render Co: guiding members toward clarity',
         heroSupporting: 'Render Co serves members with clarity.',
         aboutTitle: 'Who Render Co is',
         aboutBody:
@@ -246,7 +246,7 @@ const context: ProjectContext = {
         lenses: composed.previews[0]
           ? {
               cinematic: {
-                heroHeadline: 'Render Co: a story still being written',
+                heroHeadline: 'Render Co: guiding members toward clarity',
                 heroSupporting: 'Render Co serves members with clarity.',
                 aboutTitle: 'Who',
                 aboutBody:
@@ -309,7 +309,7 @@ const project = {
 } as FactoryProject;
 
 const status = buildLaunchConceptStatus(project);
-assert.equal(status.conceptPackReady, true);
+assert.equal(status.conceptPackReady, true, JSON.stringify({qualityReasons:status.qualityReasons,qualityBlocked:status.qualityBlocked,conceptPackError:status.conceptPackError,conceptPackFailed:status.conceptPackFailed},null,2));
 assert.equal(status.conceptUrls.length, 3);
 
 for (const link of status.conceptUrls) {
