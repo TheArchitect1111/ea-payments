@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs';
 import { NextRequest } from 'next/server.js';
 const root = process.cwd();
 import { db, mocks } from './fixtures/chassis-ports';
+import { installPeopleRuntimeFixture } from './fixtures/people-runtime';
 const compiled = await build({ stdin: { contents: `export * from './lib/tenant-foundation'; export * from './lib/modules/ensure-package-entitlements';export * from './lib/modules/client-factory-assembly';export * from './lib/portal-universal/bricks/amanda';export { changeMemberGrant } from './lib/bricks/commerce-family';export { POST as brickPOST } from './app/api/portal/[slug]/bricks/amanda/route';export * from './lib/portal-universal/bricks/amanda/stripe';export { POST as entitlementsPOST } from './app/api/admin/entitlements/route';`, resolveDir: root },
   bundle: true, write: false, platform: 'node', format: 'esm', packages: 'external', plugins: [{ name: 'ports', setup(b) {
     b.onResolve({ filter: /.*/ }, args => args.path in mocks ? { path: args.path, namespace: 'ports' } : undefined);
@@ -30,10 +31,10 @@ test('dependency-integration-readiness: offer key, bundle, pack and unknown sele
 test('success-empty-failure-states: nondurable or dropped writes never produce successful install',async()=>{reset();db.durable=false;await assert.rejects(install(),/durably/);reset();db.dropped=true;await assert.rejects(install(),/read-back/);});
 test('observability: receipt, install manifest and signup/paid tracking events are retained',async()=>{reset();await install();const row=await api.signupAmandaBrick(tenant,{email:'student@example.com',name:'Student',offerId:'lesson'});assert.ok(db.writes.some(x=>x.startsWith('assembly-evidence-')));assert.ok(db.writes.includes('enrollment-signup-'+row.registration_id));});
 test('rollback-disable: blocked manifests write nothing and failed installs remain incomplete',async()=>{reset();await assert.rejects(api.ensureTenantFoundation({...base,requestedModuleIds:['missing']}));assert.deepEqual(db.writes,[]);reset();db.dropped=true;await assert.rejects(install());const journal=[...db.records.values()].find(r=>r.brickIds);assert.equal(journal.state,'installing');});
-test('business-lifecycle: verified payment updates same registration; replay has one confirmation',async()=>{reset();await install();const row=await api.signupAmandaBrick(tenant,{email:'student@example.com',name:'<Student>',offerId:'lesson'});const ports={verify:async(reference:string)=>({reference,organizationId:tenant.organizationId,registrationId:row.registration_id,offerId:'lesson',amount:100,currency:'cad',paid:true}),confirm:async(message:any)=>{db.confirmations++;assert.match(message.html,/&lt;Student&gt;/);}};await assert.rejects(api.payAmandaBrick(tenant,row.registration_id,'pi_wrong',{...ports,verify:async(reference:string)=>({...await ports.verify(reference),amount:999})}));assert.equal((await api.readAmandaRegistration(tenant,row.registration_id)).payment_status,'unpaid');await api.payAmandaBrick(tenant,row.registration_id,'pi_test',ports);await api.payAmandaBrick(tenant,row.registration_id,'pi_test',ports);const again=await api.signupAmandaBrick(tenant,{email:'student@example.com',name:'Student',offerId:'lesson'});assert.equal(again.payment_status,'paid');assert.equal(again.payment_reference,'pi_test');assert.equal(db.confirmations,1);assert.equal([...db.records.keys()].filter(k=>/^experience:enrollment-[a-f0-9]{64}$/.test(k)).length,1);await assert.rejects(api.payAmandaBrick(tenant,row.registration_id,'pi_other',ports),/Conflicting/);});
+test('business-lifecycle: verified payment updates same registration; replay has one confirmation',async()=>{reset();await install();const row=await api.signupAmandaBrick(tenant,{email:'student@example.com',name:'<Student>',offerId:'lesson'});const ports={verify:async(reference:string)=>({reference,organizationId:tenant.organizationId,registrationId:row.registration_id,offerId:'lesson',amount:100,currency:'cad',paid:true}),confirm:async(message:{html:string})=>{db.confirmations++;assert.match(message.html,/&lt;Student&gt;/);}};await assert.rejects(api.payAmandaBrick(tenant,row.registration_id,'pi_wrong',{...ports,verify:async(reference:string)=>({...await ports.verify(reference),amount:999})}));assert.equal((await api.readAmandaRegistration(tenant,row.registration_id)).payment_status,'unpaid');await api.payAmandaBrick(tenant,row.registration_id,'pi_test',ports);await api.payAmandaBrick(tenant,row.registration_id,'pi_test',ports);const again=await api.signupAmandaBrick(tenant,{email:'student@example.com',name:'Student',offerId:'lesson'});assert.equal(again.payment_status,'paid');assert.equal(again.payment_reference,'pi_test');assert.equal(db.confirmations,1);assert.equal([...db.records.keys()].filter(k=>/^experience:enrollment-[a-f0-9]{64}$/.test(k)).length,1);await assert.rejects(api.payAmandaBrick(tenant,row.registration_id,'pi_other',ports),/Conflicting/);});
 test('immutable-version-fingerprint: original client files are outside portable adapter',()=>{assert.match(readFileSync('lib/portal-universal/bricks/registry.ts','utf8'),/version: 1/);assert.match(readFileSync('lib/amanda-catherine/preview-dollar-test.ts','utf8'),/STRIPE_TEST_SECRET_KEY/);});
 
-const request=(data:any,origin='https://example.com')=>new NextRequest('https://example.com/api/portal/new-academy/bricks/amanda',{method:'POST',headers:{'Content-Type':'application/json',origin},body:JSON.stringify(data)});
+const request=(data:Record<string,unknown>,origin='https://example.com')=>new NextRequest('https://example.com/api/portal/new-academy/bricks/amanda',{method:'POST',headers:{'Content-Type':'application/json',origin},body:JSON.stringify(data)});
 const context={params:Promise.resolve({slug:'new-academy'})};
 test('API denies unauthenticated, wrong tenant, missing membership and cross-origin requests',async()=>{reset();await install();assert.equal((await api.brickPOST(request({action:'signup',name:'Student',offerId:'lesson'}),context)).status,401);db.session={slug:'new-academy',orgId:'recOTHER',role:'viewer',email:'student@example.com'};assert.equal((await api.brickPOST(request({action:'signup',name:'Student',offerId:'lesson'}),context)).status,403);db.session.orgId=tenant.organizationId;db.member=false;assert.equal((await api.brickPOST(request({action:'signup',name:'Student',offerId:'lesson'}),context)).status,403);db.member=true;assert.equal((await api.brickPOST(request({action:'signup',name:'Student',offerId:'lesson'},'https://evil.example'),context)).status,403);});
 test('authenticated API signup, checkout and signed-callback fulfillment use installed adapter',async()=>{reset();await install();db.session={slug:'new-academy',orgId:tenant.organizationId,role:'viewer',email:'student@example.com'};const response=await api.brickPOST(request({action:'signup',name:'Student',offerId:'lesson'}),context);assert.equal(response.status,200);const {registration}=await response.json();assert.equal((await api.brickPOST(request({action:'checkout',registrationId:registration.registration_id}),context)).status,200);db.payment={id:'pi_test',metadata:{organizationId:tenant.organizationId,registrationId:registration.registration_id,offerId:'lesson'},amount_received:100,currency:'cad',status:'succeeded'};assert.equal(await api.fulfillPortableAmandaSession({metadata:{portableBrick:'amanda',organizationId:tenant.organizationId,portalSlug:tenant.portalSlug,registrationId:registration.registration_id},payment_intent:'pi_test',payment_status:'paid'}),true);assert.equal((await api.readAmandaRegistration(tenant,registration.registration_id)).payment_status,'paid');db.entitlements=db.entitlements.filter(e=>e.moduleId!=='billing');await assert.rejects(api.fulfillPortableAmandaPayment(tenant,registration.registration_id,'pi_test'),/unavailable/);});
@@ -60,8 +61,10 @@ test('Member grant reaches platform entitlement writer, readback and selected ba
  assert.ok(db.entitlements.some(e=>e.moduleId==='member'&&e.status==='active'));
 });
 
-test('AYF manifest installs with tenant isolation and durable evidence',async()=>{
+test('AYF manifest installs with real Postgres adapter, tenant isolation and durable evidence',async()=>{
   reset();
+  const runtime = installPeopleRuntimeFixture();
+  try {
   const manifest=JSON.parse(readFileSync('config/chassis-manifests/ayf.json','utf8'));
   const result=await api.ensureTenantFoundation({...manifest,assemblyMode:'certified'});
   const plan=api.requireClientFactoryAssembly(manifest);
@@ -69,4 +72,22 @@ test('AYF manifest installs with tenant isolation and durable evidence',async()=
   assert.equal(result.assemblyEvidence.portalSlug,manifest.portalSlug);
   assert.ok(db.writes.some(x=>x.startsWith('assembly-evidence-')));
   assert.equal([...db.records.values()].find(x=>x.portalSlug===manifest.portalSlug&&x.brickIds)?.state,'installed');
+  assert.deepEqual(runtime.calls.map(call=>call.organizationId), ['recCERTREADINESS','recCERTREADINESS','recTENANT1']);
+  const receipt=[...db.records.values()].find(x=>x.portalSlug===manifest.portalSlug&&x.provider==='postgres');
+  assert.equal(receipt.organizationId,'recTENANT1');
+  } finally { runtime.restore(); }
+});
+
+test('AYF missing People flags, credentials or schema fails before any tenant write',async()=>{
+  const manifest=JSON.parse(readFileSync('config/chassis-manifests/ayf.json','utf8'));
+  for (const failure of ['flags','credentials','schema']) {
+    reset(); const runtime=installPeopleRuntimeFixture();
+    try {
+      if(failure==='flags') delete process.env.UNIVERSAL_PEOPLE;
+      if(failure==='credentials') delete process.env.PEOPLE_SUPABASE_API_KEY;
+      if(failure==='schema') runtime.failSchema();
+      await assert.rejects(api.ensureTenantFoundation({...manifest,assemblyMode:'certified'}),/People|schema|Unavailable/i);
+      assert.deepEqual(db.writes,[],`${failure} must not create organizations or entitlements`);
+    } finally {runtime.restore();}
+  }
 });

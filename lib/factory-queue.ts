@@ -191,6 +191,7 @@ export async function launchFactoryProjectFlow(
   const queued = await enqueueFactoryProject(projectId);
   if (!queued) return null;
   scheduleFactoryGenerateJob(projectId);
+  if (created.buildMode === 'screenshot') return queued;
   try {
     const { notifyFactoryStarted } = await import('@/lib/factory-notify');
     await notifyFactoryStarted(projectId);

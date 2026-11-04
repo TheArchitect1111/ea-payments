@@ -1,0 +1,245 @@
+{
+  "evidenceKind": "curated local acceptance record",
+  "realProvidersVerified": false,
+  "productionVerified": false,
+  "ayfReady": false,
+  "excluded": "Raw logs, generated test directories, rasters, capture rows and credentials are not included.",
+  "branch": "work/ayf-chassis-20261103",
+  "startedAt": "2026-11-04T00:45:53.143Z",
+  "finishedAt": "2026-11-04T01:10:52.280Z",
+  "status": "FAIL",
+  "sourceReportSha256": "b642571e9d3635db1960a3df61b25ea89c920f350889682d3b85a36bc4e01f28",
+  "configurationPresence": {
+    "vision": false,
+    "airtable": false,
+    "peopleCredentials": false,
+    "peopleEnabled": false,
+    "peoplePersistEnabled": false,
+    "remoteVerifier": false
+  },
+  "jobs": [
+    {
+      "name": "behavioral",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 2879,
+      "attempt": 6,
+      "priorAttemptStatuses": [
+        "FAIL",
+        "FAIL",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "scope": "--test-name-pattern=private verifier boundary",
+      "coverageNote": "Targeted repair; unchanged passing cases retained in previous attempt logs",
+      "sourceLogSha256": "006889942070456350ddc198aeafa85b2c2f83809ef1f5f03ee428a1598b1442"
+    },
+    {
+      "name": "factory-production",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 248,
+      "attempt": 2,
+      "priorAttemptStatuses": [
+        "FAIL"
+      ],
+      "sourceLogSha256": "71af7f399b33ebdf179dcd065f3002a9a42f720f210c4a76fc99d40c62b1560c"
+    },
+    {
+      "name": "factory-capability-registry",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 261,
+      "attempt": 2,
+      "priorAttemptStatuses": [
+        "FAIL"
+      ],
+      "sourceLogSha256": "aab8d2287d8ee98cbe894f1ad147b2ed41eb1963464647f61b4f726e92345738"
+    },
+    {
+      "name": "factory-orchestrator",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 191,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "2d42e060f0c29c8f3fea8f672391cea6cac16836630a019f81e60919e8d3b950"
+    },
+    {
+      "name": "factory-project-context",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 172,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "1da6d35032cfaa8045efdd1ed6e80575d3d04fea0ab1681e63f5c2c62e3e1790"
+    },
+    {
+      "name": "universal-quick-launch",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 175,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "66030f4dc869d137f9b769b5886540eef059bc0a05788443039de36829f9507b"
+    },
+    {
+      "name": "production-protection",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 206,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "5eb94df0219f363c2e936cdaa4cd0de0917ba2fda5c6624a485fec57ea3fa0aa"
+    },
+    {
+      "name": "tenant-release-safety",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 165,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "3adb365bb80ca70f3e0564f5e18cfa1c3415d177a3a49a5173c5b25bfc3c4f01"
+    },
+    {
+      "name": "release-guardrails",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 177,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "cc77b9f482ebfd090fabb38058fe4a4a6394b2c6993ca842a375149f0baf00c6"
+    },
+    {
+      "name": "master-guard-contract",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 152,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "6436826719ef4588fc765858632f3b719739ed0602c988da0315e587fcef01cd"
+    },
+    {
+      "name": "system-registry",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 154,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "a60c0ec62fa6ac75c33e9d98d7eb7d9047db4bda8a8b6416dbcf79db42f9f171"
+    },
+    {
+      "name": "tenant-safety",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 160,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "5549da76b20937183104b9d3281d5e4b80b8ea5e196071794f641a9f7a8cf209"
+    },
+    {
+      "name": "lego-strict-authority",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 137,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "66a6fb0723f6d504eb1c2795bb59d00b4b9a93a8061a9074d758b6ae97926063"
+    },
+    {
+      "name": "lego-final-acceptance",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 134,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "2a86d1ca07a099cb9fab94975f88617a31ee2398ff084cd96942909cb87751e2"
+    },
+    {
+      "name": "airtable-read-hardening",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 136,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "834c792bbd62123408f364cb59e324f92ffb2278ea7c5c2099f459a73db00ac1"
+    },
+    {
+      "name": "factory-run2-torture-certification",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 158,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "ef21a84110728065b2032bc3584da8377980c72690e24eb4f75973b2d409035f"
+    },
+    {
+      "name": "factory-identity-concept-pack",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 682,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "254d75b6c7b42ef27941a3cb97a3e2fac25ba301b87aa5f8fe25e8de15f7632b"
+    },
+    {
+      "name": "experience-creation-engine",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 407,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "f09057b82d6f310cdedaf933b5e2cece07ba56340e569481bb3a6462cd943eb7"
+    },
+    {
+      "name": "factory-wire-selected",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 143,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "a80e51926967240eb064fb7c62ee858a9e10e268385366e7df7f4ce0dab0f37a"
+    },
+    {
+      "name": "factory-quick-launch-review",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 491,
+      "attempt": 1,
+      "priorAttemptStatuses": [],
+      "sourceLogSha256": "6dd51de825e0e9ca01c8d97ac75dcb15f5294634237ad6db4a281c61712bee8e"
+    },
+    {
+      "name": "lint",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 7735,
+      "attempt": 6,
+      "priorAttemptStatuses": [
+        "FAIL",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "sourceLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "types",
+      "status": "FAIL",
+      "exitCode": 2,
+      "durationMs": 43470,
+      "diagnosticCount": 413,
+      "attempt": 2,
+      "priorAttemptStatuses": [
+        "FAIL"
+      ],
+      "sourceLogSha256": "75c5bd814d8ae962ccd24792a361a3bb932303f961436bfcd283750bb2ffc076"
+    }
+  ],
+  "totals": {
+    "PASS": 21,
+    "FAIL": 1
+  }
+}

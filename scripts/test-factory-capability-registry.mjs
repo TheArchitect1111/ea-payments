@@ -305,6 +305,13 @@ const {
   });
 
   const websiteMod = await import(pathToFileURL(join(root, 'lib/factory-builders/website-builder.mjs')).href);
+  const { wrapBuilderWithExecutionContract } = await import('../lib/factory-execution-contract.mjs');
+  const builders = new Map([['website', wrapBuilderWithExecutionContract(websiteMod.websiteBuilder)]]);
+  for (const name of ['portal','learning','knowledge','report']) {
+    const mod = await import(`../lib/factory-builders/${name}-builder.mjs`);
+    const builder=wrapBuilderWithExecutionContract(mod[`${name}Builder`]);
+    builders.set(builder.workOrderType, builder);
+  }
   registry.register({
     id: 'production',
     dependencies: ['planning'],
@@ -319,16 +326,17 @@ const {
         if (!prev || String(wo.createdAt || '') >= String(prev.createdAt || '')) byId.set(wo.id, wo);
       }
       const websitePending = [...byId.values()].filter(
-        (wo) => wo.type === 'website' && wo.status !== 'complete',
+        (wo) => builders.has(wo.type) && wo.status !== 'complete',
       );
       let next = { ...context, artifacts: [...(context.artifacts || [])] };
       for (const wo of websitePending) {
-        const built = websiteMod.buildWebsiteDeliverable(wo, {
+        const built = builders.get(wo.type).build(wo, {
           artifacts: next.artifacts,
           projectId: context.projectId,
           seedClient: context.seed.client,
         });
         if (!built.ok) continue;
+        assert(Boolean(built.executionContract) && built.deliveryBlocked === true, `${wo.type} verification remains mandatory`);
         next.artifacts = [
           ...next.artifacts,
           ...built.drafts.map((draft) => ({

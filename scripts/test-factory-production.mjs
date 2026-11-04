@@ -393,7 +393,27 @@ function planningArtifacts(projectId) {
   assert(listPendingWorkOrders(ctx.artifacts, 'website').length === 0, 'website WO complete');
   assert(listWorkOrdersFromArtifacts(ctx.artifacts).find((w) => w.type === 'website')?.status === 'complete', 'website complete');
   assert(progress.percentComplete === 100, 'website in-scope 100%');
-  assert(productionCanRun(ctx) === false, 'production idle after website complete');
+  assert(productionCanRun(ctx) === true, 'remaining certified builder work keeps production runnable');
+  const { wrapBuilderWithExecutionContract } = await import('../lib/factory-execution-contract.mjs');
+  const productionBuilders = [websiteMod.websiteBuilder];
+  for (const name of ['portal','learning','knowledge','report']) {
+    const mod = await import(`../lib/factory-builders/${name}-builder.mjs`);
+    productionBuilders.push(mod[`${name}Builder`]);
+  }
+  const productionRegistry = createBuilderRegistry();
+  for (const builder of productionBuilders) productionRegistry.register(wrapBuilderWithExecutionContract(builder));
+  for (const order of listPendingWorkOrders(ctx.artifacts)) {
+    const builder = productionRegistry.getByWorkOrderType(order.type);
+    if (!builder) continue; // Accessibility/QA/automation belong to their own controllers.
+    const result = builder.build(order, { artifacts: ctx.artifacts, projectId, seedClient: 'BGCA' });
+    assert(result.ok && result.executionContract && result.deliveryBlocked, `${order.type} retains mandatory execution contract`);
+    const appended = appendArtifacts(ctx.artifacts, result.drafts.map(d => ({ ...d, projectId })));
+    ctx = appendProjectContextArtifacts(ctx, appended.artifacts);
+  }
+  assert(listPendingWorkOrders(ctx.artifacts).filter(wo=>productionRegistry.supportedWorkOrderTypes().includes(wo.type)).length === 0, 'all supported work completed by registered builders');
+  assert(listPendingWorkOrders(ctx.artifacts).length > 0, 'unsupported work remains pending for its owning capability');
+  assert(productionCanRun(ctx) === false, 'production idle after every supported work order completes');
+  assert(listReviewGatesFromArtifacts(ctx.artifacts).every(gate => gate.status === 'pending'), 'builder execution cannot approve review gates');
 }
 
 // --- Contract: preserved surfaces + no other builders ---
@@ -423,9 +443,9 @@ function planningArtifacts(projectId) {
   assert(production.includes('getByWorkOrderType') || production.includes('Builder'), 'dispatches builders');
   assert(production.includes('[factory-production] metrics'), 'logs metrics');
   assert(websiteBuilderSrc.includes("workOrderType: 'website'") || websiteBuilderSrc.includes("type !== 'website'"), 'website-only builder');
-  assert(!buildersIndex.includes('portalBuilder'), 'no portal builder registered');
-  assert(!buildersIndex.includes('learningBuilder'), 'no learning builder registered');
-  assert(!buildersIndex.includes('reportBuilder'), 'no report builder registered');
+  for (const builder of ['websiteBuilder','portalBuilder','learningBuilder','knowledgeBuilder','reportBuilder'])
+    assert(buildersIndex.includes(builder), `${builder} registered`);
+  assert(buildersIndex.includes('wrapBuilderWithExecutionContract'), 'bootstrap retains mandatory execution contracts');
   assert(bootstrap.includes('productionCapability'), 'bootstrap registers production');
   assert(bootstrap.includes('bootstrapBuilderRegistry'), 'bootstrap builders with capabilities');
   assert(docs.includes('Builder Registry'), 'docs cover builder registry');

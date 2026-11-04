@@ -1,0 +1,119 @@
+{
+  "evidenceKind": "curated local acceptance record",
+  "realProvidersVerified": false,
+  "productionVerified": false,
+  "ayfReady": false,
+  "excluded": "Raw logs, generated test directories, rasters, capture rows and credentials are not included.",
+  "sourceReportSha256": "d83419725c3dcfcd6493c71725319bec902a4a6c1c03c8032ea63bd93460d389",
+  "projectId": "synthetic-project",
+  "revision": "2d391afdca89de9ca2f5652b474adc053ac99699b74c80e9f605f76b679299f7",
+  "runId": "browser-1793754078303",
+  "outcomes": [
+    {
+      "check": "rendering",
+      "status": "PASS",
+      "reason": "Actual private browser/HTTP interactions passed"
+    },
+    {
+      "check": "links",
+      "status": "PASS",
+      "reason": "Actual private browser/HTTP interactions passed"
+    },
+    {
+      "check": "login",
+      "status": "PASS",
+      "reason": "Actual private browser/HTTP interactions passed"
+    },
+    {
+      "check": "form-persistence",
+      "status": "PASS",
+      "reason": "Actual private browser/HTTP interactions passed"
+    },
+    {
+      "check": "authorization",
+      "status": "PASS",
+      "reason": "Actual private browser/HTTP interactions passed"
+    },
+    {
+      "check": "tenant-isolation",
+      "status": "PASS",
+      "reason": "Actual private browser/HTTP interactions passed"
+    },
+    {
+      "check": "visual-desktop",
+      "status": "FAIL",
+      "reason": "home desktop pixel difference 0.11579 exceeds approved tolerance 0.005"
+    },
+    {
+      "check": "visual-mobile",
+      "status": "BLOCKED",
+      "reason": "Approved mobile reference files required for every page"
+    }
+  ],
+  "evidence": [
+    {
+      "check": "rendering",
+      "passed": true,
+      "method": "browser",
+      "detail": "Private browser worker; test-member sessions, actual routes and read-back",
+      "runId": "browser-1793754078303",
+      "revision": "2d391afdca89de9ca2f5652b474adc053ac99699b74c80e9f605f76b679299f7",
+      "checkedAt": "2026-11-04T01:01:18.538Z"
+    },
+    {
+      "check": "links",
+      "passed": true,
+      "method": "browser",
+      "detail": "Private browser worker; test-member sessions, actual routes and read-back",
+      "runId": "browser-1793754078303",
+      "revision": "2d391afdca89de9ca2f5652b474adc053ac99699b74c80e9f605f76b679299f7",
+      "checkedAt": "2026-11-04T01:01:18.590Z"
+    },
+    {
+      "check": "login",
+      "passed": true,
+      "method": "browser",
+      "detail": "Private browser worker; test-member sessions, actual routes and read-back",
+      "runId": "browser-1793754078303",
+      "revision": "2d391afdca89de9ca2f5652b474adc053ac99699b74c80e9f605f76b679299f7",
+      "checkedAt": "2026-11-04T01:01:18.619Z"
+    },
+    {
+      "check": "form-persistence",
+      "passed": true,
+      "method": "browser",
+      "detail": "Private browser worker; test-member sessions, actual routes and read-back",
+      "runId": "browser-1793754078303",
+      "revision": "2d391afdca89de9ca2f5652b474adc053ac99699b74c80e9f605f76b679299f7",
+      "checkedAt": "2026-11-04T01:01:18.725Z"
+    },
+    {
+      "check": "authorization",
+      "passed": true,
+      "method": "browser",
+      "detail": "Private browser worker; test-member sessions, actual routes and read-back",
+      "runId": "browser-1793754078303",
+      "revision": "2d391afdca89de9ca2f5652b474adc053ac99699b74c80e9f605f76b679299f7",
+      "checkedAt": "2026-11-04T01:01:18.733Z"
+    },
+    {
+      "check": "tenant-isolation",
+      "passed": true,
+      "method": "browser",
+      "detail": "Private browser worker; test-member sessions, actual routes and read-back",
+      "runId": "browser-1793754078303",
+      "revision": "2d391afdca89de9ca2f5652b474adc053ac99699b74c80e9f605f76b679299f7",
+      "checkedAt": "2026-11-04T01:01:18.738Z"
+    },
+    {
+      "check": "visual-desktop",
+      "passed": false,
+      "method": "visual-comparison",
+      "detail": "home desktop pixel difference 0.11579 exceeds approved tolerance 0.005",
+      "runId": "browser-1793754078303",
+      "revision": "2d391afdca89de9ca2f5652b474adc053ac99699b74c80e9f605f76b679299f7",
+      "checkedAt": "2026-11-04T01:01:18.860Z"
+    }
+  ],
+  "interpretation": "Desktop mismatch is an intentional negative fixture; missing mobile references remain BLOCKED. No visual acceptance is claimed."
+}

@@ -1,0 +1,82 @@
+{
+  "evidenceKind": "curated local acceptance record",
+  "realProvidersVerified": false,
+  "productionVerified": false,
+  "ayfReady": false,
+  "excluded": "Raw logs, generated test directories, rasters, capture rows and credentials are not included.",
+  "sourceReportSha256": "0f7edc80ce5342d2f66f3316a934fd3459a0fb34f82f91bc7d942417ccba38a7",
+  "projectId": "synthetic-project",
+  "revision": "2d391afdca89de9ca2f5652b474adc053ac99699b74c80e9f605f76b679299f7",
+  "status": "draft_ready",
+  "assertions": [
+    "private preview anonymous denial",
+    "desktop rendering",
+    "cross-page links",
+    "anonymous and cross-tenant form denial",
+    "controlled login redirect",
+    "canonical capture durable disk read-back",
+    "failed writes, stale drafts and conflicting replays rejected",
+    "mobile no horizontal overflow",
+    "actual intake and applications portals render persisted own records; signed sessions, durable ledger replay/drop failures and approved asset/source routes verified"
+  ],
+  "evidence": [
+    {
+      "check": "rendering",
+      "passed": true,
+      "method": "browser",
+      "detail": "Synthetic HTTP/browser acceptance: rendering; controlled auth/vision/storage services",
+      "runId": "synthetic-http",
+      "revision": "2d391afdca89de9ca2f5652b474adc053ac99699b74c80e9f605f76b679299f7",
+      "checkedAt": "2026-11-04T01:01:18.885Z"
+    },
+    {
+      "check": "links",
+      "passed": true,
+      "method": "browser",
+      "detail": "Synthetic HTTP/browser acceptance: links; controlled auth/vision/storage services",
+      "runId": "synthetic-http",
+      "revision": "2d391afdca89de9ca2f5652b474adc053ac99699b74c80e9f605f76b679299f7",
+      "checkedAt": "2026-11-04T01:01:18.885Z"
+    },
+    {
+      "check": "login",
+      "passed": true,
+      "method": "browser",
+      "detail": "Synthetic HTTP/browser acceptance: login; controlled auth/vision/storage services",
+      "runId": "synthetic-http",
+      "revision": "2d391afdca89de9ca2f5652b474adc053ac99699b74c80e9f605f76b679299f7",
+      "checkedAt": "2026-11-04T01:01:18.885Z"
+    },
+    {
+      "check": "form-persistence",
+      "passed": true,
+      "method": "browser",
+      "detail": "Synthetic HTTP/browser acceptance: form-persistence; controlled auth/vision/storage services",
+      "runId": "synthetic-http",
+      "revision": "2d391afdca89de9ca2f5652b474adc053ac99699b74c80e9f605f76b679299f7",
+      "checkedAt": "2026-11-04T01:01:18.885Z"
+    },
+    {
+      "check": "authorization",
+      "passed": true,
+      "method": "browser",
+      "detail": "Synthetic HTTP/browser acceptance: authorization; controlled auth/vision/storage services",
+      "runId": "synthetic-http",
+      "revision": "2d391afdca89de9ca2f5652b474adc053ac99699b74c80e9f605f76b679299f7",
+      "checkedAt": "2026-11-04T01:01:18.885Z"
+    },
+    {
+      "check": "tenant-isolation",
+      "passed": true,
+      "method": "browser",
+      "detail": "Synthetic HTTP/browser acceptance: tenant-isolation; controlled auth/vision/storage services",
+      "runId": "synthetic-http",
+      "revision": "2d391afdca89de9ca2f5652b474adc053ac99699b74c80e9f605f76b679299f7",
+      "checkedAt": "2026-11-04T01:01:18.885Z"
+    }
+  ],
+  "limitations": [
+    "Vision and identity/storage provider transports are controlled fixtures; login handler, HMAC sessions, capture and portal ledger/page are actual code.",
+    "Real provider availability and screenshot-reference fidelity are not certified."
+  ]
+}

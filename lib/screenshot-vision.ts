@@ -10,7 +10,7 @@ Return plain text only — no markdown fences.`;
 export async function describeScreenshotBase64(
   base64: string,
   mimeType = 'image/png',
-  options?: { prompt?: string },
+  options?: { prompt?: string; maxTokens?: number; throwOnFailure?: boolean },
 ): Promise<string | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY ?? process.env.CLAUDE_API_KEY;
   if (!apiKey || !base64) return null;
@@ -18,6 +18,7 @@ export async function describeScreenshotBase64(
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
+      signal: AbortSignal.timeout(20000),
       headers: {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
@@ -25,7 +26,7 @@ export async function describeScreenshotBase64(
       },
       body: JSON.stringify({
         model: process.env.CLAUDE_MODEL ?? 'claude-sonnet-4-6',
-        max_tokens: 1200,
+        max_tokens: Math.min(8000, Math.max(1200, options?.maxTokens || 1200)),
         messages: [
           {
             role: 'user',
@@ -49,6 +50,9 @@ export async function describeScreenshotBase64(
     });
 
     if (!res.ok) {
+      if (options?.throwOnFailure) throw Object.assign(new Error(`Vision provider returned ${res.status}`), {
+        retryable: [429, 500, 502, 503, 504].includes(res.status),
+      });
       console.error('Vision request failed:', await res.text());
       return null;
     }
@@ -56,6 +60,7 @@ export async function describeScreenshotBase64(
     const data = (await res.json()) as { content?: { type: string; text?: string }[] };
     return data.content?.find((part) => part.type === 'text')?.text?.trim() ?? null;
   } catch (err) {
+    if (options?.throwOnFailure) throw err;
     console.error('Vision request error:', err);
     return null;
   }

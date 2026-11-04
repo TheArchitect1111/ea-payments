@@ -26,6 +26,8 @@ export type {
 };
 
 export type LaunchProjectInput = {
+  buildMode?: 'exploratory' | 'screenshot';
+  screenshotBuild?: import('./factory-screenshot-build').ScreenshotBuildRequest;
   command?: string;
   client?: string;
   companyName?: string;
@@ -173,6 +175,8 @@ export async function createFactoryProject(
   );
   const project: FactoryProject = {
     version: 1,
+    buildMode: body.buildMode || 'exploratory',
+    screenshotBuild: body.buildMode === 'screenshot' ? body.screenshotBuild : undefined,
     id,
     client: resolved.input.client,
     goal: resolved.input.goal,

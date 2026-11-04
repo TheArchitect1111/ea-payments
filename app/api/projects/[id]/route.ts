@@ -160,6 +160,17 @@ export async function GET(request: NextRequest, { params }: Params) {
     return NextResponse.json({ ok: false, error: 'Project not found.' }, { status: 404 });
   }
 
+  if (project.buildMode === 'screenshot') {
+    const result = project.screenshotResult;
+    return NextResponse.json({ ok: true, project, screenshotBuild: result || null,
+      plainLanguageStage: result ? (result.status === 'blocked' ? 'Private build needs attention' : 'Private draft ready') : 'Reconstructing your screenshots',
+      progressHint: result ? `${result.pages.length} pages; ${result.blockers.length} unresolved items. Behavioral acceptance is ${result.status === 'accepted' ? 'recorded' : 'pending'}.` : 'Interpreting layout and checking certified tenant wiring.',
+      inProgress: !result && project.pipelineStatus !== 'FAILED' && project.pipelineStatus !== 'CANCELLED',
+      ready: Boolean(result?.pages.length), failed: project.pipelineStatus === 'FAILED',
+      statusLabel: result?.status || project.pipelineStatus,
+    }, { headers: { 'cache-control': 'private, no-store' } });
+  }
+
   const launch = buildLaunchConceptStatus(project);
   const pipelineInProgress = factoryIsInProgress(project.pipelineStatus);
   const inProgress = launch.identityBlocked

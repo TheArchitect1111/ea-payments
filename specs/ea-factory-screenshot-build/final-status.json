@@ -1,0 +1,42 @@
+{
+  "branch": "work/ayf-chassis-20261103",
+  "scopedAcceptance": "PASS",
+  "productionVerified": false,
+  "ayfReady": false,
+  "jobs": {
+    "PASS": 21,
+    "FAIL": [
+      {
+        "name": "types",
+        "diagnostics": 413,
+        "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1793753153141\\types-attempt2.log"
+      }
+    ]
+  },
+  "externalBlockerCount": 4,
+  "externalBlockers": [
+    {
+      "id": "E1",
+      "status": "BLOCKED",
+      "reason": "Approved vision credential unavailable"
+    },
+    {
+      "id": "E2",
+      "status": "BLOCKED",
+      "reason": "Durable Airtable credentials/data access unavailable"
+    },
+    {
+      "id": "E3",
+      "status": "BLOCKED",
+      "reason": "People Postgres/PostgREST credentials/schema readiness unavailable; flags disabled"
+    },
+    {
+      "id": "E4",
+      "status": "BLOCKED",
+      "reason": "Approved real AYF reference/binding/role/test-session packet unavailable"
+    }
+  ],
+  "consolidatedReport": "C:/Users/brick/AppData/Local/Temp/ea-screenshot-consolidated-1793753153141/report.json",
+  "finalReport": "specs/ea-factory-screenshot-build/final-evidence.md",
+  "recordedAt": "2026-11-04T01:14:49.384Z"
+}

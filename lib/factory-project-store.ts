@@ -162,6 +162,10 @@ export type FactoryProjectContextBlob = {
 
 export type FactoryProject = {
   version: 1;
+  buildMode?: 'exploratory' | 'screenshot';
+  screenshotBuild?: import('./factory-screenshot-build').ScreenshotBuildRequest;
+  screenshotResult?: import('./factory-screenshot-build').ScreenshotBuildResult;
+  screenshotRetryAttempts?: number;
   id: string;
   client: string;
   goal: string;

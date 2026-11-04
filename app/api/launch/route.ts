@@ -3,7 +3,7 @@ import { checkRateLimit } from '@/lib/ai/rate-limit';
 import { requireFactoryApiAccess } from '@/lib/factory-api-auth';
 import { parseFactoryLaunchBody } from '@/lib/factory-launch-request';
 import { createFactoryProject, resolveLaunchProjectInput } from '@/lib/factory-project';
-import { listFactoryProjects } from '@/lib/factory-project-store';
+import { listFactoryProjects, saveFactoryProject } from '@/lib/factory-project-store';
 import { launchFactoryProjectFlow } from '@/lib/factory-queue';
 import { registerFactoryProjectControlPlane } from '@/lib/control-plane-bridge';
 
@@ -36,16 +36,43 @@ export async function POST(request: NextRequest) {
   }
 
   const resolved = resolveLaunchProjectInput(parsed.body);
-  if (resolved.input?.client && !parsed.forceNew) {
+  if (resolved.input?.client && (!parsed.forceNew || parsed.body.buildMode === 'screenshot')) {
     const recent = await listFactoryProjects();
-    const needle = resolved.input.client.trim().toLowerCase();
+    const canonicalName = (name: string) => parsed.body.buildMode === 'screenshot' && /^(ayf|are you fundable)$/i.test(name.trim()) ? 'are you fundable' : name.trim().toLowerCase();
+    const needle = canonicalName(resolved.input.client);
     const cutoff = Date.now() - DUPLICATE_WINDOW_MS;
     const existing = recent.find((project) => {
-      if (project.client.trim().toLowerCase() !== needle) return false;
+      if (canonicalName(project.client) !== needle) return false;
+      if (parsed.body.buildMode === 'screenshot') return true;
       const created = Date.parse(project.createdAt);
       return Number.isFinite(created) && created >= cutoff;
     });
     if (existing) {
+      if (parsed.body.buildMode === 'screenshot') {
+        if (existing.pipelineStatus === 'CANCELLED') return NextResponse.json({ ok: false,
+          error: 'The existing project is cancelled. It was not duplicated or restarted.' }, { status: 409 });
+        const bridge = await registerFactoryProjectControlPlane(existing);
+        if (!bridge.ok) return NextResponse.json({ ok: false, error: 'Canonical Control Plane registration is required before private execution.' }, { status: 503 });
+        const attachments = [...existing.attachments];
+        const indexes = (parsed.body.attachments || []).map(attachment => {
+          const priorIndex = attachments.findIndex(a => a.url && a.url === attachment.url);
+          if (priorIndex >= 0) return priorIndex;
+          attachments.push(attachment); return attachments.length - 1;
+        });
+        if (attachments.length > 1024) return NextResponse.json({ ok: false, error: 'Project attachment limit reached. Existing references were preserved.' }, { status: 400 });
+        const config = parsed.body.screenshotBuild!;
+        const screenshotBuild = { ...config, pages: config.pages.map(p => ({ ...p, attachmentIndex: indexes[p.attachmentIndex]! })),
+          imageBindings: config.imageBindings.map(b => ({ ...b, attachmentIndex: indexes[b.attachmentIndex]! })) };
+        const updated = { ...existing, buildMode: 'screenshot' as const, screenshotBuild,
+          attachments, screenshotResult: undefined, error: undefined,
+          screenshotRetryAttempts: 0,
+          pipelineStatus: 'QUEUED' as const, updatedAt: new Date().toISOString() };
+        const saved = await saveFactoryProject(updated);
+        if (!saved.ok) return NextResponse.json({ ok: false, error: 'Could not save the private build request.' }, { status: 503 });
+        await launchFactoryProjectFlow(existing.id);
+        return NextResponse.json({ ok: true, reused: true, projectId: existing.id, client: existing.client,
+          status: 'QUEUED', message: 'Screenshot build queued on the existing project. No duplicate was created.' });
+      }
       const bridge = await registerFactoryProjectControlPlane(existing);
       if (!bridge.ok) {
         return NextResponse.json(

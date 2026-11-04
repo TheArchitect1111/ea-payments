@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useSearchParams } from 'next/navigation';
+import type { ScreenshotBuildRequest } from '@/lib/factory-screenshot-build';
 
 type DesiredOutput = 'landing-page' | 'website' | 'portal' | 'website-and-portal';
 
@@ -111,6 +112,14 @@ function loadDraft() {
 }
 
 export default function QuickLaunchClient() {
+  const [buildMode, setBuildMode] = useState<'exploratory' | 'screenshot'>('exploratory');
+  const [portalSlug, setPortalSlug] = useState('');
+  const [assemblyManifest, setAssemblyManifest] = useState<'' | 'ayf' | 'starter'>('');
+  const [screenshotRequest, setScreenshotRequest] = useState<ScreenshotBuildRequest | null>(null);
+  const [approvedAssets, setApprovedAssets] = useState<File[]>([]);
+  const [assetChoices, setAssetChoices] = useState<Array<{ index: number; name: string }>>([]);
+  const [screenshotPages, setScreenshotPages] = useState<Array<{ id: string; attachmentIndex: number; order: number; surface: 'website' | 'portal'; title: string }>>([]);
+  const [screenshotResult, setScreenshotResult] = useState<{ status: string; blockers: string[]; pages: Array<{ id: string; title: string; previewPath: string; spec: { ambiguities: string[]; components: Array<{ id: string; type: string; text: string; destination?: { pageId?: string; moduleId?: string; login?: true } }> } }>; evidence: Array<{ check: string; passed: boolean; detail: string }> } | null>(null);
   const searchParams = useSearchParams();
   const initialProjectId = searchParams.get('projectId')?.trim() || '';
 
@@ -186,7 +195,8 @@ export default function QuickLaunchClient() {
   }, []);
 
   const applyStatus = useCallback((data: {
-    project?: { client?: string; error?: string };
+    screenshotBuild?: typeof screenshotResult;
+    project?: { client?: string; error?: string; buildMode?: string; screenshotBuild?: ScreenshotBuildRequest; attachments?: Array<{ name?: string }> };
     plainLanguageStage?: string;
     progressHint?: string;
     statusLabel?: string;
@@ -196,6 +206,24 @@ export default function QuickLaunchClient() {
     launch?: LaunchState;
     review?: ReviewPayload;
   }) => {
+    if (data.project?.buildMode === 'screenshot') {
+      setBuildMode('screenshot');
+      setScreenshotRequest(data.project.screenshotBuild || null);
+      const pageIndexes = new Set(data.project.screenshotBuild?.pages.map(p => p.attachmentIndex) || []);
+      setAssetChoices((data.project.attachments || []).flatMap((asset, index) => pageIndexes.has(index) ? [] : [{ index, name: asset.name || `Approved image ${index + 1}` }]));
+    }
+    if (data.screenshotBuild) {
+      setBuildMode('screenshot');
+      setScreenshotResult(data.screenshotBuild);
+      setClientName(data.project?.client || '');
+      setStage(data.plainLanguageStage || 'Private draft');
+      setProgressHint(data.progressHint || '');
+      setInProgress(Boolean(data.inProgress));
+      setReady(Boolean(data.ready));
+      setFailed(Boolean(data.failed));
+      setReview(null); setLaunch(null);
+      return;
+    }
     setClientName(data.project?.client || '');
     const nextReady = Boolean(data.ready);
     const nextFailed = Boolean(data.failed);
@@ -234,7 +262,8 @@ export default function QuickLaunchClient() {
         });
         const data = (await res.json()) as {
           ok?: boolean;
-          project?: { client?: string; error?: string };
+          project?: { client?: string; error?: string; buildMode?: string; screenshotBuild?: ScreenshotBuildRequest; attachments?: Array<{ name?: string }> };
+          screenshotBuild?: typeof screenshotResult;
           plainLanguageStage?: string;
           progressHint?: string;
           statusLabel?: string;
@@ -246,6 +275,7 @@ export default function QuickLaunchClient() {
         };
         if (cancelled || !data.ok) return;
         applyStatus(data);
+        if (data.screenshotBuild) return;
 
         const blocked = Boolean(data.launch?.identityBlocked);
         if (data.inProgress || (!data.ready && !data.failed && !blocked)) {
@@ -288,6 +318,11 @@ export default function QuickLaunchClient() {
     setWireMessage(null);
 
     const client = name.trim();
+    if (buildMode === 'screenshot' && (!files.length || screenshotPages.length !== files.length)) {
+      setError('Add and classify your page screenshots before starting.');
+      setBusy(false);
+      return;
+    }
     if (!client) {
       setError('Enter a person or organization name.');
       setBusy(false);
@@ -310,22 +345,40 @@ export default function QuickLaunchClient() {
 
     try {
       const form = new FormData();
+      form.set('buildMode', buildMode);
+      if (buildMode === 'screenshot') form.set('screenshotBuild', JSON.stringify({ version: 1,
+        pages: screenshotPages, ...(portalSlug.trim() ? { portalSlug: portalSlug.trim() } : {}),
+        ...(assemblyManifest ? { assembly: { manifest: assemblyManifest, requestedModuleIds: [] } } : {}), formBindings: [] }));
       form.set('command', `Launch ${client}`);
       form.set('client', client);
       form.set('companyName', client);
-      form.set('goal', outputMeta.goal);
+      form.set('goal', buildMode === 'screenshot' ? 'Reconstruct ordered screenshot specifications into a wired private website and portal draft' : outputMeta.goal);
       form.set('deliverable', outputMeta.deliverable);
       form.set('notes', notes);
       if (knownUrl.trim()) form.set('url', knownUrl.trim());
       if (forceNew) form.set('forceNew', '1');
-      files.forEach((file, index) => {
+      (buildMode === 'screenshot' ? [...files, ...approvedAssets] : files).forEach((file, index) => {
         form.append(index === 0 ? 'image' : `file${index}`, file);
       });
 
+      let launchBody: BodyInit = form;
+      if (buildMode === 'screenshot') {
+        const attachments = [];
+        for (const file of [...files, ...approvedAssets]) {
+          const upload = new FormData(); upload.set('file', file);
+          const uploaded = await fetch('/api/admin/factory/screenshot-assets', { method: 'POST', credentials: 'include', body: upload });
+          const response = await uploaded.json();
+          if (!uploaded.ok || !response.ok) throw new Error(response.error || 'Screenshot upload failed.');
+          attachments.push(response.attachment);
+        }
+        launchBody = JSON.stringify({ ...Object.fromEntries([...form.entries()].filter(([, value]) => typeof value === 'string')),
+          screenshotBuild: JSON.parse(String(form.get('screenshotBuild'))), attachments });
+      }
       const res = await fetch('/api/launch', {
         method: 'POST',
         credentials: 'include',
-        body: form,
+        ...(buildMode === 'screenshot' ? { headers: { 'content-type': 'application/json' } } : {}),
+        body: launchBody,
       });
       const data = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
@@ -347,10 +400,11 @@ export default function QuickLaunchClient() {
       setInProgress(true);
       setReady(false);
       setStage('Finding the right person or organization');
+      if (buildMode === 'screenshot') setStage('Reconstructing your screenshots');
       setMessage(
         data.reused
           ? 'Reopening your recent project for this name.'
-          : 'Research & create started. Stay on this screen.',
+          : buildMode === 'screenshot' ? 'Private screenshot build started. Stay on this screen.' : 'Research & create started. Stay on this screen.',
       );
       setFiles([]);
       reviewAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -482,12 +536,55 @@ export default function QuickLaunchClient() {
           Drop in a name. We research and build.
         </h1>
         <p className="mt-3 text-sm leading-6 text-[#665F57]">
-          Enter who to build for. We research, create three website samples with matching portals,
-          and bring you back here to choose a direction.
+          {buildMode === 'screenshot' ? 'Upload ordered screenshots to recreate website and portal pages in a working private draft.' : 'Enter who to build for. We research, create three website samples with matching portals, and bring you back here to choose a direction.'}
         </p>
 
         {!projectId ? (
           <form className="mt-6 space-y-5" onSubmit={onSubmit}>
+            <fieldset>
+              <legend className="text-sm font-bold">How should we build?</legend>
+              <label className="mr-4"><input type="radio" name="build-mode" checked={buildMode === 'exploratory'} onChange={() => setBuildMode('exploratory')} /> Research &amp; three concepts</label>
+              <label><input type="radio" name="build-mode" checked={buildMode === 'screenshot'} onChange={() => setBuildMode('screenshot')} /> Screenshot Build Mode</label>
+            </fieldset>
+            {buildMode === 'screenshot' ? <section className="space-y-3 rounded-xl border p-4">
+              <p>Recreate your ordered website and portal pages as a private draft. Forms need confirmed wiring; publishing, payments and emails require separate approval.</p>
+              <label className="block">Existing portal slug (optional for visual drafts)
+                <input className="block w-full border p-2" value={portalSlug} onChange={e => setPortalSlug(e.target.value)} placeholder="existing-client-portal" />
+              </label>
+              <label className="block">Private portal setup
+                <select className="ml-2 border p-2" value={assemblyManifest} onChange={e => setAssemblyManifest(e.target.value as '' | 'ayf' | 'starter')}>
+                  <option value="">Use existing installed portal</option>
+                  <option value="starter">Assemble certified website + portal starter</option>
+                  <option value="ayf">Use approved AYF manifest</option>
+                </select>
+              </label>
+              <label className="block">Page screenshots (PNG, JPG, WebP or GIF; up to 24, 2MB each)
+                <input type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif" onChange={e => {
+                  const next = Array.from(e.target.files || []);
+                  if (next.length + approvedAssets.length > 24 || next.some(f => f.size > 2 * 1024 * 1024)) { setError('Use up to 24 total images, at most 2MB each.'); return; }
+                  setFiles(next);
+                  setScreenshotPages(next.map((f, i) => ({ id: `page-${i + 1}`, attachmentIndex: i, order: i,
+                    surface: 'website', title: f.name.replace(/\.[^.]+$/, '') })));
+                }} />
+              </label>
+              {screenshotPages.map((page, index) => <div key={page.id} className="flex flex-wrap gap-2 border-t pt-2">
+                <span>{index + 1}. {files[page.attachmentIndex]?.name}</span>
+                <label>Page name<input aria-label={`Page ${index + 1} name`} className="border p-1" value={page.title} onChange={e => setScreenshotPages(p => p.map(x => x.id === page.id ? { ...x, title: e.target.value } : x))} /></label>
+                <select aria-label={`Page ${index + 1} type`} value={page.surface} onChange={e => setScreenshotPages(p => p.map(x => x.id === page.id ? { ...x, surface: e.target.value as 'website' | 'portal' } : x))}>
+                  <option value="website">Website</option><option value="portal">Portal</option>
+                </select>
+                <button type="button" disabled={index === 0} onClick={() => setScreenshotPages(p => {
+                  const next = [...p]; [next[index - 1], next[index]] = [next[index]!, next[index - 1]!]; return next.map((x, order) => ({ ...x, order }));
+                })}>Move up</button>
+              </div>)}
+              <label className="block">Approved logos and page images (separate from layout screenshots)
+                <input type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif" onChange={e => {
+                  const next = Array.from(e.target.files || []);
+                  if (next.length + files.length > 24 || next.some(f => f.size > 2 * 1024 * 1024)) { setError('Use at most 24 total files, each under 2MB.'); return; }
+                  setApprovedAssets(next);
+                }} />
+              </label>
+            </section> : null}
             <label className="block">
               <span className="text-xs font-bold uppercase tracking-[0.16em] text-[#665F57]">
                 Who should we build for?
@@ -508,7 +605,7 @@ export default function QuickLaunchClient() {
               disabled={busy}
               className="w-full rounded-xl bg-[#17130F] px-6 py-4 text-sm font-bold uppercase tracking-[0.16em] text-white disabled:opacity-50"
             >
-              {busy ? 'Starting…' : 'Research & Create'}
+              {busy ? 'Starting…' : buildMode === 'screenshot' ? 'Build private draft from screenshots' : 'Research & Create'}
             </button>
 
             <details className="rounded-xl border border-[#E6DCCE] bg-[#FBF8F3] px-4 py-3">
@@ -558,7 +655,7 @@ export default function QuickLaunchClient() {
                     className="mt-1 w-full rounded-xl border border-[#D9CFC1] px-3 py-2"
                   />
                 </label>
-                <label className="block text-sm">
+                <label className="block text-sm" hidden={buildMode === 'screenshot'}>
                   Photos, logo, or docs
                   <input
                     type="file"
@@ -580,7 +677,7 @@ export default function QuickLaunchClient() {
                     className="mt-1 block w-full text-sm"
                   />
                 </label>
-                <label className="flex items-start gap-2 text-sm">
+                <label className="flex items-start gap-2 text-sm" hidden={buildMode === 'screenshot'}>
                   <input
                     type="checkbox"
                     checked={forceNew}
@@ -604,6 +701,69 @@ export default function QuickLaunchClient() {
             {message}
           </p>
         ) : null}
+        {screenshotResult ? <section className="mt-6 space-y-3 rounded-xl border p-4" aria-label="Screenshot build readiness">
+          <h2 className="text-xl font-bold">Private screenshot draft: {screenshotResult.status}</h2>
+          <p>Production has not been published or verified. Portal forms require a signed-in member of the selected tenant.</p>
+          {screenshotResult.pages.map(page => <a key={page.id} className="block underline" href={page.previewPath} target="_blank" rel="noreferrer">Open {page.title}</a>)}
+          {screenshotResult.blockers.length ? <ul>{screenshotResult.blockers.map((reason, i) => <li key={i}>{reason}</li>)}</ul> : null}
+          {screenshotRequest ? screenshotResult.pages.flatMap(page => page.spec.components.filter(c => c.type === 'form').map(component => <label key={`${page.id}/${component.id}`} className="block">
+            Confirm what “{component.text || component.id}” on {page.title} should save
+            <select className="ml-2 border p-2" value={screenshotRequest.formBindings.find(b => b.pageId === page.id && b.componentId === component.id)?.kind || ''} onChange={e => {
+              const kind = e.target.value as 'intake' | 'applications' | '';
+              setScreenshotRequest(config => config ? { ...config, formBindings: [
+                ...config.formBindings.filter(b => b.pageId !== page.id || b.componentId !== component.id),
+                ...(kind ? [{ pageId: page.id, componentId: component.id, kind }] : []),
+              ] } : config);
+            }}><option value="">Needs clarification</option><option value="intake">Intake request</option><option value="applications">Application</option></select>
+          </label>)) : null}
+          {screenshotRequest ? screenshotResult.pages.flatMap(page => page.spec.components.filter(c => c.type === 'image').map(component => <label key={`${page.id}/${component.id}`} className="block">
+            Choose the approved image for “{component.text || component.id}” on {page.title}
+            <select className="ml-2 border p-2" value={screenshotRequest.imageBindings.find(b => b.pageId === page.id && b.componentId === component.id)?.attachmentIndex ?? ''} onChange={e => {
+              const selected = e.target.value;
+              setScreenshotRequest(config => config ? { ...config, imageBindings: [
+                ...config.imageBindings.filter(b => b.pageId !== page.id || b.componentId !== component.id),
+                ...(selected !== '' ? [{ pageId: page.id, componentId: component.id, attachmentIndex: Number(selected) }] : []),
+              ] } : config);
+            }}><option value="">Needs approved image</option>{assetChoices.map(asset => <option key={asset.index} value={asset.index}>{asset.name}</option>)}</select>
+          </label>)) : null}
+          {screenshotRequest ? screenshotResult.pages.flatMap(page => page.spec.components.filter(c => ['navigation', 'cta', 'portal-section'].includes(c.type)).map(component => {
+            const destination = screenshotRequest.linkBindings.find(b => b.pageId === page.id && b.componentId === component.id)?.destination || component.destination;
+            const selected = destination?.pageId ? `page:${destination.pageId}` : destination?.moduleId ? `module:${destination.moduleId}` : destination?.login ? 'login' : '';
+            return <label key={`${page.id}/${component.id}`} className="block">Destination for “{component.text || component.id}”
+              <select className="ml-2 border p-2" value={selected} onChange={e => {
+                const value = e.target.value;
+                const target = value === 'login' ? { login: true as const } : value.startsWith('page:') ? { pageId: value.slice(5) } : value.startsWith('module:') ? { moduleId: value.slice(7) } : null;
+                setScreenshotRequest(config => config ? { ...config, linkBindings: [
+                  ...config.linkBindings.filter(b => b.pageId !== page.id || b.componentId !== component.id),
+                  ...(target ? [{ pageId: page.id, componentId: component.id, destination: target }] : []),
+                ] } : config);
+              }}><option value="">Needs confirmation</option><option value="login">Portal member login</option>
+                {screenshotRequest.pages.map(p => <option key={p.id} value={`page:${p.id}`}>{p.title}</option>)}
+                {['dashboard', 'intake', 'applications', 'documents', 'reports', 'messaging', 'training', 'people', 'resources', 'settings'].map(id => <option key={id} value={`module:${id}`}>Portal: {id}</option>)}
+              </select>
+            </label>;
+          })) : null}
+          {screenshotRequest ? screenshotResult.pages.flatMap(page => page.spec.ambiguities.map(ambiguity => <label key={`${page.id}/${ambiguity}`} className="block">
+            Clarify: {ambiguity}
+            <input className="block w-full border p-2" value={screenshotRequest.clarifications.find(note => note.pageId === page.id && note.ambiguity === ambiguity)?.resolution || ''} onChange={e => {
+              const resolution = e.target.value;
+              setScreenshotRequest(config => config ? { ...config, clarifications: [
+                ...config.clarifications.filter(note => note.pageId !== page.id || note.ambiguity !== ambiguity),
+                ...(resolution.trim() ? [{ pageId: page.id, ambiguity, resolution }] : []),
+              ] } : config);
+            }} />
+          </label>)) : null}
+          <p>{screenshotResult.evidence.length} recorded behavioral checks. Rendering, links, login, persistence, authorization, isolation and desktop/mobile fidelity must all pass before acceptance.</p>
+          <button type="button" disabled={busy} onClick={async () => {
+            setBusy(true);
+            try {
+              const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/screenshot-build`, { method: 'POST', credentials: 'include', headers: { 'content-type': 'application/json' }, body: JSON.stringify(screenshotRequest ? { screenshotBuild: screenshotRequest } : {}) });
+              if (!response.ok) throw new Error('Could not retry private build.');
+              setScreenshotResult(null); setInProgress(true); window.location.reload();
+            } catch (err) { setError(err instanceof Error ? err.message : 'Retry failed'); }
+            finally { setBusy(false); }
+          }}>Apply confirmed wiring / retry private build</button>
+        </section> : null}
 
         {projectId ? (
           <div ref={reviewAnchorRef} className="mt-8 space-y-6">

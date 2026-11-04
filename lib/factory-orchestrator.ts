@@ -50,6 +50,12 @@ export type OrchestratorStepResult = {
 };
 
 export async function orchestrateOnce(projectId: string): Promise<OrchestratorStepResult> {
+  const screenshotProject = await getProject(projectId);
+  if (screenshotProject?.buildMode === 'screenshot') {
+    const { runFactoryScreenshotBuild } = await import('@/lib/factory-screenshot-runtime');
+    return { project: await runFactoryScreenshotBuild(projectId), dispatched: !screenshotProject.screenshotResult,
+      worker: 'screenshot-build', capabilityId: 'screenshot-build' };
+  }
   bootstrapCapabilityRegistry();
   await ensureProjectContext(projectId);
   const context = await loadProjectContext(projectId);
@@ -113,6 +119,10 @@ export async function orchestrateOnce(projectId: string): Promise<OrchestratorSt
 export async function runFactoryOrchestrator(projectId: string): Promise<FactoryProject | null> {
   let project = await getProject(projectId);
   if (!project) return null;
+  if (project.buildMode === 'screenshot') {
+    const { runFactoryScreenshotBuild } = await import('@/lib/factory-screenshot-runtime');
+    return runFactoryScreenshotBuild(projectId);
+  }
 
   if (project.pipelineStatus === 'CREATED') {
     const { enqueueFactoryProject } = await import('@/lib/factory-queue');
@@ -200,6 +210,7 @@ export async function failOrchestration(
   message: string,
 ): Promise<FactoryProject | null> {
   const failed = await transitionFactoryProject(projectId, 'FAILED', 'generate', message, { error: message });
+  if (failed?.buildMode === 'screenshot') return failed;
   try {
     const { notifyFactoryFailed } = await import('@/lib/factory-notify');
     await notifyFactoryFailed(projectId);

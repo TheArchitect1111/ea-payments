@@ -358,7 +358,7 @@ export async function buildSubjectKnowledgePack(
       : ['People seeking clarity, structure, and a trusted next step'],
     interviewsAndMedia,
     quotes,
-    callsToAction: ['Continue the conversation', 'Explore the work'],
+    callsToAction: ['Get in touch', 'Explore the work'],
     citations,
     conflictingClaims,
     unsupportedClaims,
@@ -368,6 +368,6 @@ export async function buildSubjectKnowledgePack(
 
   const gate = evaluateKnowledgeGate(draft);
   draft.validation = { ok: gate.ok, reasons: gate.reasons };
-  draft.warnings = [...draft.warnings, ...gate.reasons.filter((r) => gate.ok)];
+  draft.warnings = [...draft.warnings, ...(gate.ok ? gate.reasons : [])];
   return draft;
 }

@@ -7,6 +7,27 @@ import {
 } from '@/lib/ctp-asset-store';
 import { factoryOrganizationId, type LaunchProjectInput } from '@/lib/factory-project';
 import type { FactoryAttachmentMeta } from '@/lib/factory-project-store';
+import { ScreenshotBuildInput } from '@/lib/factory-screenshot-build';
+
+export function validateScreenshotLaunch(body: LaunchProjectInput): void {
+  if (body.buildMode !== undefined && body.buildMode !== 'exploratory' && body.buildMode !== 'screenshot') throw new Error('Unknown build mode.');
+  if (body.buildMode !== 'screenshot') {
+    if (body.screenshotBuild) throw new Error('Screenshot specifications require Screenshot Build Mode.');
+    return;
+  }
+  body.screenshotBuild = ScreenshotBuildInput.parse(body.screenshotBuild);
+  if (!Array.isArray(body.attachments) || body.attachments.length < 1 || body.attachments.length > 24 ||
+    body.attachments.some(a => a.type !== 'image' || !a.url?.match(/\/api\/ctp\/assets\/[a-zA-Z0-9_-]+$/)))
+    throw new Error('Use 1–24 uploaded image attachments for Screenshot Build Mode.');
+  for (const page of body.screenshotBuild.pages) {
+    const attachment = body.attachments?.[page.attachmentIndex];
+    if (attachment?.type !== 'image' || !attachment.url?.match(/\/api\/ctp\/assets\/[a-zA-Z0-9_-]+$/))
+      throw new Error(`Uploaded image required for page ${page.id}.`);
+  }
+  for (const binding of body.screenshotBuild.imageBindings) {
+    if (body.attachments?.[binding.attachmentIndex]?.type !== 'image') throw new Error('Approved image attachment is missing.');
+  }
+}
 
 function publicBaseUrl(): string {
   const raw = (
@@ -30,7 +51,7 @@ function mimeToAttachmentType(mime: string): FactoryAttachmentMeta['type'] {
   return 'other';
 }
 
-async function attachmentFromFile(file: File): Promise<FactoryAttachmentMeta> {
+export async function attachmentFromFile(file: File, options?: { requireDurable?: boolean }): Promise<FactoryAttachmentMeta> {
   if (file.size > CTP_ASSET_MAX_BYTES) {
     throw new Error(
       `File is too large. Keep it under ${Math.round(CTP_ASSET_MAX_BYTES / (1024 * 1024))}MB.`,
@@ -49,7 +70,8 @@ async function attachmentFromFile(file: File): Promise<FactoryAttachmentMeta> {
     mimeType,
     bytes,
   });
-  await persistCtpAssetToStudio(asset.id, factoryOrganizationId());
+  const persisted = await persistCtpAssetToStudio(asset.id, factoryOrganizationId());
+  if (options?.requireDurable && !persisted) throw new Error('Screenshot upload could not be durably saved.');
 
   return {
     type: mimeToAttachmentType(mimeType),
@@ -72,7 +94,8 @@ function collectFiles(form: FormData): File[] {
       files.push(value);
     }
   }
-  return files.slice(0, 6);
+  if (files.length > 24) throw new Error('Use at most 24 attachments.');
+  return files;
 }
 
 export type ParsedFactoryLaunch =
@@ -98,10 +121,15 @@ export async function parseFactoryLaunchBody(request: NextRequest): Promise<Pars
         String(form.get('forceNew') ?? '').trim() === '1' ||
         String(form.get('forceNew') ?? '').toLowerCase() === 'true';
 
+      const buildMode = String(form.get('buildMode') || 'exploratory') as LaunchProjectInput['buildMode'];
+      const screenshotBuild = form.get('screenshotBuild') ? JSON.parse(String(form.get('screenshotBuild'))) : undefined;
+
       const attachments: FactoryAttachmentMeta[] = [];
       for (const file of collectFiles(form)) {
-        attachments.push(await attachmentFromFile(file));
+        attachments.push(await attachmentFromFile(file, { requireDurable: buildMode === 'screenshot' }));
       }
+      const modeInput = { buildMode, screenshotBuild, attachments };
+      validateScreenshotLaunch(modeInput);
 
       if (!command && !client && attachments.length === 0) {
         return {
@@ -126,6 +154,7 @@ export async function parseFactoryLaunchBody(request: NextRequest): Promise<Pars
         ok: true,
         forceNew,
         body: {
+          ...modeInput,
           command: resolvedCommand,
           text: command || undefined,
           client: client || undefined,
@@ -151,6 +180,7 @@ export async function parseFactoryLaunchBody(request: NextRequest): Promise<Pars
 
   try {
     const body = (await request.json()) as LaunchProjectInput & { forceNew?: boolean | string };
+    validateScreenshotLaunch(body);
     const forceNew =
       body.forceNew === true || body.forceNew === '1' || body.forceNew === 'true';
     return { ok: true, forceNew, body };

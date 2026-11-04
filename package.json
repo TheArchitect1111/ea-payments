@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "test:factory-screenshot-build": "node --import tsx --test tests/factory-screenshot-build.test.mts",
+    "test:factory-screenshot-acceptance": "node scripts/test-factory-screenshot-acceptance.mjs",
+    "factory:screenshot-verifier": "node --import tsx scripts/serve-factory-screenshot-verifier.mts",
     "dev": "next dev",
     "dev:lan": "next dev --hostname 0.0.0.0",
     "build": "next build",
