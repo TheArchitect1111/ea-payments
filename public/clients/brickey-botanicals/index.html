@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#17291f">
+  <meta name="description" content="Brickey Botanicals. An elevated, nature-inspired skincare experience. Explore an early look at the collection.">
+  <title>Brickey Botanicals | Nature, beautifully considered</title>
+  <style>
+    :root { --ink:#1e2b23; --forest:#142a21; --deep:#10211a; --sage:#748b72; --cream:#f9f6ee; --linen:#f3eee3; --paper:#fffdfa; --gold:#bc9967; --muted:#677066; --line:#deded1; --shadow:0 20px 70px rgba(21,41,31,.11); }
+    * {box-sizing:border-box}
+    html {scroll-behavior:smooth;scroll-padding-top:100px}
+    body {margin:0;background:var(--cream);color:var(--ink);font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
+    button,a { -webkit-tap-highlight-color:transparent }
+    a {color:inherit;text-decoration:none}
+    button {font:inherit;cursor:pointer}
+    img,svg {max-width:100%;display:block}
+    .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .eyebrow {font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.23em;color:#71816f;line-height:1.6}
+    .serif {font-family:Georgia,'Times New Roman',serif;font-weight:400;letter-spacing:-.045em}
+    .announcement {background:var(--forest);color:#f4eedf;padding:10px 20px;font-size:10px;letter-spacing:.17em;text-transform:uppercase;text-align:center;line-height:1.5}
+    .announcement span {color:#d9cba9}
+    header {position:sticky;top:0;z-index:30;background:rgba(250,248,241,.96);border-bottom:1px solid #e8e5db;backdrop-filter:blur(20px)}
+    .nav {max-width:1460px;margin:auto;padding:0 5%;height:86px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .brand {display:flex;gap:10px;align-items:center;flex:none}
+    .brand-mark {height:44px;width:36px;color:#607961}
+    .brand-label {font-family:Georgia,serif;font-size:22px;letter-spacing:-.055em;line-height:.86;font-weight:bold}
+    .brand-label small {display:block;margin-top:9px;font:10px Arial,sans-serif;letter-spacing:.32em;font-weight:600}
+    .nav-links {display:flex;align-items:center;gap:34px;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+    .nav-links>a,.menu-trigger {padding:20px 0;color:#3d4b42;background:none;border:0;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+    .nav-links a:hover,.menu-trigger:hover {color:#8e7653}
+    .nav-actions {display:flex;gap:15px;align-items:center}
+    .nav-cta {padding:12px 18px;border:1px solid #45604d;color:#294535;font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;white-space:nowrap;transition:.2s}
+    .nav-cta:hover {background:var(--forest);color:#fff}
+    .menu-toggle {display:none;border:0;background:none;color:var(--ink);padding:10px}
+    .has-menu {position:relative}
+    .menu-trigger::after {content:'⌄';margin-left:7px}
+    .dropdown {display:none;position:absolute;top:100%;left:-25px;width:235px;background:var(--paper);box-shadow:var(--shadow);border:1px solid var(--line);padding:13px 0;z-index:31}
+    .dropdown a {display:block;padding:13px 22px;white-space:nowrap;letter-spacing:.07em;font-size:11px}
+    .dropdown a:hover {background:var(--linen)}
+    .has-menu:hover .dropdown,.has-menu:focus-within .dropdown,.has-menu[data-open="true"] .dropdown {display:block}
+    .hero {min-height:690px;display:grid;grid-template-columns:1fr 1fr;overflow:hidden}
+    .hero-copy {background:#ebe9da;position:relative;padding:110px max(6vw,30px) 100px max(calc((100vw - 1310px)/2),6vw);display:flex;justify-content:center;flex-direction:column;isolation:isolate}
+    .hero-copy::before {content:'';position:absolute;width:390px;height:390px;border:1px solid #d6d8c8;border-radius:50%;top:15%;left:-260px;z-index:-1}
+    .hero h1 {font-size:clamp(60px,6.2vw,104px);line-height:.98;margin:24px 0 25px;max-width:720px;color:#19291f}
+    .hero h1 em {font-weight:400;color:#728976}
+    .hero p {max-width:440px;font-size:15px;line-height:1.9;color:#526056;margin:0 0 35px}
+    .btn {display:inline-flex;align-items:center;justify-content:center;gap:20px;padding:17px 23px;min-height:53px;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;transition:transform .25s,background .25s}
+    .btn:hover {transform:translateY(-2px)}
+    .btn-primary {background:var(--forest);color:#f8f7ef}
+    .btn-primary:hover {background:#2d513a}
+    .btn-light {background:#f6f0e3;color:var(--ink)}
+    .btn-outline {border:1px solid #b4b9a9;color:var(--ink)}
+    .hero-actions {display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+    .hero-actions .quiet {font-size:12px;color:#506254;text-decoration:underline;text-underline-offset:6px}
+    .hero-art {background:radial-gradient(circle at 56% 42%,#bbb99c 0%,#939986 35%,#3d5a48 100%);position:relative;min-height:690px;isolation:isolate;overflow:hidden}
+    .hero-art::before {content:'';position:absolute;inset:0;opacity:.19;background-image:radial-gradient(#fff 0.65px,transparent .8px);background-size:6px 6px}
+    .art-circle {position:absolute;border-radius:50%;width:650px;height:650px;border:1px solid rgba(255,255,255,.28);top:5%;left:10%}
+    .leaf {position:absolute;width:80px;height:200px;transform-origin:bottom center;filter:drop-shadow(2px 12px 8px rgba(9,37,22,.16));background:linear-gradient(115deg,#213e2c 6%,#60885c 49%,#b3b49a 50%,#466a48 60%,#153422 100%);clip-path:polygon(50% 0,83% 21%,94% 50%,78% 78%,49% 100%,24% 78%,8% 51%,16% 27%);border-radius:90% 0 90% 0}
+    .leaf.l1{top:-45px;right:9%;transform:rotate(-28deg) scale(1.7)} .leaf.l2{top:17%;right:-20px;transform:rotate(54deg) scale(1.45)} .leaf.l3{bottom:-35px;left:5%;transform:rotate(136deg) scale(1.4)} .leaf.l4{top:23%;left:-20px;transform:rotate(-46deg) scale(.85)}
+    .plinth {position:absolute;bottom:8%;left:15%;width:77%;height:29%;border-radius:55% 55% 6% 6% / 22% 22% 5% 5%;background:linear-gradient(180deg,#d7cbb0,#8d8874);box-shadow:0 28px 40px #132f2455}
+    .product-jars {position:absolute;inset:17% 0 0;display:flex;justify-content:center;align-items:center;gap:18px;filter:drop-shadow(13px 23px 17px rgba(7,26,16,.42))}
+    .jar,.bottle {position:relative;display:flex;align-items:center;justify-content:center;text-align:center;flex-direction:column;flex:none}
+    .bottle {height:320px;width:175px;border-radius:28px 28px 15px 15px;background:linear-gradient(90deg,#253c2a,#547b59 25%,#67896c 54%,#253c2c 100%);box-shadow:inset 10px 0 13px #ffffff16,inset -14px 0 16px #0c201964;margin-top:-85px}
+    .bottle::before {content:'';position:absolute;bottom:100%;left:55px;width:64px;height:65px;border-radius:7px 7px 0 0;background:linear-gradient(90deg,#1b1b19,#514737,#151a15);box-shadow:inset 8px 0 #ffffff16}
+    .bottle::after {content:'';position:absolute;bottom:calc(100% + 60px);left:80px;width:15px;height:49px;background:#1c231d;border-radius:5px 5px 0 0}
+    .jar {height:174px;width:210px;background:linear-gradient(95deg,#d5c6a6,#faf0d6 29%,#e5d5b4 63%,#c7b28c 100%);border-radius:7px 7px 23px 23px;margin-top:100px}
+    .jar::before {content:'';position:absolute;bottom:99%;width:216px;height:38px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#313a31,#17241c 45%,#344134)}
+    .package-label {position:relative;z-index:1;width:78%;padding:21px 8px 18px;background:#f6eee0;color:#2b4230;display:flex;flex-direction:column;gap:10px;align-items:center;box-shadow:0 0 0 1px #bfc1a7}
+    .package-label .logo-text {font-family:Georgia,serif;font-weight:bold;font-size:15px;line-height:.91}
+    .package-label .logo-text span{display:block;font:6px Arial,sans-serif;letter-spacing:.4em;margin-top:6px}
+    .package-label .line{height:1px;width:55%;background:#b9baa2}
+    .package-label strong{font:9px Arial,sans-serif;letter-spacing:.15em;text-transform:uppercase}
+    .package-label small{font-size:7px;letter-spacing:.1em;text-transform:uppercase}
+    .product-jars .mini {transform:scale(.7);margin-left:-75px;margin-bottom:-105px}
+    .art-note {position:absolute;bottom:28px;right:31px;color:#f1eee3;font-size:10px;letter-spacing:.18em;text-transform:uppercase}
+    .trustbar{display:grid;grid-template-columns:repeat(4,1fr);gap:0;max-width:1300px;margin:auto;padding:39px 5%}
+    .trust{padding:3px 26px;border-right:1px solid var(--line);display:flex;gap:15px;align-items:center;justify-content:center;color:#687864}
+    .trust:last-child{border:0} .trust svg{flex:none;width:26px;height:26px}
+    .trust strong{display:block;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#33483a;margin-bottom:6px}
+    .trust small{display:block;font-size:11px;line-height:1.5;color:#768074}
+    .section {max-width:1360px;margin:0 auto;padding:105px 6%}
+    .section-head {display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:42px}
+    h2{font-size:clamp(42px,4.2vw,66px);line-height:1.08;margin:14px 0 0}
+    .section-intro{max-width:400px;font-size:14px;color:var(--muted);line-height:1.85;margin:0}
+    .categories{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    .category {min-height:350px;display:flex;flex-direction:column;justify-content:flex-end;padding:26px;position:relative;overflow:hidden;isolation:isolate;color:#fff}
+    .category::before {content:'';position:absolute;inset:0;z-index:-1;transition:transform .6s;background:linear-gradient(0deg,#10241bdd,#10241b03 75%),var(--cat-bg)}
+    .category:hover::before{transform:scale(1.07)}
+    .category .symbol{position:absolute;top:40px;right:30px;font-family:Georgia,serif;font-size:140px;opacity:.2;font-style:italic;line-height:1}
+    .category h3{font:33px Georgia,serif;margin:0 0 8px;letter-spacing:-.025em}
+    .category p{font-size:12px;opacity:.9;margin:0 0 25px}
+    .category span:last-child{font-size:10px;letter-spacing:.15em;text-transform:uppercase;font-weight:bold}
+    .collection {background:#f0eee7;padding-top:100px;padding-bottom:110px}
+    .collection-inner {max-width:1360px;padding:0 6%;margin:auto}
+    .sample-note {padding:12px 16px;border:1px solid #d5d4c5;background:#fffaf0;font-size:12px;color:#5d675e;line-height:1.7;margin:0 0 26px;display:inline-flex;gap:8px}
+    .filters {display:flex;gap:12px;flex-wrap:wrap;margin-bottom:35px}
+    .filter {border:1px solid #cdd3c6;border-radius:40px;background:transparent;color:#4d5a50;padding:11px 19px;font-size:11px;letter-spacing:.08em}
+    .filter.active,.filter:hover {background:var(--forest);color:white;border-color:var(--forest)}
+    .products {display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+    .product-card {background:var(--paper);overflow:hidden;border:1px solid #e6e4d9}
+    .product-visual {aspect-ratio:1.15;display:flex;justify-content:center;align-items:center;position:relative;overflow:hidden;background:var(--product-bg)}
+    .product-visual::before{content:'';position:absolute;border:1px solid #ffffff88;width:260px;height:260px;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}
+    .product-visual::after{content:'';position:absolute;width:170px;height:170px;right:-80px;top:-90px;border-radius:50%;background:#ffffff27}
+    .product-visual .jar,.product-visual .bottle {transform:scale(.62);margin:0;filter:drop-shadow(12px 23px 13px #24312750)}
+    .product-visual .jar {margin-top:40px}
+    .product-visual .bottle {margin-top:45px}
+    .product-visual .bottle::after {height:30px;bottom:calc(100% + 60px)}
+    .product-visual .bottle::before {height:55px}
+    .tag {position:absolute;top:20px;left:19px;background:#faf7ede8;color:#536850;padding:9px 11px;font-size:9px;font-weight:bold;letter-spacing:.11em;text-transform:uppercase;z-index:2}
+    .product-info {padding:27px 25px 25px}
+    .product-type {font-size:10px;color:#768675;letter-spacing:.15em;text-transform:uppercase}
+    .product-info h3 {font:27px Georgia,serif;letter-spacing:-.03em;margin:10px 0}
+    .product-info p {font-size:12px;color:#788078;line-height:1.75;min-height:42px;margin:0 0 20px}
+    .product-row {display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #e4e3db;padding-top:18px}
+    .not-priced {font-size:11px;color:#70806d;letter-spacing:.04em}
+    .details {background:transparent;border:0;color:#2d4935;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:bold;padding:5px 0}
+    .details:hover {text-decoration:underline;text-underline-offset:4px}
+    [hidden] {display:none!important}
+    .story {background:var(--forest);color:#f9f3e7;display:grid;grid-template-columns:1fr 1fr;min-height:610px}
+    .story-art {position:relative;overflow:hidden;background:radial-gradient(circle at 35% 35%,#8a9b7b,#47654c 45%,#172e20 85%)}
+    .story-art::before {content:'✦';font:220px Georgia,serif;color:#ccd4b227;position:absolute;left:15%;top:10%}
+    .story-art::after {content:'';position:absolute;width:300px;height:500px;border:110px solid #80966b70;transform:rotate(45deg);border-radius:50% 2% 50% 3%;top:15%;left:18%;box-shadow:0 0 0 50px #b3bd9b25}
+    .story-copy{display:flex;flex-direction:column;justify-content:center;padding:90px clamp(40px,8vw,125px)}
+    .story-copy .eyebrow {color:#cfbe98}
+    .story-copy h2{font-size:clamp(45px,4.4vw,70px);margin:20px 0 26px}
+    .story-copy p{font-size:14px;line-height:2;color:#d6dece;max-width:450px}
+    .story-copy .btn{align-self:start;margin-top:24px}
+    .process {background:#faf8f1}
+    .process-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:55px}
+    .process-item {border-top:1px solid #d6d8cc;padding-top:25px}
+    .process-item b{font:32px Georgia,serif;color:#8d9a81}
+    .process-item h3{font:26px Georgia,serif;margin:18px 0 10px}
+    .process-item p{font-size:13px;line-height:1.9;color:var(--muted)}
+    .contact-band{text-align:center;padding:105px 20px;background:#e4e9dc}
+    .contact-band h2 {max-width:790px;margin:15px auto 23px}
+    .contact-band p{font-size:14px;line-height:1.8;color:var(--muted);margin:0 auto 27px;max-width:550px}
+    footer {background:#12251c;color:#f0f0e6;padding:60px 6% 35px}
+    .footer-inner {max-width:1250px;margin:0 auto;display:grid;grid-template-columns:2.3fr 1fr 1fr;gap:40px}
+    footer .brand-label {font-size:24px} footer .brand-mark{color:#91a68d}
+    footer p{font-size:13px;line-height:1.8;color:#c6d0c0;max-width:340px;margin:20px 0}
+    footer h4 {font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#c4c8b2;margin:5px 0 20px}
+    footer a:not(.brand){display:block;color:#c4d0c1;font-size:12px;padding:8px 0}
+    footer a:hover {color:white}
+    .footer-bottom{border-top:1px solid #ffffff24;max-width:1250px;margin:45px auto 0;padding-top:23px;color:#b0bcb0;font-size:11px;display:flex;justify-content:space-between;gap:25px;flex-wrap:wrap}
+    dialog {border:0;padding:0;background:var(--paper);max-width:520px;width:calc(100% - 30px);box-shadow:0 40px 130px #0d211a77;color:var(--ink)}
+    dialog::backdrop{background:#12251bba;backdrop-filter:blur(4px)}
+    .modal-inner {padding:39px}
+    .modal-inner h2 {font:43px Georgia,serif;margin:10px 0 13px}
+    .modal-inner p{font-size:14px;line-height:1.85;color:var(--muted)}
+    .close {position:absolute;top:15px;right:15px;border:0;background:transparent;font-size:24px;color:var(--ink);padding:8px}
+    .modal-note{border-top:1px solid var(--line);padding-top:18px;margin-top:20px;font-size:12px!important}
+    @media (max-width:1100px){ .nav{height:75px}.nav-links{gap:15px}.nav-links>a,.menu-trigger{font-size:10px}.brand-label{font-size:19px}.brand-mark{width:30px}.hero{min-height:600px}.hero-art{min-height:600px}.hero-copy{padding:75px 7%}.hero h1{font-size:64px}.products{gap:13px}.category{min-height:285px;padding:18px}.category h3{font-size:25px} }
+    @media (max-width:800px) { .nav{height:70px}.nav-links{display:none;position:absolute;top:70px;left:0;right:0;background:var(--paper);padding:10px 6% 25px;box-shadow:0 15px 35px #09271825;flex-direction:column;gap:0;align-items:stretch}.nav-links.is-open{display:flex}.nav-links>a,.menu-trigger{display:block;width:100%;text-align:left;padding:15px 0;border-bottom:1px solid var(--line)}.dropdown{display:none;position:static;width:auto;border:0;box-shadow:none;padding:5px 0;background:#f3f0e6}.has-menu:hover .dropdown{display:none}.has-menu[data-open="true"] .dropdown{display:block}.menu-toggle{display:block}.nav-cta{padding:10px 13px;font-size:9px}.hero{grid-template-columns:1fr}.hero-copy{padding:70px 7% 66px}.hero h1{font-size:clamp(53px,12vw,88px)}.hero-art{min-height:500px}.product-jars{transform:scale(.85)}.trustbar{grid-template-columns:repeat(2,1fr);gap:25px 0}.trust:nth-child(2){border:0}.section{padding:75px 6%}.section-head{display:block}.section-intro{margin-top:25px}.categories{grid-template-columns:repeat(2,1fr)}.products{grid-template-columns:repeat(2,1fr)}.story{grid-template-columns:1fr}.story-art{min-height:320px}.story-copy{padding:70px 7%}.process-grid{gap:20px}.collection{padding-top:75px;padding-bottom:75px} }
+    @media (max-width:540px) { .announcement{font-size:9px;letter-spacing:.06em;padding:8px 4%}.brand-label{font-size:17px}.brand-label small{font-size:8px}.brand-mark{height:34px;width:28px}.nav-cta{display:none}.hero-copy{padding:58px 7% 55px}.hero p{font-size:14px}.hero-art{min-height:375px}.art-circle{width:370px;height:370px}.product-jars{inset:10% 0 0;transform:scale(.65)}.plinth{bottom:3%}.trustbar{padding:26px 3%;gap:18px 0}.trust{padding:0 10px;gap:8px}.trust svg{width:20px}.trust strong{font-size:9px}.trust small{font-size:10px}.section{padding:66px 6%}.section-head{margin-bottom:30px}h2{font-size:43px}.categories{gap:10px}.category{min-height:225px;padding:15px}.category h3{font-size:24px}.category p{font-size:11px}.category .symbol{font-size:80px}.products{grid-template-columns:1fr;gap:19px}.product-visual{aspect-ratio:1.3}.product-info{padding:22px}.process-grid{grid-template-columns:1fr;gap:15px}.contact-band{padding:75px 20px}.footer-inner{grid-template-columns:1fr 1fr;gap:35px}.footer-inner>div:first-child{grid-column:1/-1}.footer-bottom{margin-top:30px} }
+    @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn,.category::before{transition:none}}
+  </style>
+</head>
+<body>
+  <div class="announcement"><span>Collection concept preview</span> · A more beautiful way to connect with nature</div>
+  <header>
+    <nav class="nav" aria-label="Main navigation">
+      <a class="brand" href="#home" aria-label="Brickey Botanicals, home">
+        <svg class="brand-mark" viewBox="0 0 40 52" fill="none" aria-hidden="true"><path d="M20 45V8m0 29C3 32 4 13 17 5c7 12 4 22 3 32Zm1-9C38 28 39 10 26 5c-7 10-6 18-5 23Z" stroke="currentColor" stroke-width="1.8"/><path d="m20 28-9-12m10 9 10-11" stroke="currentColor" stroke-width="1.2"/></svg>
+        <span class="brand-label">BRICKEY<small>BOTANICALS</small></span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="#home">Home</a>
+        <div class="has-menu" id="shopMenu"><button type="button" class="menu-trigger" id="shopButton" aria-expanded="false" aria-controls="shopDropdown">Shop</button>
+          <div class="dropdown" id="shopDropdown">
+            <a href="#collection" data-category="all">All products</a>
+            <a href="#collection" data-category="face">Face care</a>
+            <a href="#collection" data-category="body">Body care</a>
+            <a href="#collection" data-category="bath">Bath &amp; soaks</a>
+            <a href="#collection" data-category="essentials">Botanical essentials</a>
+          </div>
+        </div>
+        <a href="#story">Our story</a>
+        <a href="#approach">Our approach</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="nav-actions">
+        <a class="nav-cta" href="#collection">Explore collection</a>
+        <button class="menu-toggle" type="button" id="navToggle" aria-label="Open menu" aria-controls="navLinks" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.7"/></svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+  <main>
+    <section class="hero" id="home" aria-labelledby="heroTitle">
+      <div class="hero-copy"><span class="eyebrow">The beauty of simple rituals</span><h1 class="serif" id="heroTitle">Nature,<br><em>beautifully</em><br>considered.</h1><p>A thoughtful approach to botanical skincare. Explore the textures, rituals, and everyday moments that bring us closer to nature.</p><div class="hero-actions"><a class="btn btn-primary" href="#collection">Explore collection <span aria-hidden="true">↗</span></a><a class="quiet" href="#story">Discover our story</a></div></div>
+      <div class="hero-art" role="img" aria-label="Stylized botanical skincare bottles and jar arranged among leaves"><div class="art-circle"></div><div class="leaf l1"></div><div class="leaf l2"></div><div class="leaf l3"></div><div class="leaf l4"></div><div class="plinth"></div>
+        <div class="product-jars"><div class="bottle"><div class="package-label"><span class="logo-text">BRICKEY<span>BOTANICALS</span></span><span class="line"></span><strong>Botanical oil</strong><small>Concept collection</small></div></div><div class="jar"><div class="package-label"><span class="logo-text">BRICKEY<span>BOTANICALS</span></span><span class="line"></span><strong>Body ritual</strong><small>Concept collection</small></div></div></div><span class="art-note">An early look at the collection</span>
+      </div>
+    </section>
+    <div class="trustbar" aria-label="Storefront highlights">
+      <div class="trust"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M16 28V10M15 23C3 21 5 6 13 4c6 7 4 13 2 19ZM17 19c12-1 13-14 4-16-6 5-6 11-4 16Z"/></svg><div><strong>Botanical inspiration</strong><small>Nature at the heart of the design</small></div></div>
+      <div class="trust"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M7 23c0-9 18-9 18 0v4H7Zm4-9a5 5 0 1 1 10 0 5 5 0 0 1-10 0Z"/></svg><div><strong>Everyday rituals</strong><small>A moment for yourself</small></div></div>
+      <div class="trust"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M16 3c5 7 10 13 10 19a10 10 0 0 1-20 0C6 16 11 10 16 3Z"/></svg><div><strong>Thoughtful care</strong><small>Designed for a simple routine</small></div></div>
+      <div class="trust"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M16 28c8-5 12-12 12-21-8 0-20 4-24 15 3 3 7 5 12 6Zm-7-5L24 11"/></svg><div><strong>Rooted in nature</strong><small>Inspired by botanicals</small></div></div>
+    </div>
+    <section class="section" id="categories"><div class="section-head"><div><span class="eyebrow">A ritual for every moment</span><h2 class="serif">Explore by category</h2></div><p class="section-intro">From the first moments of your morning to the pause at the end of the day. Find a ritual that feels like yours.</p></div><div class="categories">
+      <a href="#collection" class="category category-link" data-category="face" style="--cat-bg:linear-gradient(135deg,#a5a994,#627f69)"><span class="symbol">✧</span><h3>Face care</h3><p>Refresh your daily routine.</p><span>Explore category ↗</span></a>
+      <a href="#collection" class="category category-link" data-category="body" style="--cat-bg:linear-gradient(135deg,#b69f77,#836e53)"><span class="symbol">◌</span><h3>Body care</h3><p>A little everyday indulgence.</p><span>Explore category ↗</span></a>
+      <a href="#collection" class="category category-link" data-category="bath" style="--cat-bg:linear-gradient(135deg,#9ba9a8,#5d7270)"><span class="symbol">≈</span><h3>Bath &amp; soaks</h3><p>Find a moment of calm.</p><span>Explore category ↗</span></a>
+      <a href="#collection" class="category category-link" data-category="essentials" style="--cat-bg:linear-gradient(135deg,#a4ab78,#647849)"><span class="symbol">❋</span><h3>Essentials</h3><p>Inspired by the botanical world.</p><span>Explore category ↗</span></a>
+    </div></section>
+    <section class="collection" id="collection" aria-labelledby="collectionTitle"><div class="collection-inner"><div class="section-head"><div><span class="eyebrow">The collection</span><h2 class="serif" id="collectionTitle">The art of everyday care</h2></div><p class="section-intro">A preview of what the Brickey Botanicals shopping experience could look like. Final products and prices will be added after catalog approval.</p></div>
+      <p class="sample-note"><strong>Preview:</strong> The six products below are illustrative placeholders, not confirmed inventory. Purchasing is disabled.</p>
+      <div class="filters" role="group" aria-label="Filter products">
+        <button class="filter active" data-category="all" aria-pressed="true">All products</button><button class="filter" data-category="face" aria-pressed="false">Face care</button><button class="filter" data-category="body" aria-pressed="false">Body care</button><button class="filter" data-category="bath" aria-pressed="false">Bath &amp; soaks</button><button class="filter" data-category="essentials" aria-pressed="false">Essentials</button>
+      </div>
+      <div class="products" id="products">
+        <article class="product-card" data-category="face" data-name="Botanical Face Oil" data-description="A sample concept for the face care range. Final ingredient details, product specifications, photos, pricing, and availability are to be confirmed by Brickey Botanicals."><div class="product-visual" style="--product-bg:linear-gradient(135deg,#d2d9cc,#9fb09d)"><span class="tag">Sample product</span><div class="bottle"><div class="package-label"><span class="logo-text">BRICKEY<span>BOTANICALS</span></span><span class="line"></span><strong>Face oil</strong><small>Sample</small></div></div></div><div class="product-info"><span class="product-type">Face care</span><h3>Botanical Face Oil</h3><p>An illustrative product for a mindful daily ritual.</p><div class="product-row"><span class="not-priced">Price to be confirmed</span><button class="details" type="button">View details ↗</button></div></div></article>
+        <article class="product-card" data-category="body" data-name="Velvet Body Butter" data-description="A sample concept for the body care range. Final ingredients, skin claims, product imagery, pricing, and inventory require the real product catalog."><div class="product-visual" style="--product-bg:linear-gradient(135deg,#e3d1b5,#bfa37e)"><span class="tag">Sample product</span><div class="jar"><div class="package-label"><span class="logo-text">BRICKEY<span>BOTANICALS</span></span><span class="line"></span><strong>Body butter</strong><small>Sample</small></div></div></div><div class="product-info"><span class="product-type">Body care</span><h3>Velvet Body Butter</h3><p>A rich-looking placeholder for the body ritual range.</p><div class="product-row"><span class="not-priced">Price to be confirmed</span><button class="details" type="button">View details ↗</button></div></div></article>
+        <article class="product-card" data-category="bath" data-name="Botanical Bath Soak" data-description="A sample concept for the bath and soaks category. Ingredient lists, packaging, scent, product photos, and pricing will be supplied by the business."><div class="product-visual" style="--product-bg:linear-gradient(135deg,#cfdbd9,#8fa9a1)"><span class="tag">Sample product</span><div class="jar"><div class="package-label"><span class="logo-text">BRICKEY<span>BOTANICALS</span></span><span class="line"></span><strong>Bath soak</strong><small>Sample</small></div></div></div><div class="product-info"><span class="product-type">Bath &amp; soaks</span><h3>Botanical Bath Soak</h3><p>An inviting sample for an end-of-day ritual.</p><div class="product-row"><span class="not-priced">Price to be confirmed</span><button class="details" type="button">View details ↗</button></div></div></article>
+        <article class="product-card" data-category="essentials" data-name="Herbal Cleansing Bar" data-description="A placeholder concept for the botanical essentials category. Actual product availability, specifications, ingredients, and pricing are not yet verified."><div class="product-visual" style="--product-bg:linear-gradient(135deg,#c4cbaa,#9ba984)"><span class="tag">Sample product</span><div class="jar"><div class="package-label"><span class="logo-text">BRICKEY<span>BOTANICALS</span></span><span class="line"></span><strong>Herbal bar</strong><small>Sample</small></div></div></div><div class="product-info"><span class="product-type">Botanical essentials</span><h3>Herbal Cleansing Bar</h3><p>A simple sample product to round out the range.</p><div class="product-row"><span class="not-priced">Price to be confirmed</span><button class="details" type="button">View details ↗</button></div></div></article>
+        <article class="product-card" data-category="body" data-name="Nourishing Body Oil" data-description="An illustrative body oil concept. Product ingredients, cosmetic claims, photos, packaging, price, and quantity must be confirmed before sale."><div class="product-visual" style="--product-bg:linear-gradient(135deg,#d5cfaa,#9b9874)"><span class="tag">Sample product</span><div class="bottle"><div class="package-label"><span class="logo-text">BRICKEY<span>BOTANICALS</span></span><span class="line"></span><strong>Body oil</strong><small>Sample</small></div></div></div><div class="product-info"><span class="product-type">Body care</span><h3>Nourishing Body Oil</h3><p>A sample to imagine the body collection.</p><div class="product-row"><span class="not-priced">Price to be confirmed</span><button class="details" type="button">View details ↗</button></div></div></article>
+        <article class="product-card" data-category="face" data-name="Gentle Daily Cleanser" data-description="A concept placeholder for a daily facial cleanser. No product-specific results, ingredients, stock status, or pricing are represented as real."><div class="product-visual" style="--product-bg:linear-gradient(135deg,#e6dfce,#b9b9a1)"><span class="tag">Sample product</span><div class="bottle"><div class="package-label"><span class="logo-text">BRICKEY<span>BOTANICALS</span></span><span class="line"></span><strong>Daily cleanser</strong><small>Sample</small></div></div></div><div class="product-info"><span class="product-type">Face care</span><h3>Gentle Daily Cleanser</h3><p>A familiar daily-care sample product.</p><div class="product-row"><span class="not-priced">Price to be confirmed</span><button class="details" type="button">View details ↗</button></div></div></article>
+      </div>
+    </div></section>
+    <section class="story" id="story"><div class="story-art" role="img" aria-label="Abstract leaf-shaped botanical artwork"></div><div class="story-copy"><span class="eyebrow">A story worth growing</span><h2 class="serif">Rooted in nature.<br>Made to feel personal.</h2><p>Brickey Botanicals is building an experience inspired by the natural world. A place to slow down, explore beautiful everyday rituals, and discover a more intentional approach to care.</p><p>This is a proposed brand-story direction. The final business story will be updated with the founder's approved wording.</p><a class="btn btn-light" href="#contact">Connect with us ↗</a></div></section>
+    <section class="section process" id="approach"><span class="eyebrow">A thoughtful experience</span><h2 class="serif">Every detail matters.</h2><div class="process-grid"><div class="process-item"><b>01</b><h3>Explore</h3><p>Find your way through a clear, beautifully organized collection with categories that make sense.</p></div><div class="process-item"><b>02</b><h3>Discover</h3><p>See product information, ingredients, and care details together once the approved catalog is available.</p></div><div class="process-item"><b>03</b><h3>Connect</h3><p>Reach the team directly for questions and updates while this collection moves toward launch.</p></div></div></section>
+    <section class="contact-band" id="contact"><span class="eyebrow">Stay close to what is growing</span><h2 class="serif">Something beautiful<br>is taking shape.</h2><p>We’re preparing the Brickey Botanicals collection. For now, connect with the team through the existing website.</p><a class="btn btn-primary" href="https://brickeybotanicals.com/" target="_blank" rel="noopener noreferrer">Visit official website ↗</a></section>
+  </main>
+  <footer><div class="footer-inner"><div><a class="brand" href="#home"><svg class="brand-mark" viewBox="0 0 40 52" fill="none" aria-hidden="true"><path d="M20 45V8m0 29C3 32 4 13 17 5c7 12 4 22 3 32Zm1-9C38 28 39 10 26 5c-7 10-6 18-5 23Z" stroke="currentColor" stroke-width="1.8"/></svg><span class="brand-label">BRICKEY<small>BOTANICALS</small></span></a><p>Nature-inspired care, beautifully considered. An early look at the future Brickey Botanicals experience.</p></div><div><h4>Explore</h4><a href="#collection">All products</a><a href="#categories">Categories</a><a href="#story">Our story</a><a href="#approach">Our approach</a></div><div><h4>Connect</h4><a href="https://brickeybotanicals.com/" target="_blank" rel="noopener noreferrer">Official website</a><a href="#contact">Get in touch</a></div></div><div class="footer-bottom"><span>© <span id="year">2026</span> Brickey Botanicals. Concept preview.</span><span>Sample product listings are not available for purchase.</span></div></footer>
+  <dialog id="productDialog" aria-labelledby="modalName"><button class="close" id="closeDialog" type="button" aria-label="Close product details">×</button><div class="modal-inner"><span class="eyebrow">Illustrative listing</span><h2 class="serif" id="modalName">Product name</h2><p id="modalDescription"></p><p class="modal-note"><strong>Preview only.</strong> This product is a placeholder. Price, availability, ingredients, and purchase functionality will be added only after the approved catalog is supplied.</p><a class="btn btn-primary" href="#contact" id="modalContact">Contact the team ↗</a></div></dialog>
+  <script>
+    (() => {
+      'use strict';
+      const toggle=document.getElementById('navToggle');
+      const links=document.getElementById('navLinks');
+      const shop=document.getElementById('shopMenu');
+      const shopButton=document.getElementById('shopButton');
+      const filters=[...document.querySelectorAll('.filter')];
+      const items=[...document.querySelectorAll('.product-card')];
+      const modal=document.getElementById('productDialog');
+      const closeNav=()=>{links.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','Open menu');shop.dataset.open='false';shopButton.setAttribute('aria-expanded','false');};
+      toggle.addEventListener('click',()=>{const open=!links.classList.contains('is-open');links.classList.toggle('is-open',open);toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Close menu':'Open menu');});
+      shopButton.addEventListener('click',()=>{const open=shop.dataset.open!=='true';shop.dataset.open=String(open);shopButton.setAttribute('aria-expanded',String(open));});
+      function applyFilter(category) {
+        const selected=['all','face','body','bath','essentials'].includes(category)?category:'all';
+        filters.forEach(button=>{const active=button.dataset.category===selected;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});
+        items.forEach(item=>{item.hidden=selected!=='all'&&item.dataset.category!==selected;});
+      }
+      filters.forEach(button=>button.addEventListener('click',()=>applyFilter(button.dataset.category)));
+      document.querySelectorAll('a[data-category]').forEach(link=>link.addEventListener('click',()=>{applyFilter(link.dataset.category);closeNav();}));
+      document.querySelectorAll('.nav-links>a').forEach(link=>link.addEventListener('click',closeNav));
+      document.addEventListener('click',event=>{if(!shop.contains(event.target)){shop.dataset.open='false';shopButton.setAttribute('aria-expanded','false');}});
+      items.forEach(item=>item.querySelector('.details').addEventListener('click',()=>{document.getElementById('modalName').textContent=item.dataset.name;document.getElementById('modalDescription').textContent=item.dataset.description;modal.showModal();}));
+      document.getElementById('closeDialog').addEventListener('click',()=>modal.close());
+      document.getElementById('modalContact').addEventListener('click',()=>modal.close());
+      modal.addEventListener('click',event=>{if(event.target===modal)modal.close();});
+      document.getElementById('year').textContent=new Date().getFullYear();
+    })();
+  </script>
+</body>
+</html>
