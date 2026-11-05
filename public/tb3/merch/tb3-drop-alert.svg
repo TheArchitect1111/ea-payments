@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+<title id="title">TB3 DROP ALERT</title><desc id="desc">The first TB3 merch release is coming. One of one. Built different.</desc>
+<defs>
+<radialGradient id="ambience"><stop offset="0" stop-color="#a31329" stop-opacity=".45"/><stop offset=".55" stop-color="#160408" stop-opacity=".7"/><stop offset="1" stop-color="#050507" stop-opacity=".9"/></radialGradient>
+<linearGradient id="chrome" x1="0" x2=".7" y1="0" y2="1"><stop stop-color="#fff"/><stop offset=".35" stop-color="#d9d9d9"/><stop offset=".58" stop-color="#fff"/><stop offset="1" stop-color="#7f8186"/></linearGradient>
+<linearGradient id="red" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff5266"/><stop offset=".5" stop-color="#b30b24"/><stop offset="1" stop-color="#590511"/></linearGradient>
+<filter id="glow" x="-30%" y="-50%" width="160%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+<filter id="shadow"><feDropShadow dx="0" dy="14" stdDeviation="10" flood-color="#000" flood-opacity=".9"/></filter>
+<pattern id="lines" width="58" height="58" patternUnits="userSpaceOnUse" patternTransform="rotate(25)"><path d="M 0 0 L 0 58" stroke="#f51a37" stroke-width="2" opacity=".15"/></pattern>
+</defs>
+<rect width="1600" height="900" fill="url(#ambience)"/>
+<rect width="1600" height="900" fill="url(#lines)" opacity=".55"/>
+<g opacity=".8"><path d="M0 0h295L0 225z" fill="#7d0a20"/><path d="M0 0h115L0 86z" fill="#ed1936"/><path d="M1600 900h-320l320-240z" fill="#9b0822"/><path d="M1600 900h-115l115-86z" fill="#f81b42"/></g>
+<path d="M200 75h365M1035 75h365" stroke="#ededed" stroke-width="3" opacity=".8"/>
+<g text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="900" letter-spacing="11">
+<text x="800" y="87" font-size="35" fill="#fff">TB3 EXCLUSIVE COLLECTION</text>
+</g>
+<g filter="url(#shadow)" text-anchor="middle" font-family="Impact,Arial Black,Arial,sans-serif" font-style="italic" font-weight="900">
+<text x="800" y="304" font-size="255" letter-spacing="-10" fill="url(#chrome)" stroke="#fff" stroke-width="2" paint-order="stroke">DROP</text>
+<text x="790" y="482" font-size="260" letter-spacing="-10" fill="url(#red)" stroke="#ff2a48" stroke-width="4" paint-order="stroke">ALERT</text>
+</g>
+<path d="M95 365 1503 323" stroke="#ff263d" stroke-width="8" opacity=".55" filter="url(#glow)"/>
+<path d="M245 497 1354 474" stroke="#f71f38" stroke-width="6" opacity=".95"/>
+<g transform="translate(206 508) skewX(-8)" filter="url(#shadow)"><rect width="1188" height="62" fill="#f7f5f2"/><text x="594" y="44" text-anchor="middle" font-family="Impact,Arial Black,Arial,sans-serif" font-size="40" font-weight="900" fill="#09090a">THE FIRST TB3 MERCH RELEASE IS COMING</text></g>
+<g text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="900">
+<circle cx="800" cy="644" r="66" fill="#1c090f" stroke="#ea233b" stroke-width="9" stroke-dasharray="30 7"/>
+<text x="800" y="632" font-size="25" fill="#fff">DROP</text><text x="800" y="682" font-size="56" fill="#fd2943">01</text>
+<path d="M540 643h155M905 643h155" stroke="#fff" stroke-width="4" opacity=".8"/>
+<text x="800" y="750" font-family="Impact,Arial Black,Arial,sans-serif" font-size="64" font-style="italic" fill="#fff" letter-spacing="2">1 OF 1. BUILT DIFFERENT.</text>
+<text x="800" y="795" font-size="24" fill="#e8e8e8" font-weight="600">SEASON STARTS NOW. THE GEAR DROPS NEXT.</text>
+</g>
+<g transform="translate(555 815) skewX(-9)"><rect width="490" height="62" rx="2" fill="#ad0c26" stroke="#ff4d64" stroke-width="5"/><text x="245" y="43" text-anchor="middle" font-family="Impact,Arial Black,Arial,sans-serif" font-size="43" font-weight="900" fill="#fff">GET FIRST ACCESS</text></g>
+</svg>
