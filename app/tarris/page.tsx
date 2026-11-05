@@ -150,9 +150,9 @@ export default function TarrisPublicPage() {
           <div id="merch-store" className="relative isolate overflow-hidden">
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4" aria-hidden="true">{merchProducts.map((product, index) => <MerchProductCard key={product.id} product={product} index={index} />)}</div>
             {/* Launch campaign takeover: the merchandise stays in the DOM and visible underneath, but ordering is not yet open. */}
-            <div className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center overflow-hidden bg-black/60 pt-16 backdrop-blur-[2px] sm:items-center sm:pt-0" aria-label="TB3 Drop Alert. The first TB3 merch release is coming. One of one, built different.">
+            <div className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center overflow-hidden bg-black/40 pt-16 backdrop-blur-[1px] sm:items-center sm:pt-0" aria-label="TB3 Drop Alert. The first TB3 merch release is coming. One of one, built different.">
               <img
-                src="/tb3/merch/tb3-drop-alert.webp"
+                src="/tb3/merch/tb3-drop-alert.svg"
                 alt="TB3 exclusive collection. DROP ALERT. The first TB3 merch release is coming. DROP 01. 1 of 1. Built Different. Season starts now. The gear drops next. Get first access. TB3.online."
                 className="relative block h-auto w-[114%] max-w-none -rotate-[5deg] drop-shadow-[0_30px_65px_rgba(0,0,0,0.9)] sm:w-[110%]"
                 loading="eager"
