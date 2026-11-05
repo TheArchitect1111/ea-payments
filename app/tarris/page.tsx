@@ -147,7 +147,18 @@ export default function TarrisPublicPage() {
         </section>
         <section id="merch" className="scroll-mt-5 py-10">
           <div className="mb-6"><p className="text-[9px] tracking-[0.25em] text-[#A51C30]">TB3 STORE</p><h2 className="mt-2 text-3xl font-black tracking-tight">WEAR THE VISION.</h2><p className="mt-3 text-sm text-black/70">The 14-piece collection is available to explore. Online orders will open after payment and fulfillment approval. For now, select an item to ask about availability.</p></div>
-          <div id="merch-store" className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">{merchProducts.map((product, index) => <MerchProductCard key={product.id} product={product} index={index} />)}</div>
+          <div id="merch-store" className="relative isolate overflow-hidden">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4" aria-hidden="true">{merchProducts.map((product, index) => <MerchProductCard key={product.id} product={product} index={index} />)}</div>
+            {/* Launch campaign takeover: the merchandise stays in the DOM and visible underneath, but ordering is not yet open. */}
+            <div className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center overflow-hidden bg-black/60 pt-16 backdrop-blur-[2px] sm:items-center sm:pt-0" aria-label="TB3 Drop Alert. The first TB3 merch release is coming. One of one, built different.">
+              <img
+                src="/tb3/merch/tb3-drop-alert.webp"
+                alt="TB3 exclusive collection. DROP ALERT. The first TB3 merch release is coming. DROP 01. 1 of 1. Built Different. Season starts now. The gear drops next. Get first access. TB3.online."
+                className="relative block h-auto w-[114%] max-w-none -rotate-[5deg] drop-shadow-[0_30px_65px_rgba(0,0,0,0.9)] sm:w-[110%]"
+                loading="eager"
+              />
+            </div>
+          </div>
         </section>
         <BookingForm/>
       </main>
