@@ -170,7 +170,7 @@ function packFromOrg(org: (typeof orgs)[number]) {
   };
 }
 
-const outDir = join(process.cwd(), 'prototypes/website-director-golden-path/five-org-run');
+const outDir = process.env.EA_LAYOUT_TEST_OUTPUT || join(process.cwd(), 'prototypes/website-director-golden-path/five-org-run');
 mkdirSync(outDir, { recursive: true });
 
 const results: Array<Record<string, unknown>> = [];

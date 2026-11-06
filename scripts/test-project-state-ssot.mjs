@@ -55,7 +55,16 @@ assert(submissions.includes('ensureCanonicalProjectState'), 'bootstrap on portal
 assert(portalStatus.includes('guideStage'), 'status view carries guideStage');
 assert(progress.includes('resolveGuideStages'), 'Progress uses stage resolution');
 assert(progress.includes('!/^WPS-/i'), 'NBA blocks WPS proposal links');
-assert(progress.includes('Continue Your Project'), 'Welcome NBA stays on Progress');
+// Verify the actual action rather than binding the contract to retired button copy.
+const { tsImport } = await import('tsx/esm/api');
+const { buildGuideProgressView } = await tsImport('../lib/ctp-guide-progress.ts', import.meta.url);
+const welcome = buildGuideProgressView('synthetic', {
+  id: 'fixture', businessName: 'Synthetic', status: 'Submitted', workspaceStatus: 'Pending',
+  studioStatus: 'Not Started', guideStage: 'Welcome', proposalId: '', submittedAt: '',
+  percentComplete: 0, assets: [], timeline: [], designStudio: [],
+});
+assert(welcome.nba.href?.includes('/progress') && welcome.nba.nothingRequired === true,
+  'Welcome NBA stays on Progress without requiring client action');
 assert(!progress.includes('Continue Your Journey'), 'Welcome NBA no longer routes to Journey');
 
 assert(consulting.includes('submission.guideStage'), 'Journey reads guideStage SSOT');

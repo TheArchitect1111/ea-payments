@@ -11,9 +11,9 @@ export type PlanningArtifactKind='executive_summary'|'information_architecture'|
 export type ProductionArtifactKind='website_site'|'experience_concepts'|'portal_app'|'learning_system'|'knowledge_base'|'report_pack'|'execution_contract'|'deliverable'|'review_gate'|'production_progress'|'subject_knowledge_pack'|'media_brand_pack'|'content_creative_pack'|'experience_manifest';
 export type ExperienceDirectorArtifactKind='experience_review';
 export type ArtifactKind=ResearchArtifactKind|DiscoveryArtifactKind|PlanningArtifactKind|ProductionArtifactKind|ExperienceDirectorArtifactKind;
-export type ArtifactProvenance={capabilityId:string;sourceType:string;sourceUrl?:string;sourceName?:string;intakeOutputId?:string;seedClient?:string;collectedAt:string;notes?:string;sourceArtifactIds?:string[]};
+export type ArtifactProvenance={capabilityId:string;sourceType:string;sourceUrl?:string;sourceName?:string;intakeOutputId?:string;seedClient?:string;collectedAt:string;notes?:string;sourceArtifactIds?:string[];confidence?:number};
 export type Artifact={schemaVersion:number;id:string;projectId:string;kind:ArtifactKind;providerId:string;createdAt:string;provenance:ArtifactProvenance;data:Record<string,unknown>};
-export type ArtifactDraft={id?:string;kind:ArtifactKind;providerId:string;provenance:Omit<ArtifactProvenance,'collectedAt'>&{collectedAt?:string};data:Record<string,unknown>};
+export type ArtifactDraft={id?:string;kind:ArtifactKind;providerId:string;title?:string;summary?:string;provenance:Omit<ArtifactProvenance,'collectedAt'>&{collectedAt?:string};data:Record<string,unknown>};
 export function createArtifact(input:{id:string;projectId:string;kind:ArtifactKind;providerId:string;provenance:ArtifactProvenance;data?:Record<string,unknown>;createdAt?:string},at?:string):Artifact{return createArtifactPure(input,at) as Artifact;}
 export function listArtifacts(context:ProjectContext,kind?:ArtifactKind):Artifact[]{return listArtifactsPure(context.artifacts||[],kind) as Artifact[];}
 export function listArtifactsByCapability(context:ProjectContext,capabilityId:string):Artifact[]{return listByCapabilityPure(context.artifacts||[],capabilityId) as Artifact[];}

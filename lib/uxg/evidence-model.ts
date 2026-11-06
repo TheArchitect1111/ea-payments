@@ -148,7 +148,7 @@ export const PORTAL_SECTION_BRIEFS: SectionBrief[] = [
     id: 'portal_communication',
     purpose: 'portal_communication',
     surface: 'portal',
-    allowedScopes: ['cta', 'contact'],
+    allowedScopes: ['cta'],
     intent: 'Enable private communication without marketing slogans.',
   },
   {

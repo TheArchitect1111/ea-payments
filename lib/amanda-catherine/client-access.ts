@@ -77,7 +77,7 @@ export async function getAmandaCourseAccessDecision(portalSlug: string, email: s
   const profile = parsed.success ? parsed.data : null;
   const grant = profile?.entitlements?.[courseId];
   if (amandaTrialExpired(grant)) {
-    return { authorized: false as const, reason: 'TRIAL_EXPIRED' as const, expiresAt: grant.expiresAt, redirect: `/portal/amanda-catherine/expired?courseId=${encodeURIComponent(courseId)}` };
+    return { authorized: false as const, reason: 'TRIAL_EXPIRED' as const, expiresAt: grant?.expiresAt, redirect: `/portal/amanda-catherine/expired?courseId=${encodeURIComponent(courseId)}` };
   }
   const assigned = profile ? profile.courseIds.includes(courseId) : Boolean(invitedAmandaLearner(email)?.courseIds?.includes(courseId));
   return { authorized: assigned && amandaCourseReady(courseId), reason: assigned ? undefined : 'NOT_ASSIGNED', expiresAt: grant?.expiresAt ?? null };

@@ -46,6 +46,7 @@ export const uxgDeepCrawlProvider: ResearchProvider = {
     const drafts: ArtifactDraft[] = [
       {
         kind: 'research_crawl_result',
+        providerId: 'uxg-deep-crawl',
         title: `UXG research crawl — ${project.client}`,
         summary: `provider=${result.providerId} completeness=${result.completeness}`,
         data: {
@@ -64,6 +65,7 @@ export const uxgDeepCrawlProvider: ResearchProvider = {
     if (result.knowledge) {
       drafts.push({
         kind: 'subject_knowledge_pack',
+        providerId: 'uxg-deep-crawl',
         title: `Subject knowledge (crawl) — ${project.client}`,
         summary: result.knowledge.verifiedIdentity.reason,
         data: result.knowledge as unknown as Record<string, unknown>,
@@ -79,6 +81,7 @@ export const uxgDeepCrawlProvider: ResearchProvider = {
     if (result.media) {
       drafts.push({
         kind: 'media_brand_pack',
+        providerId: 'uxg-deep-crawl',
         title: `Brand/media (crawl) — ${project.client}`,
         summary: `${result.media.assets.length} assets`,
         data: result.media as unknown as Record<string, unknown>,
@@ -86,7 +89,7 @@ export const uxgDeepCrawlProvider: ResearchProvider = {
           capabilityId: 'research',
           sourceType: 'uxg-deep-crawl',
           collectedAt: now,
-          confidence: result.media.completenessScore,
+          confidence: result.media.completeness,
         },
       });
     }

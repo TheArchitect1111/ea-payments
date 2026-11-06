@@ -101,7 +101,7 @@ export function mapCrawlToKnowledgePack(
 
   const citations = result.evidence.map((e) => ({
     url: e.sourceUrl,
-    title: e.pageTitle,
+    title: e.pageTitle ?? undefined,
     usedFor: [e.category],
   }));
 
@@ -165,7 +165,7 @@ export function mapCrawlToKnowledgePack(
     },
     alternativeIdentities: (result.identity.rejectedDomains || []).slice(0, 8).map((r) => ({
       name: r.domain,
-      url: r.url,
+      url: r.url ?? undefined,
       reason: r.reason,
     })),
     officialWebsite: result.identity.officialDomains[0]
@@ -225,8 +225,8 @@ export function mapCrawlToMediaBrandPack(
                 : m.relevanceCategory === 'environment'
                   ? 'location'
                   : 'other',
-      width: m.width,
-      height: m.height,
+      width: m.width ?? undefined,
+      height: m.height ?? undefined,
       qualityScore: 0.6,
       facePresent: typeof m.faceCount === 'number' ? m.faceCount > 0 : undefined,
       sourceUrl: m.pageUrl,
@@ -234,12 +234,12 @@ export function mapCrawlToMediaBrandPack(
       previewEligible: Boolean(m.durableUrl) || true,
       publicationEligible: false,
       usageStatus: m.usageStatus === 'user_supplied' ? 'user_supplied' : m.usageStatus,
-      title: m.altText || m.caption,
-      attribution: m.attribution,
-      license: m.licenseEvidence,
+      title: m.altText || m.caption || undefined,
+      attribution: m.attribution ?? undefined,
+      license: m.licenseEvidence ?? undefined,
       mediaProvider: 'uxg-research-crawl',
-      checksum: m.perceptualHash,
-      format: m.mimeType,
+      checksum: m.perceptualHash ?? undefined,
+      format: m.mimeType ?? undefined,
     });
   }
 

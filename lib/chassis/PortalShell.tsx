@@ -15,6 +15,7 @@ import {
 } from '@/lib/ctp-client-nav';
 
 export type EAPortalTab =
+  | 'settings'
   | 'home'
   | 'pulse'
   | 'simplifi'
@@ -63,6 +64,7 @@ type Props = {
 };
 
 const FALLBACK_TITLES: Record<EAPortalTab, string> = {
+  settings: 'Settings',
   home: 'Dashboard',
   pulse: 'Pulse',
   simplifi: 'Simplifi',

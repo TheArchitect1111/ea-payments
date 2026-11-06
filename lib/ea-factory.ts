@@ -280,6 +280,7 @@ export const EA_FACTORY_PROTOCOLS: EAFactoryProtocol[] = [
     versionHistory: [{ version: '1.0.0', status: 'active', notes: 'Integrated per PRAISONAI-ARCHITECTURE.md.' }],
   },
   {
+    id: 'ea-chassis',
     name: 'EA Chassis Protocol',
     category: 'platform',
     status: 'active',

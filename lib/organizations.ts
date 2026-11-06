@@ -37,8 +37,6 @@ export type Organization = {
   industryPackId?: string;
   /** Tenant booking embed URL for Event Hub calendar */
   bookingUrl?: string;
-  nylasGrantId?: string;
-  nylasCalendarId?: string;
   /** Tenant-scoped Nylas connection. The API key remains server environment only. */
   nylasGrantId?: string;
   nylasCalendarId?: string;
@@ -280,6 +278,8 @@ export async function updateOrganizationBilling(
 
 
 export type OrganizationWorkspaceConfigInput = {
+  nylasGrantId?: string;
+  nylasCalendarId?: string;
   platformClientId?: string;
   themeId?: string;
   personalityId?: string;

@@ -26,6 +26,7 @@ import type {
   Person,
   PersonAclGrant,
   PersonConsent,
+  ConsentPurpose,
   PersonDirectoryMembership,
   PersonId,
   PersonProgramLink,
@@ -41,6 +42,17 @@ import type {
 
 function newId(prefix: string): string {
   return `${prefix}_${randomUUID().replace(/-/g, '').slice(0, 16)}`;
+}
+
+function consentPurpose(value: unknown): ConsentPurpose {
+  switch (value) {
+    case 'portal_access': case 'email_transactional': case 'email_marketing': case 'sms':
+    case 'directory_visible_to_members': case 'directory_visible_to_staff':
+    case 'share_with_guardian': case 'data_processing':
+      return value;
+    default:
+      throw peopleValidation('Invalid stored consent purpose');
+  }
 }
 
 function rowToPerson(row: Record<string, unknown>): Person {
@@ -444,7 +456,7 @@ class PostgresPeopleRepository implements PeopleRepository {
       organizationId: String(r.organization_id),
       personId,
       kind: r.kind as PersonProgramLink['kind'],
-      externalRef: r.external_ref ? String(r.external_ref) : undefined,
+      externalRef: r.external_ref ? String(r.external_ref) : '',
       label: r.label ? String(r.label) : undefined,
       status: r.status as PersonProgramLink['status'],
       roleInProgram: r.role_in_program ? String(r.role_in_program) : undefined,
@@ -482,9 +494,9 @@ class PostgresPeopleRepository implements PeopleRepository {
       id: String(r.consent_key),
       organizationId: String(r.organization_id),
       personId,
-      purpose: String(r.purpose),
+      purpose: consentPurpose(r.purpose),
       status: r.status as PersonConsent['status'],
-      capturedAt: r.captured_at ? String(r.captured_at) : undefined,
+      capturedAt: r.captured_at ? String(r.captured_at) : '',
       expiresAt: r.expires_at ? String(r.expires_at) : undefined,
       source: (r.source
         ? String(r.source)

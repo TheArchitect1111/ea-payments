@@ -200,7 +200,7 @@ export function evaluateNextTransition(
 
 /** Record evidence flags (idempotent). Does not advance stage by itself. */
 export function recordProjectEvidence(
-  evidence: ProjectEvidenceState,
+  evidence: ProjectEvidenceState | undefined,
   kinds: ProjectEvidenceKind[],
   at = new Date().toISOString(),
 ): ProjectEvidenceState {

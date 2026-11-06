@@ -224,7 +224,7 @@ export async function createFactoryProject(
       context: project.context
         ? { ...project.context, pipelineStatus: 'FAILED', updatedAt: failedAt }
         : project.context,
-      activity: [
+      activity: ([
         ...project.activity,
         {
           at: failedAt,
@@ -233,7 +233,7 @@ export async function createFactoryProject(
           worker: 'control-plane-bridge',
           detail: bridge.error || 'Control Plane registration failed',
         },
-      ].slice(-100),
+      ] satisfies FactoryActivity[]).slice(-100),
     };
     await saveFactoryProject(failed);
     return {

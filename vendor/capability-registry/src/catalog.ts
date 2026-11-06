@@ -284,7 +284,7 @@ export const CAPABILITY_CATALOG: CapabilityManifest[] = [
     name: 'Portal Settings',
     description: 'Branding and notification preferences for tenant portals.',
     purpose: 'Launch Edition core — lightweight portal configuration surface.',
-    category: 'Platform',
+    category: 'Portal',
     status: 'Development',
     consumers: ['ea-payments'],
     dependencies: ['authentication', 'organizations'],

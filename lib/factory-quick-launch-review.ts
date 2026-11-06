@@ -277,7 +277,7 @@ export async function buildQuickLaunchReview(
         .map((c) => {
           const rec = asRecord(c);
           const name = str(rec?.name) || 'Concept';
-          const rationale = str(rec?.rationale) || str(rec?.story?.sentence) || '';
+          const rationale = str(rec?.rationale) || str(asRecord(rec?.story)?.sentence) || '';
           return rationale ? `${name}: ${rationale}` : name;
         })
         .filter(Boolean),

@@ -1,0 +1,440 @@
+{
+  "reviewedHead": "59e5ea7e82871fb529921edd79b2478d40a207b1",
+  "branch": "work/ayf-chassis-20261103",
+  "status": "BLOCKED",
+  "productionVerified": false,
+  "ayfReady": false,
+  "jobCounts": {
+    "PASS": 34,
+    "FAIL": 1
+  },
+  "jobs": [
+    {
+      "name": "behavioral",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx --test tests/factory-screenshot-build.test.mts tests/chassis-autowire.test.mts tests/blockers-certified.test.mts tests/capture-family.test.mts tests/capture-customer-routes.test.mts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 10639,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\behavioral.log"
+    },
+    {
+      "name": "factory-production",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-factory-production.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 306,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\factory-production.log"
+    },
+    {
+      "name": "factory-capability-registry",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-factory-capability-registry.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 242,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\factory-capability-registry.log"
+    },
+    {
+      "name": "factory-orchestrator",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-factory-orchestrator.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 197,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\factory-orchestrator.log"
+    },
+    {
+      "name": "factory-project-context",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-factory-project-context.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 184,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\factory-project-context.log"
+    },
+    {
+      "name": "universal-quick-launch",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-universal-quick-launch.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 187,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\universal-quick-launch.log"
+    },
+    {
+      "name": "production-protection",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-production-protection.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 197,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\production-protection.log"
+    },
+    {
+      "name": "tenant-release-safety",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-tenant-release-safety.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 171,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\tenant-release-safety.log"
+    },
+    {
+      "name": "release-guardrails",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-release-guardrails.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 202,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\release-guardrails.log"
+    },
+    {
+      "name": "master-guard-contract",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-master-guard-contract.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 190,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\master-guard-contract.log"
+    },
+    {
+      "name": "system-registry",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-system-registry.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 172,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\system-registry.log"
+    },
+    {
+      "name": "tenant-safety",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-tenant-safety.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 194,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\tenant-safety.log"
+    },
+    {
+      "name": "lego-strict-authority",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-lego-strict-authority.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 159,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\lego-strict-authority.log"
+    },
+    {
+      "name": "lego-final-acceptance",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-lego-final-acceptance.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 171,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\lego-final-acceptance.log"
+    },
+    {
+      "name": "airtable-read-hardening",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-airtable-read-hardening.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 162,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\airtable-read-hardening.log"
+    },
+    {
+      "name": "factory-run2-torture-certification",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-factory-run2-torture-certification.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 242,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\factory-run2-torture-certification.log"
+    },
+    {
+      "name": "factory-identity-concept-pack",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-factory-identity-concept-pack.ts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 947,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\factory-identity-concept-pack.log"
+    },
+    {
+      "name": "experience-creation-engine",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-experience-creation-engine.ts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 532,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\experience-creation-engine.log"
+    },
+    {
+      "name": "factory-wire-selected",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-factory-wire-selected.ts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 203,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\factory-wire-selected.log"
+    },
+    {
+      "name": "factory-quick-launch-review",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-factory-quick-launch-review.ts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 728,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\factory-quick-launch-review.log"
+    },
+    {
+      "name": "lint",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe node_modules/eslint/bin/eslint.js lib/factory-screenshot-submit.ts lib/factory-screenshot-verifier.ts lib/factory-screenshot-browser-worker.ts scripts/serve-factory-screenshot-verifier.mts lib/experience-creation/build-knowledge-pack.ts tests/factory-screenshot-build.test.mts tests/chassis-autowire.test.mts tests/fixtures/people-runtime.ts tests/fixtures/screenshot-ledger.ts scripts/test-factory-production.mjs scripts/test-factory-capability-registry.mjs scripts/test-factory-identity-concept-pack.ts scripts/test-factory-screenshot-acceptance.mjs app/api/projects/[id]/screenshot-build/submit/route.ts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 11068,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\lint.log"
+    },
+    {
+      "name": "types",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false",
+      "status": "FAIL",
+      "exitCode": 2,
+      "durationMs": 50555,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\types.log",
+      "diagnosticCount": 348
+    },
+    {
+      "name": "factory-types",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe scripts/check-factory-release-types.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 8422,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\factory-types.log"
+    },
+    {
+      "name": "release-contracts",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx --test tests/factory-release-contracts.test.mts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 836,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\release-contracts.log"
+    },
+    {
+      "name": "uxg-research-schemas",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-uxg-research-schemas.ts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 254,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\uxg-research-schemas.log"
+    },
+    {
+      "name": "uxg-research-identity",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-uxg-research-identity.ts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 244,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\uxg-research-identity.log"
+    },
+    {
+      "name": "uxg-research-provider-selection",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-uxg-research-provider-selection.ts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 255,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\uxg-research-provider-selection.log"
+    },
+    {
+      "name": "layout-composer-five-orgs",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-layout-composer-five-orgs.ts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 491,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\layout-composer-five-orgs.log"
+    },
+    {
+      "name": "people-offline",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-people-phase2c-offline.mts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 367,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\people-offline.log"
+    },
+    {
+      "name": "amanda-payment-regression",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx --test tests/amanda-dollar-test.test.ts tests/amanda-wiring.test.mts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 1784,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\amanda-payment-regression.log"
+    },
+    {
+      "name": "project-state-ssot",
+      "attempt": 2,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-project-state-ssot.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 962,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\project-state-ssot-attempt2.log",
+      "history": [
+        {
+          "status": "FAIL",
+          "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\project-state-ssot.log"
+        }
+      ]
+    },
+    {
+      "name": "organization-workspace-config",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-organization-workspace-config.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 161,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\organization-workspace-config.log"
+    },
+    {
+      "name": "experience-registry",
+      "attempt": 1,
+      "command": "C:\\Program Files\\nodejs\\node.exe --require C:\\Users\\brick\\Projects\\ea-payments\\tests\\fixtures\\network-offline.cjs --import tsx scripts/test-experience-registry.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 173,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\experience-registry.log"
+    },
+    {
+      "name": "native-build",
+      "attempt": 1,
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Users\\brick\\AppData\\Local\\Temp\\ea-low-memory-monitor.ps1",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 132980,
+      "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-screenshot-consolidated-1794004674685\\native-build.log"
+    },
+    {
+      "name": "dependency-lint",
+      "status": "PASS",
+      "exitCode": 0,
+      "log": "C:/Users/brick/AppData/Local/Temp/ea-screenshot-consolidated-1794004674685/dependency-lint.log",
+      "note": "0 errors, two existing unused-variable warnings and one ignored vendor-file notice"
+    }
+  ],
+  "configurationPresence": {
+    "vision": false,
+    "airtable": false,
+    "peopleCredentials": false,
+    "peopleEnabled": false,
+    "peoplePersistEnabled": false,
+    "remoteVerifier": false
+  },
+  "factoryDependencyErrors": 0,
+  "rootTypeErrors": 348,
+  "rootDiagnosticDelta": {
+    "added": 0,
+    "removed": 63
+  },
+  "behavioral": {
+    "screenshotPortalAndChassis": {
+      "passed": 57,
+      "failed": 0
+    },
+    "releaseContracts": {
+      "passed": 4,
+      "failed": 0
+    },
+    "amandaPayment": {
+      "passed": 14,
+      "failed": 0
+    },
+    "peopleOffline": {
+      "passed": 10,
+      "failed": 0,
+      "skipped": 2
+    }
+  },
+  "build": {
+    "command": "node node_modules/next/dist/bin/next build",
+    "startedAt": "2026-11-06T22:39:27.002Z",
+    "finishedAt": "2026-11-06T22:41:37.715Z",
+    "exitCode": 0,
+    "signal": null,
+    "log": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-factory-build-1794004767001\\build.log",
+    "credentialsSuppressed": true,
+    "outboundNodeServicesBlocked": true
+  },
+  "memory": {
+    "startedAt": "2026-11-06T22:39:26.8479271Z",
+    "finishedAt": "2026-11-06T22:41:38.4647771Z",
+    "exitCode": null,
+    "peakSampledTreeWorkingSetBytes": 1389441024,
+    "peakSampledTreePrivateBytes": 4009988096,
+    "samples": 54,
+    "trackedProcessIds": [
+      3364,
+      29372,
+      14356,
+      27176,
+      19600
+    ],
+    "sampleIntervalSeconds": 2,
+    "note": "Sampled aggregate Node launcher/build/worker process memory; not a hard memory cap or exact instantaneous OS peak",
+    "output": "C:\\Users\\brick\\AppData\\Local\\Temp\\ea-low-memory-1794004766793"
+  },
+  "changedFiles": [
+    "lib/amanda-catherine/client-access.ts",
+    "lib/amanda-catherine/config.ts",
+    "lib/chassis/PortalShell.tsx",
+    "lib/ea-factory.ts",
+    "lib/experience-creation/build-media-pack.ts",
+    "lib/experience-creation/openverse-provider.ts",
+    "lib/experience-registry.ts",
+    "lib/factory-artifact.ts",
+    "lib/factory-builder-registry.mjs",
+    "lib/factory-builders/index.ts",
+    "lib/factory-deliverable.mjs",
+    "lib/factory-discovery/derive.mjs",
+    "lib/factory-planning/derive.mjs",
+    "lib/factory-project-context.mjs",
+    "lib/factory-project.ts",
+    "lib/factory-quick-launch-review.ts",
+    "lib/factory-research/uxg-deep-crawl-provider.ts",
+    "lib/factory-research/website-provider.ts",
+    "lib/layout-composer/compose-puck-data.ts",
+    "lib/organizations.ts",
+    "lib/people/postgres-repository.ts",
+    "lib/project-state-engine.ts",
+    "lib/uxg/evidence-model.ts",
+    "lib/uxg/research/durable-assets.ts",
+    "lib/uxg/research/firecrawl-provider.ts",
+    "lib/uxg/research/map-to-packs.ts",
+    "scripts/test-factory-screenshot-acceptance.mjs",
+    "scripts/test-layout-composer-five-orgs.ts",
+    "scripts/test-project-state-ssot.mjs",
+    "vendor/capability-registry/src/catalog.ts",
+    "lib/factory-builder-contract.ts",
+    "scripts/check-factory-release-types.mjs",
+    "tests/factory-release-contracts.test.mts",
+    "specs/ea-factory-screenshot-build/release-readiness.md",
+    "specs/ea-factory-screenshot-build/release-readiness-types.json",
+    "specs/ea-factory-screenshot-build/release-verification.json"
+  ],
+  "blockers": [
+    "Root strict typecheck: 348 errors outside the 22-entrypoint factory dependency graph",
+    "Exact-source private preview and seven promotion gate proofs absent; release actions not authorized",
+    "Approved vision credential absent",
+    "Scoped Airtable credential absent",
+    "People runtime credentials/configuration absent and flags off",
+    "Approved real AYF screenshots/bindings/role/test-identity packet not established"
+  ]
+}

@@ -1,0 +1,478 @@
+{
+  "scope": "Factory entrypoints and transitive dependencies; root compiler options preserved",
+  "entrypoints": [
+    "app/admin/ea-factory/quick-launch/QuickLaunchClient.tsx",
+    "app/api/admin/factory/screenshot-assets/route.ts",
+    "app/api/launch/route.ts",
+    "app/api/projects/[id]/route.ts",
+    "app/api/projects/[id]/screenshot-build/assets/[index]/route.ts",
+    "app/api/projects/[id]/screenshot-build/preview/[pageId]/route.ts",
+    "app/api/projects/[id]/screenshot-build/source/[pageId]/route.ts",
+    "app/api/projects/[id]/screenshot-build/submit/route.ts",
+    "app/api/projects/[id]/screenshot-build/route.ts",
+    "lib/experience-creation/build-knowledge-pack.ts",
+    "lib/factory-launch-request.ts",
+    "lib/factory-orchestrator.ts",
+    "lib/factory-project-store.ts",
+    "lib/factory-project.ts",
+    "lib/factory-queue.ts",
+    "lib/factory-screenshot-browser-worker.ts",
+    "lib/factory-screenshot-build.ts",
+    "lib/factory-screenshot-runtime.ts",
+    "lib/factory-screenshot-submit.ts",
+    "lib/factory-screenshot-verifier.ts",
+    "lib/screenshot-vision.ts",
+    "scripts/serve-factory-screenshot-verifier.mts"
+  ],
+  "diagnosticCount": 0,
+  "diagnostics": [],
+  "fullRootDiagnosticCount": 348,
+  "rootErrorsAdded": 0,
+  "rootErrorsRemoved": 63,
+  "previousBaseline": {
+    "diagnosticCount": 63,
+    "diagnostics": [
+      {
+        "file": "lib/amanda-catherine/client-access.ts",
+        "code": 18048,
+        "message": "'grant' is possibly 'undefined'.",
+        "line": 80,
+        "preexisting": true
+      },
+      {
+        "file": "lib/amanda-catherine/config.ts",
+        "code": 18048,
+        "message": "'offer' is possibly 'undefined'.",
+        "line": 503,
+        "preexisting": true
+      },
+      {
+        "file": "lib/chassis/portal-nav-mapping.ts",
+        "code": 2322,
+        "message": "Type '\"settings\"' is not assignable to type 'EAPortalTab | undefined'.",
+        "line": 60,
+        "preexisting": true
+      },
+      {
+        "file": "lib/ea-factory.ts",
+        "code": 2741,
+        "message": "Property 'id' is missing in type '{ name: string; category: string; status: \"active\"; activeVersion: string; owner: string; createdDate: string; modifiedDate: string; approvedBy: string; approvalStatus: \"active\"; futureNotes: string; ... 4 more ...; versionHistory: { ...; }[]; }' but required in type 'EAFactoryProtocol'.",
+        "line": 282,
+        "preexisting": true
+      },
+      {
+        "file": "lib/experience-creation/build-media-pack.ts",
+        "code": 2322,
+        "message": "Type '{ id: string; kind: \"location\"; url: string; originalUrl: string; title: string; sourcePageUrl: string; license: string; licenseClass: \"cc0\"; licenseVerified: true; attribution: string; usageStatus: \"preview_only\"; ... 4 more ...; assignedSections: string[]; }[]' is not assignable to type 'MediaAsset[]'.\n  Type '{ id: string; kind: \"location\"; url: string; originalUrl: string; title: string; sourcePageUrl: string; license: string; licenseClass: \"cc0\"; licenseVerified: true; attribution: string; usageStatus: \"preview_only\"; ... 4 more ...; assignedSections: string[]; }' is missing the following properties from type 'MediaAsset': qualityScore, sourceUrl",
+        "line": 81,
+        "preexisting": true
+      },
+      {
+        "file": "lib/experience-creation/build-media-pack.ts",
+        "code": 2322,
+        "message": "Type 'import(\"C:/Users/brick/Projects/ea-payments/lib/experience-creation/types\").MediaUsageStatus' is not assignable to type 'import(\"C:/Users/brick/Projects/ea-payments/lib/experience-creation/openverse-provider\").MediaUsageStatus'.\n  Type '\"user_supplied\"' is not assignable to type 'MediaUsageStatus'.",
+        "line": 117,
+        "preexisting": true
+      },
+      {
+        "file": "lib/experience-registry.ts",
+        "code": 2322,
+        "message": "Type '\"shared-calendar\"' is not assignable to type 'CapabilityId'.",
+        "line": 262,
+        "preexisting": true
+      },
+      {
+        "file": "lib/experience-registry.ts",
+        "code": 2322,
+        "message": "Type '\"convert\"' is not assignable to type '\"capture\" | \"organize\" | \"communicate\" | \"act\" | \"measure\" | undefined'.",
+        "line": 498,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-builders/index.ts",
+        "code": 7006,
+        "message": "Parameter 'registry' implicitly has an 'any' type.",
+        "line": 18,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-builders/index.ts",
+        "code": 7006,
+        "message": "Parameter 'builder' implicitly has an 'any' type.",
+        "line": 18,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-capabilities/discovery-capability.ts",
+        "code": 2322,
+        "message": "Type '{ kind: ArtifactKind; providerId: string; provenance: { intakeOutputId: any; }; data: object; }[]' is not assignable to type 'ArtifactDraft[]'.\n  Type '{ kind: ArtifactKind; providerId: string; provenance: { intakeOutputId: any; }; data: object; }' is not assignable to type 'ArtifactDraft'.\n    Types of property 'provenance' are incompatible.\n      Type '{ intakeOutputId: any; }' is not assignable to type 'Omit<ArtifactProvenance, \"collectedAt\"> & { collectedAt?: string | undefined; }'.\n        Type '{ intakeOutputId: any; }' is missing the following properties from type 'Omit<ArtifactProvenance, \"collectedAt\">': capabilityId, sourceType",
+        "line": 75,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-capabilities/discovery-capability.ts",
+        "code": 2339,
+        "message": "Property 'intakeOutputId' does not exist on type 'object'.",
+        "line": 80,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-capabilities/planning-capability.ts",
+        "code": 2339,
+        "message": "Property 'id' does not exist on type 'object'.",
+        "line": 101,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-capabilities/planning-capability.ts",
+        "code": 2339,
+        "message": "Property 'type' does not exist on type 'object'.",
+        "line": 115,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-capabilities/production-capability.ts",
+        "code": 2339,
+        "message": "Property 'id' does not exist on type 'object'.",
+        "line": 61,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-capabilities/production-capability.ts",
+        "code": 2339,
+        "message": "Property 'canBuild' does not exist on type 'object'.",
+        "line": 90,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-capabilities/production-capability.ts",
+        "code": 2339,
+        "message": "Property 'id' does not exist on type 'object'.",
+        "line": 93,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-capabilities/production-capability.ts",
+        "code": 2339,
+        "message": "Property 'id' does not exist on type 'object'.",
+        "line": 101,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-capabilities/production-capability.ts",
+        "code": 2339,
+        "message": "Property 'build' does not exist on type 'object'.",
+        "line": 106,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-capabilities/production-capability.ts",
+        "code": 2339,
+        "message": "Property 'id' does not exist on type 'object'.",
+        "line": 115,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-capabilities/production-capability.ts",
+        "code": 2339,
+        "message": "Property 'id' does not exist on type 'object'.",
+        "line": 119,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-capabilities/production-capability.ts",
+        "code": 2339,
+        "message": "Property 'id' does not exist on type 'object'.",
+        "line": 145,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-capabilities/production-capability.ts",
+        "code": 2339,
+        "message": "Property 'id' does not exist on type 'object'.",
+        "line": 155,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-capabilities/publishing-capability.ts",
+        "code": 7006,
+        "message": "Parameter 'item' implicitly has an 'any' type.",
+        "line": 57,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-capabilities/qa-capability.ts",
+        "code": 7006,
+        "message": "Parameter 'item' implicitly has an 'any' type.",
+        "line": 18,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-quick-launch-review.ts",
+        "code": 2339,
+        "message": "Property 'sentence' does not exist on type '{}'.",
+        "line": 280,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-research/uxg-deep-crawl-provider.ts",
+        "code": 2353,
+        "message": "Object literal may only specify known properties, and 'confidence' does not exist in type 'Omit<ArtifactProvenance, \"collectedAt\"> & { collectedAt?: string | undefined; }'.",
+        "line": 59,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-research/uxg-deep-crawl-provider.ts",
+        "code": 2353,
+        "message": "Object literal may only specify known properties, and 'confidence' does not exist in type 'Omit<ArtifactProvenance, \"collectedAt\"> & { collectedAt?: string | undefined; }'.",
+        "line": 74,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-research/uxg-deep-crawl-provider.ts",
+        "code": 2353,
+        "message": "Object literal may only specify known properties, and 'confidence' does not exist in type 'Omit<ArtifactProvenance, \"collectedAt\"> & { collectedAt?: string | undefined; }'.",
+        "line": 89,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-research/uxg-deep-crawl-provider.ts",
+        "code": 2551,
+        "message": "Property 'completenessScore' does not exist on type 'MediaBrandPack'. Did you mean 'completeness'?",
+        "line": 89,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-research/website-provider.ts",
+        "code": 2345,
+        "message": "Argument of type '{ url: string; status: number; contentType: string | null; html: string; extraPages: { url: string; html: string; }[]; }' is not assignable to parameter of type '{ url: any; status: any; contentType: any; html: any; fetchError: any; extraPages: any; }'.\n  Property 'fetchError' is missing in type '{ url: string; status: number; contentType: string | null; html: string; extraPages: { url: string; html: string; }[]; }' but required in type '{ url: any; status: any; contentType: any; html: any; fetchError: any; extraPages: any; }'.",
+        "line": 102,
+        "preexisting": true
+      },
+      {
+        "file": "lib/factory-research/website-provider.ts",
+        "code": 2345,
+        "message": "Argument of type '{ url: string; status: number; contentType: null; html: string; fetchError: string; }' is not assignable to parameter of type '{ url: any; status: any; contentType: any; html: any; fetchError: any; extraPages: any; }'.\n  Property 'extraPages' is missing in type '{ url: string; status: number; contentType: null; html: string; fetchError: string; }' but required in type '{ url: any; status: any; contentType: any; html: any; fetchError: any; extraPages: any; }'.",
+        "line": 123,
+        "preexisting": true
+      },
+      {
+        "file": "lib/layout-composer/compose-puck-data.ts",
+        "code": 2353,
+        "message": "Object literal may only specify known properties, and 'compositionSignature' does not exist in type '{ title?: string | undefined; }'.",
+        "line": 253,
+        "preexisting": true
+      },
+      {
+        "file": "lib/organizations.ts",
+        "code": 2300,
+        "message": "Duplicate identifier 'nylasGrantId'.",
+        "line": 40,
+        "preexisting": true
+      },
+      {
+        "file": "lib/organizations.ts",
+        "code": 2300,
+        "message": "Duplicate identifier 'nylasCalendarId'.",
+        "line": 41,
+        "preexisting": true
+      },
+      {
+        "file": "lib/organizations.ts",
+        "code": 2300,
+        "message": "Duplicate identifier 'nylasGrantId'.",
+        "line": 43,
+        "preexisting": true
+      },
+      {
+        "file": "lib/organizations.ts",
+        "code": 2300,
+        "message": "Duplicate identifier 'nylasCalendarId'.",
+        "line": 44,
+        "preexisting": true
+      },
+      {
+        "file": "lib/organizations.ts",
+        "code": 2339,
+        "message": "Property 'nylasGrantId' does not exist on type 'OrganizationWorkspaceConfigInput'.",
+        "line": 337,
+        "preexisting": true
+      },
+      {
+        "file": "lib/organizations.ts",
+        "code": 2339,
+        "message": "Property 'nylasCalendarId' does not exist on type 'OrganizationWorkspaceConfigInput'.",
+        "line": 338,
+        "preexisting": true
+      },
+      {
+        "file": "lib/organizations.ts",
+        "code": 2339,
+        "message": "Property 'nylasGrantId' does not exist on type 'OrganizationWorkspaceConfigInput'.",
+        "line": 358,
+        "preexisting": true
+      },
+      {
+        "file": "lib/organizations.ts",
+        "code": 2339,
+        "message": "Property 'nylasGrantId' does not exist on type 'OrganizationWorkspaceConfigInput'.",
+        "line": 358,
+        "preexisting": true
+      },
+      {
+        "file": "lib/organizations.ts",
+        "code": 2339,
+        "message": "Property 'nylasCalendarId' does not exist on type 'OrganizationWorkspaceConfigInput'.",
+        "line": 359,
+        "preexisting": true
+      },
+      {
+        "file": "lib/organizations.ts",
+        "code": 2339,
+        "message": "Property 'nylasCalendarId' does not exist on type 'OrganizationWorkspaceConfigInput'.",
+        "line": 359,
+        "preexisting": true
+      },
+      {
+        "file": "lib/people/postgres-repository.ts",
+        "code": 2322,
+        "message": "Type '{ id: string; organizationId: string; personId: string; kind: PersonProgramLinkKind; externalRef: string | undefined; label: string | undefined; status: \"active\" | \"completed\" | \"archived\" | \"withdrawn\"; roleInProgram: string | undefined; }[]' is not assignable to type 'PersonProgramLink[]'.\n  Type '{ id: string; organizationId: string; personId: string; kind: PersonProgramLink[\"kind\"]; externalRef: string | undefined; label: string | undefined; status: PersonProgramLink[\"status\"]; roleInProgram: string | undefined; }' is not assignable to type 'PersonProgramLink'.\n    Types of property 'externalRef' are incompatible.\n      Type 'string | undefined' is not assignable to type 'string'.\n        Type 'undefined' is not assignable to type 'string'.",
+        "line": 442,
+        "preexisting": true
+      },
+      {
+        "file": "lib/people/postgres-repository.ts",
+        "code": 2322,
+        "message": "Type '{ id: string; organizationId: string; personId: string; purpose: string; status: \"expired\" | \"withdrawn\" | \"granted\" | \"denied\"; capturedAt: string | undefined; expiresAt: string | undefined; source: \"staff\" | ... 3 more ... | \"legacy-client-record\"; }[]' is not assignable to type 'PersonConsent[]'.\n  Type '{ id: string; organizationId: string; personId: string; purpose: string; status: PersonConsent[\"status\"]; capturedAt: string | undefined; expiresAt: string | undefined; source: PersonConsent[\"source\"]; }' is not assignable to type 'PersonConsent'.\n    Types of property 'purpose' are incompatible.\n      Type 'string' is not assignable to type 'ConsentPurpose'.",
+        "line": 481,
+        "preexisting": true
+      },
+      {
+        "file": "lib/project-state-engine.ts",
+        "code": 2345,
+        "message": "Argument of type 'ProjectEvidenceState | undefined' is not assignable to parameter of type 'ProjectEvidenceState'.\n  Type 'undefined' is not assignable to type 'ProjectEvidenceState'.",
+        "line": 233,
+        "preexisting": true
+      },
+      {
+        "file": "lib/uxg/evidence-model.ts",
+        "code": 2322,
+        "message": "Type '\"contact\"' is not assignable to type 'EvidenceScope'.",
+        "line": 151,
+        "preexisting": true
+      },
+      {
+        "file": "lib/uxg/research/durable-assets.ts",
+        "code": 2345,
+        "message": "Argument of type 'string | null | undefined' is not assignable to parameter of type 'string | undefined'.\n  Type 'null' is not assignable to type 'string | undefined'.",
+        "line": 56,
+        "preexisting": true
+      },
+      {
+        "file": "lib/uxg/research/durable-assets.ts",
+        "code": 2322,
+        "message": "Type 'string | null | undefined' is not assignable to type 'string | undefined'.\n  Type 'null' is not assignable to type 'string | undefined'.",
+        "line": 81,
+        "preexisting": true
+      },
+      {
+        "file": "lib/uxg/research/firecrawl-provider.ts",
+        "code": 2322,
+        "message": "Type '{ originalUrl: string; pageUrl: string; relevanceCategory: \"logo\" | \"other\"; usageStatus: \"preview_only\"; rejected: false; }[]' is not assignable to type '{ rejected: boolean; pageUrl: string; ownership: \"unknown\" | \"subject_owned\" | \"employer_affiliated\"; originalUrl: string; relevanceCategory: \"document\" | \"logo\" | \"other\" | \"community\" | \"environment\" | \"portrait\" | \"product\"; ... 13 more ...; rejectionReason?: string | ... 1 more ... | undefined; }[]'.\n  Property 'ownership' is missing in type '{ originalUrl: string; pageUrl: string; relevanceCategory: \"logo\" | \"other\"; usageStatus: \"preview_only\"; rejected: false; }' but required in type '{ rejected: boolean; pageUrl: string; ownership: \"unknown\" | \"subject_owned\" | \"employer_affiliated\"; originalUrl: string; relevanceCategory: \"document\" | \"logo\" | \"other\" | \"community\" | \"environment\" | \"portrait\" | \"product\"; ... 13 more ...; rejectionReason?: string | ... 1 more ... | undefined; }'.",
+        "line": 30,
+        "preexisting": true
+      },
+      {
+        "file": "lib/uxg/research/firecrawl-provider.ts",
+        "code": 2322,
+        "message": "Type '{ kind: \"color\"; value: string; sourceUrl: string; confidence: number; consistentAcrossSources: false; }[]' is not assignable to type '{ value: string; kind: \"color\" | \"logo\" | \"favicon\" | \"og_image\" | \"social_share\" | \"brand_language\" | \"app_icon\" | \"css_variable\" | \"font_family\"; confidence: number; sourceUrl: string; consistentAcrossSources: boolean; ownership: \"unknown\" | ... 1 more ... | \"employer_affiliated\"; notes?: string | ... 1 more ... |...'.\n  Property 'ownership' is missing in type '{ kind: \"color\"; value: string; sourceUrl: string; confidence: number; consistentAcrossSources: false; }' but required in type '{ value: string; kind: \"color\" | \"logo\" | \"favicon\" | \"og_image\" | \"social_share\" | \"brand_language\" | \"app_icon\" | \"css_variable\" | \"font_family\"; confidence: number; sourceUrl: string; consistentAcrossSources: boolean; ownership: \"unknown\" | ... 1 more ... | \"employer_affiliated\"; notes?: string | ... 1 more ... |...'.",
+        "line": 44,
+        "preexisting": true
+      },
+      {
+        "file": "lib/uxg/research/firecrawl-provider.ts",
+        "code": 2345,
+        "message": "Argument of type '{ originalUrl: string; pageUrl: string; relevanceCategory: \"other\"; usageStatus: \"preview_only\"; rejected: false; }' is not assignable to parameter of type '{ rejected: boolean; pageUrl: string; ownership: \"unknown\" | \"subject_owned\" | \"employer_affiliated\"; originalUrl: string; relevanceCategory: \"document\" | \"logo\" | \"other\" | \"community\" | \"environment\" | \"portrait\" | \"product\"; ... 13 more ...; rejectionReason?: string | ... 1 more ... | undefined; }'.\n  Property 'ownership' is missing in type '{ originalUrl: string; pageUrl: string; relevanceCategory: \"other\"; usageStatus: \"preview_only\"; rejected: false; }' but required in type '{ rejected: boolean; pageUrl: string; ownership: \"unknown\" | \"subject_owned\" | \"employer_affiliated\"; originalUrl: string; relevanceCategory: \"document\" | \"logo\" | \"other\" | \"community\" | \"environment\" | \"portrait\" | \"product\"; ... 13 more ...; rejectionReason?: string | ... 1 more ... | undefined; }'.",
+        "line": 95,
+        "preexisting": true
+      },
+      {
+        "file": "lib/uxg/research/firecrawl-provider.ts",
+        "code": 2345,
+        "message": "Argument of type '{ kind: \"og_image\"; value: string; sourceUrl: string; confidence: number; consistentAcrossSources: false; }' is not assignable to parameter of type '{ value: string; kind: \"color\" | \"logo\" | \"favicon\" | \"og_image\" | \"social_share\" | \"brand_language\" | \"app_icon\" | \"css_variable\" | \"font_family\"; confidence: number; sourceUrl: string; consistentAcrossSources: boolean; ownership: \"unknown\" | ... 1 more ... | \"employer_affiliated\"; notes?: string | ... 1 more ... |...'.\n  Property 'ownership' is missing in type '{ kind: \"og_image\"; value: string; sourceUrl: string; confidence: number; consistentAcrossSources: false; }' but required in type '{ value: string; kind: \"color\" | \"logo\" | \"favicon\" | \"og_image\" | \"social_share\" | \"brand_language\" | \"app_icon\" | \"css_variable\" | \"font_family\"; confidence: number; sourceUrl: string; consistentAcrossSources: boolean; ownership: \"unknown\" | ... 1 more ... | \"employer_affiliated\"; notes?: string | ... 1 more ... |...'.",
+        "line": 102,
+        "preexisting": true
+      },
+      {
+        "file": "lib/uxg/research/map-to-packs.ts",
+        "code": 2322,
+        "message": "Type '{ name: string; url: string | null | undefined; reason: string; }[]' is not assignable to type '{ name: string; url?: string | undefined; reason?: string | undefined; }[]'.\n  Type '{ name: string; url: string | null | undefined; reason: string; }' is not assignable to type '{ name: string; url?: string | undefined; reason?: string | undefined; }'.\n    Types of property 'url' are incompatible.\n      Type 'string | null | undefined' is not assignable to type 'string | undefined'.\n        Type 'null' is not assignable to type 'string | undefined'.",
+        "line": 166,
+        "preexisting": true
+      },
+      {
+        "file": "lib/uxg/research/map-to-packs.ts",
+        "code": 2322,
+        "message": "Type '{ url: string; title: string | null | undefined; usedFor: (\"role\" | \"organization\" | \"other\" | \"mission\" | \"program\" | \"audience\" | \"contact\" | \"service\" | \"identity\" | \"geography\" | \"history\" | \"product\" | \"leadership\")[]; }[]' is not assignable to type '{ url: string; title?: string | undefined; usedFor: string[]; }[]'.\n  Type '{ url: string; title: string | null | undefined; usedFor: (\"role\" | \"organization\" | \"other\" | \"mission\" | \"program\" | \"audience\" | \"contact\" | \"service\" | \"identity\" | \"geography\" | \"history\" | \"product\" | \"leadership\")[]; }' is not assignable to type '{ url: string; title?: string | undefined; usedFor: string[]; }'.\n    Types of property 'title' are incompatible.\n      Type 'string | null | undefined' is not assignable to type 'string | undefined'.\n        Type 'null' is not assignable to type 'string | undefined'.",
+        "line": 189,
+        "preexisting": true
+      },
+      {
+        "file": "lib/uxg/research/map-to-packs.ts",
+        "code": 2322,
+        "message": "Type 'number | null | undefined' is not assignable to type 'number | undefined'.\n  Type 'null' is not assignable to type 'number | undefined'.",
+        "line": 228,
+        "preexisting": true
+      },
+      {
+        "file": "lib/uxg/research/map-to-packs.ts",
+        "code": 2322,
+        "message": "Type 'number | null | undefined' is not assignable to type 'number | undefined'.\n  Type 'null' is not assignable to type 'number | undefined'.",
+        "line": 229,
+        "preexisting": true
+      },
+      {
+        "file": "lib/uxg/research/map-to-packs.ts",
+        "code": 2322,
+        "message": "Type 'string | null | undefined' is not assignable to type 'string | undefined'.\n  Type 'null' is not assignable to type 'string | undefined'.",
+        "line": 237,
+        "preexisting": true
+      },
+      {
+        "file": "lib/uxg/research/map-to-packs.ts",
+        "code": 2322,
+        "message": "Type 'string | null | undefined' is not assignable to type 'string | undefined'.\n  Type 'null' is not assignable to type 'string | undefined'.",
+        "line": 238,
+        "preexisting": true
+      },
+      {
+        "file": "lib/uxg/research/map-to-packs.ts",
+        "code": 2322,
+        "message": "Type 'string | null | undefined' is not assignable to type 'string | undefined'.\n  Type 'null' is not assignable to type 'string | undefined'.",
+        "line": 239,
+        "preexisting": true
+      },
+      {
+        "file": "lib/uxg/research/map-to-packs.ts",
+        "code": 2322,
+        "message": "Type 'string | null | undefined' is not assignable to type 'string | undefined'.\n  Type 'null' is not assignable to type 'string | undefined'.",
+        "line": 241,
+        "preexisting": true
+      },
+      {
+        "file": "lib/uxg/research/map-to-packs.ts",
+        "code": 2322,
+        "message": "Type 'string | null | undefined' is not assignable to type 'string | undefined'.\n  Type 'null' is not assignable to type 'string | undefined'.",
+        "line": 242,
+        "preexisting": true
+      },
+      {
+        "file": "vendor/capability-registry/src/catalog.ts",
+        "code": 2322,
+        "message": "Type '\"Platform\"' is not assignable to type '\"Portal\" | \"Email\" | \"Organizations\" | \"Authentication\" | \"Users\" | \"Roles\" | \"Permissions\" | \"Registration\" | \"Profiles\" | \"Workspace\" | \"Dashboard\" | \"Messaging\" | \"Documents\" | ... 38 more ... | \"Other\"'.",
+        "line": 287,
+        "preexisting": true
+      }
+    ]
+  }
+}

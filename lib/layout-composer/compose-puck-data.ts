@@ -3,6 +3,9 @@ import { composeScenesFromDirection } from './compose-scenes';
 import type { CompositionId, LayoutComposerInput } from './types';
 
 type PuckBlock = Data['content'][number];
+type ComposedPuckData = Omit<Data, 'root'> & {
+  root: { props: { title: string; compositionSignature: string; primaryArchetype: string; primaryColor?: string; accentColor?: string } };
+};
 
 function blockId(prefix: string, index: number): string {
   return `${prefix}-${index + 1}`;
@@ -234,7 +237,7 @@ function emitComposition(
  * Map approved Creative Direction + composed scenes → ExperiencePage.puckData.
  * Never emits EAFeatures three-card grids.
  */
-export function composePuckDataFromDirector(input: LayoutComposerInput): Data {
+export function composePuckDataFromDirector(input: LayoutComposerInput): ComposedPuckData {
   const composed = composeScenesFromDirection(input);
   const brand = input.director.organization.organizationName;
   const hrefs = {

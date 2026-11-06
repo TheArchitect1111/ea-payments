@@ -105,6 +105,7 @@ export function createWebsiteProvider(fetcher?: WebsiteFetcher): ResearchProvide
           contentType: page.contentType,
           html: page.html,
           extraPages,
+          fetchError: undefined,
         });
         console.info('[factory-research:website] collect ok', {
           projectId: context.projectId,
@@ -126,6 +127,7 @@ export function createWebsiteProvider(fetcher?: WebsiteFetcher): ResearchProvide
           contentType: null,
           html: '',
           fetchError: message,
+          extraPages: [],
         });
       }
 

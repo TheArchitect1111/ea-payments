@@ -500,7 +500,7 @@ export const AMANDA_COURSES = [
 ] as const;
 
 export const AMANDA_SELF_ENROLLMENT_COURSES = AMANDA_OFFERS.filter(
-  (offer): offer is (typeof AMANDA_OFFERS)[number] & { courseId: string } => 'courseId' in offer && amandaCourseReady(offer.courseId),
+  (offer): offer is (typeof AMANDA_OFFERS)[number] & { courseId: string } => !!offer && 'courseId' in offer && amandaCourseReady(offer.courseId),
 ).map((offer) => ({
   offerId: offer.id,
   courseId: offer.courseId,

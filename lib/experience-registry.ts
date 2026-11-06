@@ -60,6 +60,7 @@ export type OrbiePolicy =
   | 'summarize';
 
 export type CapabilityId =
+  | 'shared-calendar'
   | 'command-view'
   | 'organization-health'
   | 'opportunity-capture'
@@ -495,7 +496,7 @@ export const CAPABILITY_REGISTRY: CapabilityDefinition[] = [
     showOnDashboardHub: false,
     orbPolicy: 'route-to-activity',
     routePatterns: ['/apply', '/applications'],
-    osLifecycle: 'convert',
+    osLifecycle: 'act',
   },
   {
     id: 'operations-reports',

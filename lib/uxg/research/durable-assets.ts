@@ -53,7 +53,7 @@ export async function materializeDurableMedia(
       continue;
     }
 
-    const key = canonicalKey(asset.originalUrl, asset.perceptualHash);
+    const key = canonicalKey(asset.originalUrl, asset.perceptualHash ?? undefined);
     if (seen.has(key)) {
       nextMedia.push({
         ...asset,
@@ -78,7 +78,7 @@ export async function materializeDurableMedia(
         kind: asset.relevanceCategory === 'logo' ? 'logo' : 'image',
         label: asset.altText || asset.likelySubject || `uxg-${options?.projectId || 'crawl'}`,
         url: asset.originalUrl,
-        mimeType: asset.mimeType,
+        mimeType: asset.mimeType ?? undefined,
         tags: [
           'uxg-research',
           `usage:${usageStatus}`,

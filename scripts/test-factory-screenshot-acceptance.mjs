@@ -4,6 +4,8 @@ import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 
 const root = process.cwd();
+const dependencyRelease = process.argv.includes('--dependency-release');
+const buildMonitor = process.argv.find(arg => arg.startsWith('--local-build-monitor='))?.slice('--local-build-monitor='.length);
 const resume = process.argv.indexOf('--resume');
 const only = process.argv.find(arg=>arg.startsWith('--only='))?.slice(7).split(',');
 const pattern = process.argv.find(arg=>arg.startsWith('--test-name-pattern='));
@@ -23,17 +25,17 @@ for (const key of ['OPENAI_API_KEY','ANTHROPIC_API_KEY','CLAUDE_API_KEY','AIRTAB
   'EA_SCREENSHOT_VERIFIER_URL','EA_SCREENSHOT_VERIFIER_SECRET','UNIVERSAL_PEOPLE','UNIVERSAL_PEOPLE_PERSIST',
   'PEOPLE_SUPABASE_URL','PEOPLE_SUPABASE_API_KEY','PEOPLE_SUPABASE_ANON_KEY','PEOPLE_SUPABASE_JWT_SECRET','PEOPLE_SUPABASE_KEY','PEOPLE_SUPABASE_APP_KEY']) delete env[key];
 const prefix = ['--require', resolve(root,'tests/fixtures/network-offline.cjs'), '--import', 'tsx'];
-function run(name, args, { offline = true, timeout = 180000 } = {}) {
+function run(name, args, { offline = true, timeout = 180000, executable = process.execPath } = {}) {
   if(only && !only.includes(name))return;
   const started = Date.now();
   const selectedArgs = pattern && name === 'behavioral' ? [args[0],pattern,...args.slice(1)] : args;
-  const child = spawnSync(process.execPath, [...(offline ? prefix : []), ...selectedArgs], { cwd: root, env, encoding: 'utf8', timeout, maxBuffer: 12 * 1024 * 1024, windowsHide: true });
+  const child = spawnSync(executable, [...(offline ? prefix : []), ...selectedArgs], { cwd: root, env: { ...env, EA_LAYOUT_TEST_OUTPUT: join(output, 'layout-fixtures'), EA_FACTORY_TYPES_OUTPUT: join(output, 'factory-types.json') }, encoding: 'utf8', timeout, maxBuffer: 12 * 1024 * 1024, windowsHide: true });
   const previous = report.jobs.find(job=>job.name===name);
   const attempt = previous ? (previous.attempt || 1) + 1 : 1;
   const log = join(output, `${name}${attempt>1?`-attempt${attempt}`:''}.log`);
   const text = (child.stdout || '') + (child.stderr || '') + (child.error ? `\n${child.error.message}` : '');
   writeFileSync(log, text);
-  const result = { name, attempt, command: `node ${[...(offline ? prefix : []), ...selectedArgs].join(' ')}`, status: child.status === 0 ? 'PASS' : 'FAIL', exitCode: child.status,
+  const result = { name, attempt, command: `${executable} ${[...(offline ? prefix : []), ...selectedArgs].join(' ')}`, status: child.status === 0 ? 'PASS' : 'FAIL', exitCode: child.status,
     ...(pattern && name==='behavioral'?{scope:pattern,coverageNote:'Targeted repair; unchanged passing cases retained in previous attempt logs'}:{}),
     durationMs: Date.now() - started, log, ...(name === 'types' ? { diagnosticCount: (text.match(/error TS\d+/g) || []).length } : {}) };
   if(previous) { result.history=[...(previous.history||[]),{status:previous.status,log:previous.log}];report.jobs[report.jobs.indexOf(previous)]=result; }
@@ -51,6 +53,15 @@ run('lint',['node_modules/eslint/bin/eslint.js','lib/factory-screenshot-submit.t
   'scripts/test-factory-production.mjs','scripts/test-factory-capability-registry.mjs','scripts/test-factory-identity-concept-pack.ts',
   'scripts/test-factory-screenshot-acceptance.mjs','app/api/projects/[id]/screenshot-build/submit/route.ts'], { offline: false });
 run('types',['node_modules/typescript/bin/tsc','--noEmit','--incremental','false','--pretty','false'], { offline: false });
+if (dependencyRelease) {
+  run('factory-types', ['scripts/check-factory-release-types.mjs'], { offline: false });
+  run('release-contracts', ['--test', 'tests/factory-release-contracts.test.mts']);
+  for (const name of ['uxg-research-schemas', 'uxg-research-identity', 'uxg-research-provider-selection', 'layout-composer-five-orgs']) run(name, [`scripts/test-${name}.ts`]);
+  run('people-offline', ['scripts/test-people-phase2c-offline.mts']);
+  run('amanda-payment-regression', ['--test', 'tests/amanda-dollar-test.test.ts', 'tests/amanda-wiring.test.mts']);
+  for (const name of ['project-state-ssot','organization-workspace-config','experience-registry']) run(name, [`scripts/test-${name}.mjs`]);
+  if (buildMonitor) run('native-build', ['-NoProfile','-ExecutionPolicy','Bypass','-File',resolve(buildMonitor)], { executable:'powershell', offline:false, timeout:900000 });
+}
 report.finishedAt = new Date().toISOString();
 report.status = report.jobs.some(job=>job.status==='FAIL') ? 'FAIL' : 'PASS';
 writeFileSync(join(output,'report.json'),JSON.stringify(report,null,2));

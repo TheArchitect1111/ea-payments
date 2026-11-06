@@ -29,6 +29,7 @@ function extractImages(markdown: string, pageUrl: string): MediaAssetCrawl[] {
   for (const m of html) urls.add(m[0]!.replace(/[),.;]+$/, ''));
   return [...urls].slice(0, 20).map((originalUrl) => ({
     originalUrl,
+    ownership: 'unknown' as const,
     pageUrl,
     relevanceCategory: /logo/i.test(originalUrl) ? ('logo' as const) : ('other' as const),
     usageStatus: 'preview_only' as const,
@@ -43,6 +44,7 @@ function extractColors(text: string, sourceUrl: string): BrandAsset[] {
   }
   return [...colors].slice(0, 8).map((value) => ({
     kind: 'color' as const,
+    ownership: 'unknown' as const,
     value,
     sourceUrl,
     confidence: 0.35,
@@ -94,6 +96,7 @@ export function createFirecrawlResearchProvider(): UxgResearchProvider {
           if (page.metadata?.ogImage) {
             mediaAssets.push({
               originalUrl: page.metadata.ogImage,
+              ownership: 'unknown',
               pageUrl: url,
               relevanceCategory: 'other',
               usageStatus: 'preview_only',
@@ -101,6 +104,7 @@ export function createFirecrawlResearchProvider(): UxgResearchProvider {
             });
             brandAssets.push({
               kind: 'og_image',
+              ownership: 'unknown',
               value: page.metadata.ogImage,
               sourceUrl: url,
               confidence: 0.7,

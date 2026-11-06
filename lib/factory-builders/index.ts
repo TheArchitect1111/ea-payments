@@ -9,13 +9,14 @@ import { learningBuilder } from '@/lib/factory-builders/learning-builder.mjs';
 import { knowledgeBuilder } from '@/lib/factory-builders/knowledge-builder.mjs';
 import { reportBuilder } from '@/lib/factory-builders/report-builder.mjs';
 import { wrapBuilderWithExecutionContract } from '@/lib/factory-execution-contract.mjs';
+import type { FactoryBuilder } from '@/lib/factory-builder-contract';
 
 export { createBuilderRegistry, defaultBuilderRegistry, websiteBuilder, portalBuilder, learningBuilder, knowledgeBuilder, reportBuilder };
 
 const PRODUCTION_BUILDERS = [websiteBuilder, portalBuilder, learningBuilder, knowledgeBuilder, reportBuilder];
 let bootstrapped = false;
 
-export function registerProductionBuilder(registry, builder) {
+export function registerProductionBuilder(registry: ReturnType<typeof createBuilderRegistry>, builder: FactoryBuilder) {
   const wrapped = wrapBuilderWithExecutionContract(builder);
   registry.register(wrapped);
   return wrapped;
