@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { PHASE_PRODUCTION_BUILD } from 'next/constants';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -56,4 +57,18 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default function configureNext(phase: string): NextConfig {
+  // Local build opt-in only; leave development and hosted/CI builds unchanged.
+  const lowMemoryBuild = phase === PHASE_PRODUCTION_BUILD
+    && process.env.EA_LOCAL_LOW_MEMORY_BUILD === '1'
+    && !process.env.CI && !process.env.VERCEL && !process.env.VERCEL_ENV;
+  if (!lowMemoryBuild) return nextConfig;
+  return {
+    ...nextConfig,
+    experimental: {
+      ...nextConfig.experimental,
+      cpus: 1,
+      turbopackMemoryLimit: 2 * 1024 ** 3,
+    },
+  };
+}
