@@ -247,17 +247,17 @@ test('private verifier boundary signs scoped runs, retries recoverable responses
     await assert.rejects(verifyPrivateScreenshotDraft(draft));
     process.env.EA_SCREENSHOT_VERIFIER_URL = 'http://unapproved.invalid';
     await assert.rejects(verifyPrivateScreenshotDraft(draft), /HTTPS/);
-    process.env.EA_SCREENSHOT_ALLOW_LOCAL_VERIFIER='1';process.env.NODE_ENV='test';delete process.env.VERCEL_ENV;
+    process.env.EA_SCREENSHOT_ALLOW_LOCAL_VERIFIER='1';Object.assign(process.env,{NODE_ENV:'test'});delete process.env.VERCEL_ENV;
     process.env.EA_SCREENSHOT_VERIFIER_URL='http://127.0.0.1:4141/verify';
     globalThis.fetch=async url=>{assert.equal(String(url),'http://127.0.0.1:4141/verify');return Response.json({evidence:[]});};
     assert.deepEqual(await verifyPrivateScreenshotDraft(draft),[]);
-    process.env.NODE_ENV='production';await assert.rejects(verifyPrivateScreenshotDraft(draft),/HTTPS/);
-    process.env.NODE_ENV='test';process.env.VERCEL_ENV='preview';await assert.rejects(verifyPrivateScreenshotDraft(draft),/HTTPS/);
+    Object.assign(process.env,{NODE_ENV:'production'});await assert.rejects(verifyPrivateScreenshotDraft(draft),/HTTPS/);
+    Object.assign(process.env,{NODE_ENV:'test',VERCEL_ENV:'preview'});await assert.rejects(verifyPrivateScreenshotDraft(draft),/HTTPS/);
   } finally {
     globalThis.fetch = originalFetch;
     if (beforeUrl === undefined) delete process.env.EA_SCREENSHOT_VERIFIER_URL; else process.env.EA_SCREENSHOT_VERIFIER_URL = beforeUrl;
     if (beforeSecret === undefined) delete process.env.EA_SCREENSHOT_VERIFIER_SECRET; else process.env.EA_SCREENSHOT_VERIFIER_SECRET = beforeSecret;
-    for(const [key,value] of [['EA_SCREENSHOT_ALLOW_LOCAL_VERIFIER',beforeLocal],['NODE_ENV',beforeNode],['VERCEL_ENV',beforeVercel]] as const){if(value===undefined)delete process.env[key];else process.env[key]=value;}
+    for(const [key,value] of [['EA_SCREENSHOT_ALLOW_LOCAL_VERIFIER',beforeLocal],['NODE_ENV',beforeNode],['VERCEL_ENV',beforeVercel]] as const){if(value===undefined)Reflect.deleteProperty(process.env,key);else Object.assign(process.env,{[key]:value});}
   }
 });
 
