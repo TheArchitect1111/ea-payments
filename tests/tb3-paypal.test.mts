@@ -13,6 +13,8 @@ import { renderPayPalButtons } from "../app/tarris/paypal-checkout/PayPalCheckou
 import { paypalConfig } from "../lib/tb3/paypal-config";
 import { paypalDatabaseUrl } from "../lib/tb3/paypal-database-config";
 import { spawnSync } from "node:child_process";
+import { createServer } from "node:http";
+import { chromium } from "playwright";
 import {
   PAYPAL_PRINTFUL_STORE_ID,
   revalidatePrintfulDraft,
@@ -91,7 +93,10 @@ function fixture(autoConfirm = false, mode: "live" | "sandbox" = "live") {
     const body = raw as PayPalObject;
     assert.ok(["GET", "POST"].includes(method));
     if (path === "/v2/checkout/orders") {
-      assert.equal(rows.size, 1, "intent committed before provider call");
+      assert.ok(
+        rows.has(body.purchase_units[0].custom_id),
+        "matching intent committed before provider call",
+      );
       calls.create++;
       order = { ...structuredClone(body), id: "ORDER123", status: "APPROVED" };
       return { id: order.id, status: "CREATED" };
@@ -1119,4 +1124,221 @@ test("actual sandbox runtime checkout and quote entry point cannot call Printful
   );
   assert.equal(providerCalls, 0);
   assert.equal(f.reads.length, 0);
+});
+test("local sandbox simulator certifies browser checkout, persisted order, retries, duplicate protection and failures through HTTP handlers", async () => {
+  const f = fixture(false, "sandbox");
+  let origin = "";
+  let browserCheckoutInput: typeof input | undefined;
+  let verifiedWebhooks = 0;
+  const failures: string[] = [];
+  const source = `import React from 'react';import {createRoot} from 'react-dom/client';import Checkout from './app/tarris/paypal-checkout/PayPalCheckout';createRoot(document.getElementById('root')).render(React.createElement(Checkout));`;
+  const script = buildSync({
+    stdin: { contents: source, resolveDir: process.cwd(), loader: "tsx" },
+    bundle: true,
+    platform: "browser",
+    format: "iife",
+    write: false,
+    define: { "process.env.NODE_ENV": '"test"' },
+  }).outputFiles[0].text;
+  const handlers = createPayPalHandlers(() => ({
+    config: { ...config, mode: "sandbox", origin },
+    service: f.service,
+    verify: (headers, event) =>
+      verifyPayPalWebhook(
+        headers,
+        event,
+        { ...config, mode: "sandbox" },
+        async () => {
+          verifiedWebhooks++;
+          return { verification_status: "SUCCESS" };
+        },
+      ),
+  }));
+  const sdk = `window.paypal={FUNDING:{PAYPAL:'paypal',CARD:'card'},Buttons(options){return {isEligible:()=>true,close(){},async render(container){const button=document.createElement('button');button.textContent='Fixture '+options.fundingSource;button.onclick=async()=>{try{const orderID=await options.createOrder();await options.onApprove({orderID});}catch(error){options.onError(error);}};container.append(button);}};}};`;
+  const server = createServer(async (req, res) => {
+    try {
+      if (req.url === "/") {
+        res.setHeader("content-type", "text/html");
+        res.end(
+          '<!doctype html><html><body><div id="root"></div><script>' +
+            sdk +
+            '</script><script src="/checkout.js"></script></body></html>',
+        );
+        return;
+      }
+      if (req.url === "/checkout.js") {
+        res.setHeader("content-type", "application/javascript");
+        res.end(script);
+        return;
+      }
+      const buffers: Buffer[] = [];
+      for await (const chunk of req) buffers.push(Buffer.from(chunk));
+      if (req.url === "/api/tb3/paypal/orders")
+        browserCheckoutInput = JSON.parse(Buffer.concat(buffers).toString("utf8"));
+      const request = new Request(origin + req.url, {
+        method: req.method,
+        headers: req.headers as Record<string, string>,
+        ...(req.method === "GET" ? {} : { body: Buffer.concat(buffers) }),
+      });
+      const action = req.url?.split("/").at(-1);
+      const response =
+        action === "config"
+          ? await handlers.config()
+          : action === "orders"
+            ? await handlers.create(request)
+            : action === "capture"
+              ? await handlers.capture(request)
+                : action === "cancel"
+                  ? await handlers.cancel(request)
+              : action === "webhook"
+                ? await handlers.webhook(request)
+                : new Response(null, { status: 404 });
+      res.writeHead(response.status, Object.fromEntries(response.headers));
+      res.end(Buffer.from(await response.arrayBuffer()));
+    } catch (error) {
+      failures.push(String(error));
+      res.writeHead(500);
+      res.end("Fixture server failure");
+    }
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  origin = "http://127.0.0.1:" + (server.address() as { port: number }).port;
+  let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined;
+  try {
+    browser = await chromium.launch({ headless: true });
+    const context = await browser.newContext();
+    let external = 0;
+    await context.route("**/*", (route) => {
+      if (new URL(route.request().url()).origin !== origin) {
+        external++;
+        return route.abort();
+      }
+      return route.continue();
+    });
+    const page = await context.newPage();
+    await page.goto(origin);
+    for (const [name, value] of Object.entries({
+      email: input.email,
+      ...input.recipient,
+    })) {
+      const field = page.locator('[name="' + name + '"]');
+      if (await field.count()) await field.fill(value);
+    }
+    await page
+      .getByRole("button", { name: "Continue to payment options" })
+      .click();
+    await page
+      .getByRole("button", { name: "Fixture paypal", exact: true })
+      .click();
+    await page
+      .getByRole("status")
+      .filter({
+        hasText: "Fulfillment simulated; no Printful order was created.",
+      })
+      .waitFor();
+    assert.equal(f.rows.size, 1);
+    const savedOrder = [...f.rows.values()][0];
+    assert.equal(savedOrder.state, "paid");
+    assert.equal(savedOrder.mode, "sandbox");
+    assert.equal(savedOrder.tenant, "tarris");
+    assert.equal(savedOrder.merchantId, config.merchantId);
+    assert.equal(savedOrder.paypalId, "ORDER123");
+    assert.equal(savedOrder.captureId, "CAPTURE123");
+    assert.equal(savedOrder.fulfillment, "simulated");
+    assert.equal(savedOrder.printfulId, undefined);
+    assert.equal(savedOrder.shipping, 500);
+    assert.equal(savedOrder.tax, 0);
+    assert.equal(savedOrder.total, savedOrder.subtotal + 500);
+    await page.reload();
+    await page.getByRole("button", { name: "Check payment status" }).click();
+    await page
+      .getByRole("status")
+      .filter({ hasText: "Fulfillment simulated" })
+      .waitFor();
+    assert.equal(f.calls.capture, 1);
+    const duplicateCheckout = await fetch(origin + "/api/tb3/paypal/orders", {
+      method: "POST",
+      headers: { origin, "content-type": "application/json" },
+      body: JSON.stringify(browserCheckoutInput),
+    });
+    assert.equal(duplicateCheckout.status, 200);
+    assert.equal((await duplicateCheckout.json()).orderId, "ORDER123");
+    assert.equal(f.calls.create, 1, "same checkout token reuses provider order");
+    const duplicateCapture = await fetch(origin + "/api/tb3/paypal/capture", {
+      method: "POST",
+      headers: { origin, "content-type": "application/json" },
+      body: JSON.stringify({ checkoutToken: browserCheckoutInput?.checkoutToken, orderId: "ORDER123" }),
+    });
+    assert.equal(duplicateCapture.status, 200);
+    assert.equal(f.calls.capture, 1, "paid retry cannot capture a second time");
+    const event = {
+      id: "EVENT123",
+      event_type: "PAYMENT.CAPTURE.COMPLETED",
+      resource: {
+        id: "CAPTURE123",
+        supplementary_data: { related_ids: { order_id: "ORDER123" } },
+      },
+    };
+    const headers = {
+      "content-type": "application/json",
+      "paypal-auth-algo": "SHA256withRSA",
+      "paypal-cert-url":
+        "https://api.sandbox.paypal.com/v1/notifications/certs/fixture",
+      "paypal-transmission-id": "fixture",
+      "paypal-transmission-sig": "fixture",
+      "paypal-transmission-time": new Date().toISOString(),
+    };
+    for (let retry = 0; retry < 2; retry++)
+      assert.equal(
+        (
+          await fetch(origin + "/api/tb3/paypal/webhook", {
+            method: "POST",
+            headers,
+            body: JSON.stringify(event),
+          })
+        ).status,
+        200,
+      );
+    assert.equal(
+      (
+        await fetch(origin + "/api/tb3/paypal/webhook", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(event),
+        })
+      ).status,
+      400,
+    );
+    const denied = await fetch(origin + "/api/tb3/paypal/capture", {
+      method: "POST",
+      headers: { origin, "content-type": "application/json" },
+      body: JSON.stringify({
+        checkoutToken: "0".repeat(64),
+        orderId: "ORDER123",
+      }),
+    });
+    assert.ok(denied.status >= 400);
+    assert.equal(verifiedWebhooks, 2);
+    assert.equal(f.calls.capture, 1);
+    assert.equal(f.rows.size, 1);
+    assert.equal(f.reads.length, 0);
+    assert.equal(f.quotes, 0);
+    assert.equal(external, 0);
+    assert.deepEqual(failures, []);
+
+    const failedCapture = await fetch(origin + "/api/tb3/paypal/capture", {
+      method: "POST",
+      headers: { origin, "content-type": "application/json" },
+      body: JSON.stringify({ checkoutToken: browserCheckoutInput?.checkoutToken, orderId: "ORDER999" }),
+    });
+    assert.equal(failedCapture.status, 503);
+    assert.equal(f.calls.capture, 1, "failed identity cannot trigger another capture");
+    assert.equal(f.rows.size, 1, "failure leaves the paid order unchanged");
+    assert.equal([...f.rows.values()][0].state, "paid");
+  } finally {
+    await browser?.close();
+    await new Promise<void>((resolve, reject) =>
+      server.close((error) => (error ? reject(error) : resolve())),
+    );
+  }
 });
