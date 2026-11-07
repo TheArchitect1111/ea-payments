@@ -9,6 +9,8 @@ export type PayPalConfig = {
 export function paypalConfig(): PayPalConfig | null {
   if (process.env.TB3_PAYPAL_ENABLED !== "true") return null;
   const mode = process.env.TB3_PAYPAL_ENV;
+  // Fail closed for sandbox until both external credentials have been certified.
+  if (mode === "sandbox" && process.env.TB3_PAYPAL_CREDENTIALS_VERIFIED !== "true") return null;
   if (
     (mode !== "live" && mode !== "sandbox") ||
     (mode === "live" && process.env.VERCEL_ENV !== "production") ||
