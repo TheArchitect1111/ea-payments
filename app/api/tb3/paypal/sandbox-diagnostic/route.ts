@@ -53,12 +53,16 @@ export async function GET() {
     }
   }
 
-  if (config) {
+  // Diagnostic-only OAuth check works while the checkout certification gate is closed.
+  // Never return a token, credential, account identifier, or provider response body.
+  const sandboxClientId = process.env.TB3_PAYPAL_CLIENT_ID?.trim();
+  const sandboxSecret = process.env.TB3_PAYPAL_CLIENT_SECRET?.trim();
+  if (sandboxClientId && sandboxSecret) {
     try {
       const response = await fetch("https://api-m.sandbox.paypal.com/v1/oauth2/token", {
         method: "POST",
         headers: {
-          Authorization: "Basic " + Buffer.from(config.clientId + ":" + config.secret).toString("base64"),
+          Authorization: "Basic " + Buffer.from(sandboxClientId + ":" + sandboxSecret).toString("base64"),
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: "grant_type=client_credentials",
