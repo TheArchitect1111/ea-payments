@@ -62,10 +62,10 @@ function MerchProductCard({ product, index }: { product: (typeof merchProducts)[
       <img src={product.image} alt={product.name} className="h-full w-full object-contain" loading="lazy" />
     </div>
     <p className="mt-3 text-xs font-bold tracking-wide">{product.name} <span className="font-normal">${product.price.toFixed(2)} USD</span></p>
-    <Link href={`/tarris/book?type=merch&product=${encodeURIComponent(product.id)}`}
-      className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-[#A51C30] px-3 py-2 text-xs font-bold text-white">
-      Ask about this item
-    </Link>
+    <span aria-label="Merchandise ordering coming soon"
+      className="mt-3 inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center rounded-md bg-[#A51C30]/80 px-3 py-2 text-xs font-bold tracking-[0.12em] text-white">
+      COMING SOON
+    </span>
   </article>;
 }
 function ActionLink({ children, className = "", href = "/tarris/future" }: { children: ReactNode; className?: string; href?: string }) {
@@ -146,7 +146,7 @@ export default function TarrisPublicPage() {
           <article className="flex flex-col justify-between bg-[#141414] p-7 text-white"><div><p className="text-[9px] tracking-[0.3em] text-white/60">THE NEXT CHAPTER</p><h2 className="mt-6 text-4xl font-black leading-none tracking-tight">PLAYER<br /><span className="text-[#A51C30]">ONE.</span></h2><p className="mt-5 text-xs leading-6 text-white/70">Same vision. Higher purpose.<br />Build what comes next.</p></div><div className="mt-8"><HQLink dark /></div></article>
         </section>
         <section id="merch" className="scroll-mt-5 py-10">
-          <div className="mb-6"><p className="text-[9px] tracking-[0.25em] text-[#A51C30]">TB3 STORE</p><h2 className="mt-2 text-3xl font-black tracking-tight">WEAR THE VISION.</h2><p className="mt-3 text-sm text-black/70">The 14-piece collection is available to explore. Online orders will open after payment and fulfillment approval. For now, select an item to ask about availability.</p></div>
+          <div className="mb-6"><p className="text-[9px] tracking-[0.25em] text-[#A51C30]">TB3 STORE</p><h2 className="mt-2 text-3xl font-black tracking-tight">WEAR THE VISION.</h2><p className="mt-3 text-sm text-black/70">COMING SOON. Explore the TB3 collection while we prepare the first drop. Online checkout is not open yet. Follow the launch for the release announcement.</p></div>
           <div id="merch-store" className="relative isolate overflow-hidden">
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4" aria-hidden="true">{merchProducts.map((product, index) => <MerchProductCard key={product.id} product={product} index={index} />)}</div>
             {/* Launch campaign takeover: the merchandise stays in the DOM and visible underneath, but ordering is not yet open. */}
