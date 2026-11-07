@@ -24,6 +24,7 @@ export async function listPortalDocuments(
   client: PortalClientRecord,
 ): Promise<PortalDocumentItem[]> {
   const items: PortalDocumentItem[] = [];
+  if(slug==='are-you-fundable')return items; // AYF uses customer-owned certified delivery only.
   let hasTenantVault = false;
 
   try {

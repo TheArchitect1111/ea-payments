@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-export default function CertifiedContentUpload({kind}:{kind:'documents'|'resources'}){
+export default function CertifiedContentUpload({kind,customerScoped=false}:{kind:'documents'|'resources';customerScoped?:boolean}){
  const [message,setMessage]=useState(''),[working,setWorking]=useState(false);
  const router=useRouter();
  return <form className="ep-module-card" onSubmit={async event=>{
@@ -18,9 +18,10 @@ export default function CertifiedContentUpload({kind}:{kind:'documents'|'resourc
   <label className="ep-module-card-title" htmlFor={kind+'-upload'}>Add private {kind==='documents'?'document':'resource'}</label>
   <p className="ep-module-card-note">PDF, plain text, Markdown, PNG or JPEG. Maximum 120 KB.</p>
   <input id={kind+'-upload'} type="file" name="file" accept=".pdf,.txt,.md,.png,.jpg,.jpeg" required/>
+  {customerScoped?<label>Customer email<input name="customerEmail" type="email" required autoComplete="off" /></label>:null}
   <label htmlFor={kind+'-visibility'}>Access</label>
   <select id={kind+'-visibility'} name="visibility" defaultValue="staff">
-   <option value="staff">Staff only</option><option value="member">Portal members</option>
+   <option value="staff">Staff only</option><option value="member">{customerScoped?'Named customer':'Portal members'}</option>
   </select>
   <button className="ep-btn" type="submit" disabled={working}>{working?'Saving...':'Save file'}</button>
   {message?<p role="status" className="ep-module-card-note">{message}</p>:null}

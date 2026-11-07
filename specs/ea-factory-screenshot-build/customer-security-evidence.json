@@ -1,0 +1,139 @@
+{
+  "projectId": "proj-mw17qt3d-744730",
+  "branch": "work/ayf-chassis-20261103",
+  "parentCommit": "62d72f1ffc01452d1a3063e5190e6bdd9b8bca75",
+  "checkedAt": "2026-11-06T23:57:08.735710+00:00",
+  "implementation": "IMPLEMENTED_LOCALLY",
+  "productionActivation": "BLOCKED",
+  "deployed": false,
+  "verification": {
+    "initialConsolidated": {
+      "passed": 90,
+      "failed": 0
+    },
+    "affectedFinal": {
+      "passed": 37,
+      "failed": 0
+    },
+    "lastChangedSecurityFile": {
+      "passed": 11,
+      "failed": 0
+    },
+    "distinctTestsCovered": 94,
+    "factoryDependencyDiagnostics": 0,
+    "affectedDependencyDiagnostics": 0,
+    "eslint": {
+      "exitCode": 0,
+      "errors": 0,
+      "warnings": 1,
+      "warning": "Existing FinalBrickPanel refresh-effect warning"
+    }
+  },
+  "limits": [
+    "Controlled synthetic storage/memberships; no real customer provisioning",
+    "No full native build or whole-root typecheck repeated",
+    "No production verification, provider sends or deployments"
+  ],
+  "files": [
+    {
+      "path": "app/api/portal/ayf/customer-access/route.ts",
+      "sha256": "73b0de8a18625e7b5ee5e360665e1c5f71f97b12a414e5cfabf46cd48efe5995"
+    },
+    {
+      "path": "app/api/portal/content-requests/route.ts",
+      "sha256": "46ca502efc9630a232a25410fb9724e2c6213414e25496032dd9185f4935cce2"
+    },
+    {
+      "path": "app/api/portal/content/download/route.ts",
+      "sha256": "4aaf7bf85b59ae83ad4f6c985d9b29e78c80f85212ddb1960ac4d2254feddbc6"
+    },
+    {
+      "path": "app/api/portal/content/route.ts",
+      "sha256": "81fcf9bd0f30baa2c02384bcf4731542a7e0df32922142e4d7498fe4e3b435c9"
+    },
+    {
+      "path": "app/api/portal/content/upload/route.ts",
+      "sha256": "66a9e3c3809652b71a7972253c10a1004b15c3f69dc7aeaef3056873d6ad2950"
+    },
+    {
+      "path": "app/api/portal/final-bricks/route.ts",
+      "sha256": "a6254dff792577ba4db83e7d9753687a8dc7127b239be81d4bbedc0ad3a120aa"
+    },
+    {
+      "path": "app/portal/[slug]/deliveries/page.tsx",
+      "sha256": "fa85976b30d6f26b6a3fb418f06891706cf2de70233afaeba3ebd9211e0d0c35"
+    },
+    {
+      "path": "app/portal/[slug]/documents/page.tsx",
+      "sha256": "0fc02058db63e21257e97baea156be0b8f2e7ec5e5a16a93f62206feae742bff"
+    },
+    {
+      "path": "app/portal/[slug]/messaging/page.tsx",
+      "sha256": "e4fee83b25f1ba3f4340d887ed7c4b5ba1a834deade757cf8a3df052a887aa0d"
+    },
+    {
+      "path": "app/portal/[slug]/reports/page.tsx",
+      "sha256": "3643780e200a3ee87ce6896c9e8745afcd12381f8123b06b63f44a49666af643"
+    },
+    {
+      "path": "app/portal/[slug]/resources/page.tsx",
+      "sha256": "335a31a5f4e8d25642dae5aea1d38f3d639ad760d94f89f8acaa761ac1cbd060"
+    },
+    {
+      "path": "app/portal/components/AyfCustomerAssignments.tsx",
+      "sha256": "696e68f230d8d29bd79b71e11a4007b76b465e06651f6dab5698724791466dc9"
+    },
+    {
+      "path": "app/portal/components/CertifiedContentUpload.tsx",
+      "sha256": "cd4bd892fc94180127f3ac3d8957f71ce3cc8389da1ae729b5145a696806ef4c"
+    },
+    {
+      "path": "app/portal/components/FinalBrickPanel.tsx",
+      "sha256": "6abfdb5ba1b5a7db070ada17e52481de87e1ba33b5a2824ac1ba43ab3dfc0990"
+    },
+    {
+      "path": "lib/ayf/customer-access.ts",
+      "sha256": "712a8fae94d270b0b90550dbca9bd50e0039d0e87682f9f0e92b0a9aa2d5331f"
+    },
+    {
+      "path": "lib/ayf/request-guard.ts",
+      "sha256": "eef3405fef0d368819f978d10fa1fd1d6199636decc38f6c2153167a59e75d56"
+    },
+    {
+      "path": "lib/bricks/content-family.ts",
+      "sha256": "913e80d35adc4430acdc771eb0fc28b6afdedf5605317bcce4f2654bb2ee39c4"
+    },
+    {
+      "path": "lib/bricks/final-family.ts",
+      "sha256": "154c00f4cdc8b199ca0daf8cdbf192eae361a79b71ed7582c834d19b1ff72fb7"
+    },
+    {
+      "path": "lib/modules/portal-modules.ts",
+      "sha256": "494d081b8b7eab2ac594e7b2705ac1c6164b27c5af2d34bb6570f7ed71ed4ac2"
+    },
+    {
+      "path": "lib/portal-document-hub.ts",
+      "sha256": "f1ea0af0184dbf85e49d1b7f74bdbd2669c8c32fceed173c97a4a7639bb656e0"
+    },
+    {
+      "path": "lib/portal-messaging-hub.ts",
+      "sha256": "cced14d1cefe2f8a817a1e88479c541e4e69382326ebd8c7e4c947d38bc2b004"
+    },
+    {
+      "path": "scripts/check-ayf-customer-security-types.mjs",
+      "sha256": "7f18e4cdfa6c7a02fe77541be52a6ec83c6df4e4c2bd0e0d19edcae789a93319"
+    },
+    {
+      "path": "specs/ea-factory-screenshot-build/customer-security-evidence.md",
+      "sha256": "ee6bb9d6ad902e9c6a6f3bc525e37e4674300c2979f80313e9b27ac7936b78fe"
+    },
+    {
+      "path": "specs/ea-factory-screenshot-build/customer-security.md",
+      "sha256": "dbee5b96d89256416a2fefe9cfa6c1818b25a59049afdb5043d7edcf8074e014"
+    },
+    {
+      "path": "tests/ayf-customer-security.test.mts",
+      "sha256": "edcb33eea2a2e91c695acd6d5882b9d112ecec0473f8976f7d84018cd817307e"
+    }
+  ]
+}

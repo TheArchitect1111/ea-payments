@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { ayfWriteDenied } from '@/lib/ayf/request-guard';
 import { z } from 'zod';
 import { guardPortalApi,portalApiUnauthorized,portalTenant } from '@/lib/api/portal-route';
 import { FinalKind,readFinal,listFinal,saveFinal,transitionFinal,generateFinal } from '@/lib/bricks/final-family';
@@ -13,7 +14,7 @@ async function context(req:NextRequest,kind:string){
  const initial=slug.startsWith('amanda-catherine')?null:await portalFinalDefault(slug,k.data);
  if(!initial)return {error:Response.json({error:'Module unavailable'},{status:404})} as const;
  return {tenant:{organizationId:initial.organizationId,portalSlug:slug},kind:k.data,
- email:String(a.session.email||'').trim().toLowerCase(),role:['staff','admin','owner'].includes(a.session.role)?'staff' as const:'member' as const} as const;
+ actor:a.session,email:String(a.session.email||'').trim().toLowerCase(),role:['staff','admin','owner'].includes(a.session.role ?? '')?'staff' as const:'member' as const} as const;
 }
 export async function GET(req:NextRequest){
  const c=await context(req,req.nextUrl.searchParams.get('kind')||'');
@@ -21,23 +22,24 @@ export async function GET(req:NextRequest){
  try{
  const key=req.nextUrl.searchParams.get('key');
  if(c.kind==='training' && c.role==='member'){
-   const rows=await listFinal(c.tenant,c.kind,c.role);
+   const rows=await listFinal(c.tenant,c.kind,c.role,c.actor);
    const mine=rows.filter(r=>r.source===c.email);
    return Response.json({ok:true,...(key?{record:mine.find(r=>r.key===key)||null}:{records:mine})});
  }
- return Response.json({ok:true,...(key?{record:await readFinal(c.tenant,c.kind,key,c.role)}:
-   {records:await listFinal(c.tenant,c.kind,c.role)})});}
+ return Response.json({ok:true,...(key?{record:await readFinal(c.tenant,c.kind,key,c.role,c.actor)}:
+   {records:await listFinal(c.tenant,c.kind,c.role,c.actor)})});}
  catch{return Response.json({error:'Unavailable'},{status:404});}
 }
 export async function POST(req:NextRequest){
  const body=z.object({kind:FinalKind,action:z.enum(['create','transition','generate']),
- key:z.string(),title:z.string().optional(),body:z.string().optional(),
+ key:z.string(),customerEmail:z.string().email().optional(),title:z.string().optional(),body:z.string().optional(),
  visibility:z.enum(['staff','member']).optional(),state:z.enum(['draft','submitted','delivered','responded','published','enrolled','in_progress','completed','ready']).optional(),
  reply:z.string().optional(),progress:z.number().optional(),channel:z.string().optional(),source:z.string().optional(),sourceText:z.string().optional()}).strict().safeParse(await req.json().catch(()=>null));
  if(!body.success)return Response.json({error:'Invalid workflow'},{status:400});
  const c=await context(req,body.data.kind);
  if('error'in c)return c.error;
  const d=body.data;
+ const denied=ayfWriteDenied(req,c.tenant.portalSlug);if(denied)return denied;
  try{
  if(d.action==='generate'){
    if(c.role!=='staff'||(c.kind!=='pulse'&&c.kind!=='amplifi'))
@@ -66,8 +68,8 @@ export async function POST(req:NextRequest){
  const row=d.action==='create'
    ?await saveFinal(c.tenant,c.kind,{key:enrollmentKey,title:d.title,body:d.body,
      visibility:d.visibility||'member',state:d.state||'submitted',channel:d.channel,
-     source:c.kind==='training'&&c.role==='member'?c.email:d.source},c.role)
-   :await transitionFinal(c.tenant,c.kind,d.key,{state:d.state,reply:d.reply,progress:d.progress},c.role);
+     customerEmail:d.customerEmail,source:c.kind==='training'&&c.role==='member'?c.email:d.source},c.role,c.actor)
+   :await transitionFinal(c.tenant,c.kind,d.key,{state:d.state,reply:d.reply,progress:d.progress},c.role,c.actor);
  return Response.json({ok:true,record:row});
  }catch(e){return Response.json({error:e instanceof Error?e.message:'Failed'},{status:400});}
 }

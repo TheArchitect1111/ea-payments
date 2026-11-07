@@ -25,8 +25,8 @@ export default async function ResourcesPage({ params }: { params: Promise<{ slug
   // Read back tenant-specific durable defaults after module authorization.
   const certifiedContent = slug.toLowerCase().startsWith('amanda-catherine')
     ? null : await portalContentDefault(slug, 'resources');
-  const staff=['staff','admin','owner'].includes(session.role);
-  const savedResources=certifiedContent?await listContent({organizationId:certifiedContent.organizationId,portalSlug:slug},'resources',staff?'staff':'member'):[];
+  const staff=['staff','admin','owner'].includes(session.role ?? '');
+  const savedResources=certifiedContent?await listContent({organizationId:certifiedContent.organizationId,portalSlug:slug},'resources',staff?'staff':'member',session):[];
 
   let siteHref: string | null = null;
   try {

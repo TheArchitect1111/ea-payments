@@ -14,8 +14,8 @@ export default async function AmandaDeliveriesPage({ params }: { params: Promise
   const isAmanda = slug.toLowerCase().startsWith('amanda-catherine');
   if (!isAmanda) {
     const tenantDefault=await portalContentDefault(slug,'documents');
-    const staff=['staff','admin','owner'].includes(session.role);
-    const documents=tenantDefault?await listContent({organizationId:tenantDefault.organizationId,portalSlug:slug},'documents',staff?'staff':'member'):[];
+    const staff=['staff','admin','owner'].includes(session.role ?? '');
+    const documents=tenantDefault?await listContent({organizationId:tenantDefault.organizationId,portalSlug:slug},'documents',staff?'staff':'member',session):[];
     return <PortalSubpage slug={slug} active="documents" kicker="Deliveries"
       title="Your private deliveries" lede="Tenant-only documents and completed work">
       <ul className="ep-module-list">

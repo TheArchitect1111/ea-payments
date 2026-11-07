@@ -346,6 +346,9 @@ export async function requirePortalModule(
   const session = await verifySession(token);
   if (!session) portalLoginRedirect(intendedPath);
   if (session.slug !== slug) redirect(`/portal/${session.slug}`);
+  // Legacy organization-wide threads are not individual AYF customer mailboxes.
+  if (slug === 'are-you-fundable' && !['intake','people','messaging','documents','applications','reports','dashboard'].includes(moduleId))
+    redirect(`/portal/${slug}/messaging`);
 
   const client = await getClientByPortalSlug(slug);
   if (!client) portalLoginRedirect(intendedPath);

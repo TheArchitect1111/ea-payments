@@ -19,7 +19,7 @@ export default async function ReportsPage({ params }: { params: Promise<{ slug: 
     ? null : await portalContentDefault(slug, 'reports');
   const staff=['staff','admin','owner'].includes(session.role ?? '');
   const canManageTb3Payments=['admin','owner'].includes(session.role ?? '');
-  const reports=certifiedContent?await listContent({organizationId:certifiedContent.organizationId,portalSlug:slug},'reports',staff?'staff':'member'):[];
+  const reports=certifiedContent?await listContent({organizationId:certifiedContent.organizationId,portalSlug:slug},'reports',staff?'staff':'member',session):[];
   const isAmanda = slug.toLowerCase().startsWith('amanda-catherine');
   const artifacts = listReportArtifacts(slug, client, access);
 

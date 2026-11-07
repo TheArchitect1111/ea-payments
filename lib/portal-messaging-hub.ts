@@ -23,6 +23,7 @@ export async function listPortalMessagingThreads(
   slug: string,
   client: PortalClientRecord,
 ): Promise<PortalMessagingView> {
+  if(slug==='are-you-fundable')return {threads:[],pendingCount:0,publishedCount:0};
   let requests: ContentRequestRecord[] = [];
   if (client.id) {
     try {

@@ -39,6 +39,7 @@ async function authenticatedClient() {
   const auth = await guardPortalApiCookie();
   if (!auth.ok) return null;
   const tenant = portalTenant(auth.session);
+  if (tenant.portalSlug === 'are-you-fundable') return null;
   return getClientByPortalSlug(tenant.portalSlug);
 }
 

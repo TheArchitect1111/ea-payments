@@ -2,7 +2,8 @@
 import {useCallback,useEffect,useState} from 'react';
 type Kind='pulse'|'amplifi'|'update-hub'|'messaging'|'training'|'landing'|'ask'|'settings'|'ctp';
 type Row={key:string;title:string;body:string;state:string;reply?:string;progress?:number};
-export default function FinalBrickPanel({kind,title,courses=[]}:{kind:Kind;title:string;courses?:{id:string;title:string}[]}){
+export default function FinalBrickPanel({kind,title,courses=[],customerScoped=false,canManage=false}:{kind:Kind;title:string;courses?:{id:string;title:string}[];customerScoped?:boolean;canManage?:boolean}){
+ const [customerEmail,setCustomerEmail]=useState('');
  const [key,setKey]=useState(''),[body,setBody]=useState(''),[reply,setReply]=useState('');
  const [rows,setRows]=useState<Row[]>([]),[message,setMessage]=useState('');
  const [working,setWorking]=useState(false);
@@ -48,16 +49,18 @@ export default function FinalBrickPanel({kind,title,courses=[]}:{kind:Kind;title
     </select>
    </label>:
    <label>Title<input value={key} onChange={e=>setKey(e.target.value)} maxLength={80}/></label>}
+  {customerScoped&&canManage?<label>Customer email<input type="email" value={customerEmail} onChange={e=>setCustomerEmail(e.target.value)} /></label>:null}
   <label>Details<textarea value={body} onChange={e=>setBody(e.target.value)} maxLength={25000}/></label>
   <button type="button" className="ep-btn" disabled={working} onClick={()=>{
    const id=kind==='training'?key:key.trim().toLowerCase().replace(/[^a-z0-9-]/g,'-');
    if(!id||!body.trim()){setMessage('Enter a title and description');return;}
    void request({action:kind==='pulse'||kind==='amplifi'?'generate':'create',
-     key:id,title:key,body,sourceText:body,visibility:'member'});
+     key:customerScoped?'message-'+crypto.randomUUID():id,title:key,body,sourceText:body,visibility:'member',
+     ...(customerScoped&&canManage?{customerEmail}: {})});
   }}>{kind==='pulse'||kind==='amplifi'?'Generate source-based draft':'Submit / save'}</button>
   <ul className="ep-module-list">
    {rows.filter(r=>r.key!=='welcome').map(r=>{
-    const action=next(r);
+    const action=customerScoped&&!canManage?null:next(r);
     return <li className="ep-module-card" key={r.key}>
      <strong>{r.title}</strong><p>{r.body}</p>
      <p className="ep-module-card-note">Status: {r.state}{r.progress!==undefined?' · '+r.progress+'%':''}</p>

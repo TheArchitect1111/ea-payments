@@ -14,10 +14,10 @@ export default async function DocumentsPage({ params }: { params: Promise<{ slug
   // Read back tenant-specific durable defaults after module authorization.
   const certifiedContent = slug.toLowerCase().startsWith('amanda-catherine')
     ? null : await portalContentDefault(slug, 'documents');
-  const staff = ['staff','admin','owner'].includes(session.role);
+  const staff = ['staff','admin','owner'].includes(session.role ?? '');
   const savedContent = certifiedContent ? await listContent(
     {organizationId:certifiedContent.organizationId,portalSlug:slug},'documents',
-    staff?'staff':'member') : [];
+    staff?'staff':'member',session) : [];
   const documents = await listPortalDocuments(slug, client);
 
   return (
@@ -28,7 +28,7 @@ export default async function DocumentsPage({ params }: { params: Promise<{ slug
       title="Your EA document hub"
       lede="Tenant uploads, CTP deliverables, and shared Update Hub files — not a generic brochure list."
     >
-      {staff && certifiedContent ? <CertifiedContentUpload kind="documents" /> : null}
+      {staff && certifiedContent ? <CertifiedContentUpload kind="documents" customerScoped={slug==='are-you-fundable'} /> : null}
       <ul className="ep-module-list">
         {savedContent.filter(item=>Boolean(item.body)).map(item=>(
           <li key={item.id} className="ep-module-card">

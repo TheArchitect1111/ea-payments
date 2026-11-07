@@ -1,4 +1,5 @@
 import FinalBrickPanel from '@/app/portal/components/FinalBrickPanel';
+import AyfCustomerAssignments from '@/app/portal/components/AyfCustomerAssignments';
 import Link from 'next/link';
 import { requirePortalModule } from '@/lib/modules/portal-modules';
 import { listPortalMessagingThreads } from '@/lib/portal-messaging-hub';
@@ -8,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function MessagingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const { client } = await requirePortalModule(slug, 'messaging');
+  const { client, session } = await requirePortalModule(slug, 'messaging');
   const view = await listPortalMessagingThreads(slug, client);
   const isAmanda = slug.toLowerCase().startsWith('amanda-catherine');
 
@@ -20,7 +21,7 @@ export default async function MessagingPage({ params }: { params: Promise<{ slug
       title={isAmanda ? 'Messages & announcements' : 'Messaging center'}
       lede={isAmanda ? 'Business and student messages go directly to Amanda’s team. Portal support requests go to Efficiency Architects.' : 'Advisor conversations live in Update Hub — start a request here, then follow replies in your activity feed.'}
     >
-      <ul className="ep-module-list">
+      {slug!=='are-you-fundable'?<ul className="ep-module-list">
         {isAmanda ? (
           <>
             <li className="ep-module-card">
@@ -73,8 +74,10 @@ export default async function MessagingPage({ params }: { params: Promise<{ slug
             <p className="ep-module-card-note">{thread.note}</p>
           </li>
         ))}
-      </ul>
-      {!slug.startsWith('amanda-catherine') ? <FinalBrickPanel kind="messaging" title="messaging workspace" /> : null}
+      </ul>:null}
+      {slug==='are-you-fundable'&&['admin','owner'].includes(session.role ?? '')?<AyfCustomerAssignments />:null}
+      {!slug.startsWith('amanda-catherine') ? <FinalBrickPanel kind="messaging" title="messaging workspace"
+        customerScoped={slug==='are-you-fundable'} canManage={['staff','admin','owner'].includes(session.role ?? '')} /> : null}
     </PortalSubpage>
   );
 }

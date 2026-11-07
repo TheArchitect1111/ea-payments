@@ -12,9 +12,9 @@ export async function GET(req:NextRequest){
  if(!['documents','resources','reports'].includes(kind.data))return Response.json({error:'Not downloadable'},{status:404});
  const initial=await portalContentDefault(slug,kind.data);
  if(!initial)return Response.json({error:'Content unavailable'},{status:404});
- const role=['staff','admin','owner'].includes(auth.session.role)?'staff':'member';
+ const role=['staff','admin','owner'].includes(auth.session.role ?? '')?'staff':'member';
  try{
-  const row=await readContent({organizationId:initial.organizationId,portalSlug:slug},kind.data,key,role);
+  const row=await readContent({organizationId:initial.organizationId,portalSlug:slug},kind.data,key,role,auth.session);
   if(!row.body||row.state==='queued')return Response.json({error:'Artifact not ready'},{status:404});
   const mime=kind.data==='reports'?'application/json':row.mediaType;
   if(!mime||!TYPES.has(mime))return Response.json({error:'Unsupported content'},{status:404});
