@@ -40,6 +40,20 @@ async function read(req: Request, limit: number) {
   }
   return JSON.parse(Buffer.concat(chunks).toString("utf8"));
 }
+function recordCheckoutFailure(action: "create" | "capture", error: unknown) {
+  // Log only error classification. Never log personal details, secrets or payment IDs.
+  const isProvider = error instanceof PayPalError;
+  const databaseCode = !isProvider && error && typeof error === "object" && "code" in error
+    ? String((error as { code?: unknown }).code || "").slice(0, 12) : undefined;
+  console.error("[tb3-paypal] checkout failure", {
+    action,
+    source: isProvider ? "paypal" : databaseCode ? "database" : "application",
+    status: isProvider ? error.status : undefined,
+    issue: isProvider ? error.issue : undefined,
+    databaseCode
+  });
+}
+
 export function createPayPalHandlers(
   getRuntime: () => PayPalRuntime | null,
   rateAllowed: (key: string) => boolean = () => true,
@@ -69,7 +83,8 @@ export function createPayPalHandlers(
         return reply({ error: "Too many checkout requests." }, 429);
       try {
         return reply(await rt.service.create(await read(req, 16384)));
-      } catch {
+      } catch (error) {
+        recordCheckoutFailure("create", error);
         return reply(
           { error: "Unable to create checkout. No payment was confirmed." },
           503,
@@ -102,6 +117,7 @@ export function createPayPalHandlers(
         );
         return reply(result, result.status === "pending" ? 202 : 200);
       } catch (error) {
+        recordCheckoutFailure("capture", error);
         return reply(
           {
             error:
