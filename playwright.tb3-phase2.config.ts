@@ -4,7 +4,10 @@ export default defineConfig({
   timeout:75000,expect:{timeout:20000},
   reporter:[['list'],['html',{open:'never',outputFolder:'playwright-tb3-phase2-report'}]],
   use:{baseURL:'http://127.0.0.1:3219',screenshot:'only-on-failure',trace:'retain-on-failure'},
-  webServer:{command:'node ./node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 3219',url:'http://127.0.0.1:3219/tarris',reuseExistingServer:false,timeout:240000,env:{
+  // The isolated certification worktree shares dependencies through a junction.
+  // Use Next's supported webpack dev server so Playwright does not require
+  // Turbopack to resolve node_modules outside the worktree root.
+  webServer:{command:'node ./node_modules/next/dist/bin/next dev --webpack --hostname 127.0.0.1 --port 3219',url:'http://127.0.0.1:3219/tarris',reuseExistingServer:false,timeout:240000,env:{
     VERCEL_ENV:'preview',VERCEL_GIT_COMMIT_REF:'codex/tb3-hq-remake-20261005',TB3_MERCH_CHECKOUT_ENABLED:'false',NEXT_TELEMETRY_DISABLED:'1'
   }},
   projects:[

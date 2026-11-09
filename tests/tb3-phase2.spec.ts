@@ -102,6 +102,7 @@ test('signed-out HQ redirects to login with return URL',async({page})=>{
 });
 test('anonymous private tracking and payment routes fail closed',async({request})=>{
   expect([401,403]).toContain((await request.get('/api/tarris/workspace')).status());
+  expect([401,403]).toContain((await request.get('/api/tb3/paypal/report')).status());
   expect((await request.get('/api/tb3/merch/checkout')).status()).toBe(404);
 });
 test('HQ tracking panels and all 14 products render in isolated local UI fixture',async({page,context})=>{
@@ -110,16 +111,23 @@ test('HQ tracking panels and all 14 products render in isolated local UI fixture
   await page.route('**/api/calendar/events',r=>r.fulfill({contentType:'application/json',body:'{"ok":true,"events":[]}'}));
   await page.route('**/api/opportunities/list',r=>r.fulfill({contentType:'application/json',body:'{"ok":true,"opportunities":[]}'}));
   await page.route('**/api/tarris/workspace',r=>r.fulfill({contentType:'application/json',body:'{"ok":true,"logs":[],"impact":[],"documents":[],"contacts":[],"academic":[],"notifications":[]}'}));
-  await page.route('**/api/tb3/paypal/report',r=>r.fulfill({contentType:'application/json',headers:{'Cache-Control':'private, no-store'},body:JSON.stringify({source:'paypal-ledger+printful',summary:{orderCount:1,capturedOrderCount:1,grossCapturedCents:5500,refundedCents:0,netAfterRefundsCents:5500,reconciliation:'ledger totals reconciled'},orders:[{orderReference:'PAYPAL-FIXTURE',paymentStatus:'captured',capturedCents:5500,refundStatus:'none',refundedCents:0,fulfillmentStatus:'shipped',tracking:[{status:'shipped',trackingNumber:'TRACK-FIXTURE',trackingUrl:'https://carrier.example/fixture'}],items:[{name:'TB3 Tee',size:'M',quantity:1,unitAmountCents:5000}],createdAt:'2026-11-09T12:00:00.000Z'}]})}));
-  await page.goto('/tarris/future',{waitUntil:'domcontentloaded'});
+  let reportRequests = 0;
+  await page.route('**/api/tb3/paypal/report',r=>{reportRequests++;return r.fulfill({contentType:'application/json',headers:{'Cache-Control':'private, no-store'},body:JSON.stringify({source:'paypal-ledger+printful',summary:{orderCount:1,capturedOrderCount:1,grossCapturedCents:5500,refundedCents:0,netAfterRefundsCents:5500,reconciliation:'ledger totals reconciled'},orders:[{orderReference:'PAYPAL-FIXTURE',paymentStatus:'captured',capturedCents:5500,refundStatus:'none',refundedCents:0,fulfillmentStatus:'shipped',fulfillmentSyncStatus:'current',tracking:[{status:'shipped',trackingNumber:'TRACK-FIXTURE',trackingUrl:'https://carrier.example/fixture'}],items:[{name:'TB3 Tee',size:'M',quantity:1,unitAmountCents:5000}],createdAt:'2026-11-09T12:00:00.000Z'}]})});});
+  await page.goto('/tarris/future',{waitUntil:'load'});
   await expect(page.locator('#hq-home')).toBeVisible();
   await expect(page.locator('#nil-brand-module')).toHaveCount(1);
   await expect(page.locator('#earnings-tracker')).toHaveCount(1);
   await expect(page.locator('#tb3-store article')).toHaveCount(14);
   await expect(page.locator('#tb3-store')).toContainText('Online checkout stays disabled');
   await page.getByRole('button',{name:'Merchandise orders'}).click();
+  await expect(page.getByRole('button',{name:'Close orders'})).toBeVisible();
   await expect(page.locator('#tb3-store')).toContainText('PAYPAL-FIXTURE');
   await expect(page.locator('#tb3-store')).toContainText('TRACK-FIXTURE');
+  await expect(page.locator('#tb3-store')).toContainText('shipped');
+  await expect(page.locator('#tb3-store')).toContainText('Captured orders');
+  await expect(page.locator('#tb3-store')).toContainText('Net after refunds');
+  await expect(page.locator('#tb3-store')).toContainText('$55.00');
+  expect(reportRequests).toBe(1);
   await expect(page.locator('#recent-media')).toContainText('Drive and Defense');
 });
 test('no horizontal page overflow',async({page})=>{
