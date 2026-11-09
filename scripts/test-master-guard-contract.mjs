@@ -52,13 +52,19 @@ assert.equal(finalShaResult.status, 0, 'final candidate commit must be available
 const finalSha = finalShaResult.stdout.trim();
 const parentShaResult = spawnSync('git', ['rev-parse', `${finalSha}^`], { encoding: 'utf8' });
 assert.equal(parentShaResult.status, 0, 'final candidate must have a parent');
-assert.equal(parentShaResult.stdout.trim(), 'fe484be6f6fc0d362e36326189106dd1ead63dfe', 'candidate must be the direct child of the pushed policy revision');
+assert.equal(parentShaResult.stdout.trim(), 'dc991cda004fba853ea3d25f612bfe18e468dbfb', 'diagnostic candidate must be the direct child of the certified commerce application revision');
 const changedFilesResult = spawnSync('git', ['diff-tree', '--no-commit-id', '--name-only', '-r', finalSha], { encoding: 'utf8' });
 assert.equal(changedFilesResult.status, 0, 'final candidate change list must be available');
 assert.deepEqual(
   changedFilesResult.stdout.trim().split(/\r?\n/).filter(Boolean).sort(),
-  ['package-lock.json', 'package.json', 'scripts/test-master-guard-contract.mjs', 'scripts/vercel-ignore-work-branches.mjs'],
-  'final candidate may contain only the required pg runtime dependency and ignored-build policy tests',
+  [
+    'app/api/tb3/printful/diagnostic/route.ts',
+    'lib/tb3/printful-diagnostic-handler.ts',
+    'scripts/test-master-guard-contract.mjs',
+    'scripts/vercel-ignore-work-branches.mjs',
+    'tests/tb3-printful-diagnostic.test.mts',
+  ],
+  'final candidate may contain only the TB3 Printful diagnostic and its exact Preview guard policy',
 );
 
 const tb3Preview = runIgnoreGuard('work/tb3-commerce-hq-20261109', finalSha, 'preview');
@@ -71,11 +77,11 @@ assert.equal(tb3PreviewFallback.status, 1, 'standard VERCEL_ENV preview fallback
 for (const [branch, commit, target, vercelEnv] of [
   ['work/another-branch', finalSha, 'preview', ''],
   ['work/tb3-commerce-hq-20261107', finalSha, 'preview', ''],
-  ['work/tb3-commerce-hq-20261109', '5720a3f1c8cf722d50a7d174e4976424db03118a', 'preview', ''],
-  ['work/tb3-commerce-hq-20261109', '1111111111111111111111111111111111111111', 'preview', ''],
   ['work/tb3-commerce-hq-20261109', finalSha, 'production', ''],
   ['work/tb3-commerce-hq-20261109', finalSha, 'production', 'preview'],
   ['work/tb3-commerce-hq-20261109', finalSha, '', 'development'],
+  ['work/tb3-commerce-hq-20261109', '5720a3f1c8cf722d50a7d174e4976424db03118a', 'preview', ''],
+  ['work/tb3-commerce-hq-20261109', '1111111111111111111111111111111111111111', 'preview', ''],
 ]) {
   const blocked = runIgnoreGuard(branch, commit, target, vercelEnv);
   assert.equal(blocked.status, 0, `work branch must remain ignored: ${branch} (${target || vercelEnv})`);

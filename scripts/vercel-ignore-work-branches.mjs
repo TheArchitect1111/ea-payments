@@ -37,11 +37,38 @@ function isApprovedTb3PreviewRevision() {
     JSON.stringify(changedFiles) === JSON.stringify(permittedPolicyFiles);
 }
 
+function isApprovedTb3PrintfulDiagnosticPreviewRevision() {
+  if (
+    branch !== 'work/tb3-commerce-hq-20261109' ||
+    target !== 'preview' ||
+    !/^[a-f0-9]{40}$/i.test(deploymentSha)
+  ) return false;
+
+  const headSha = gitText(['rev-parse', 'HEAD']);
+  const parentSha = gitText(['rev-parse', `${deploymentSha}^`]);
+  const changedFilesText = gitText(['diff-tree', '--no-commit-id', '--name-only', '-r', deploymentSha]);
+  if (!headSha || !parentSha || changedFilesText === null) return false;
+
+  const changedFiles = changedFilesText.split(/\r?\n/).filter(Boolean).sort();
+  const permittedDiagnosticFiles = [
+    'app/api/tb3/printful/diagnostic/route.ts',
+    'lib/tb3/printful-diagnostic-handler.ts',
+    'scripts/test-master-guard-contract.mjs',
+    'scripts/vercel-ignore-work-branches.mjs',
+    'tests/tb3-printful-diagnostic.test.mts',
+  ];
+  return headSha === deploymentSha &&
+    parentSha === 'dc991cda004fba853ea3d25f612bfe18e468dbfb' &&
+    JSON.stringify(changedFiles) === JSON.stringify(permittedDiagnosticFiles);
+}
+
 // Permit only the final candidate child of the committed policy revision.
 // It must retain the certified TB3 app and include only policy tests plus the
 // runtime package fix needed by the PayPal ledger. All other work/* refs and
 // all Production targets block.
-if (branch.startsWith('work/') && !isApprovedTb3PreviewRevision()) {
+if (branch.startsWith('work/') &&
+    !isApprovedTb3PreviewRevision() &&
+    !isApprovedTb3PrintfulDiagnosticPreviewRevision()) {
   console.log(`[EA Build Space] Ignoring Vercel deployment for local-only branch: ${branch}`);
   process.exit(0);
 }
