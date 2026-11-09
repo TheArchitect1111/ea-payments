@@ -62,13 +62,40 @@ function isApprovedTb3PrintfulDiagnosticPreviewRevision() {
     JSON.stringify(changedFiles) === JSON.stringify(permittedDiagnosticFiles);
 }
 
+function isApprovedTb3PrintfulCredentialPreviewRevision() {
+  if (
+    branch !== 'work/tb3-commerce-hq-20261109' ||
+    target !== 'preview' ||
+    !/^[a-f0-9]{40}$/i.test(deploymentSha)
+  ) return false;
+
+  const headSha = gitText(['rev-parse', 'HEAD']);
+  const parentSha = gitText(['rev-parse', `${deploymentSha}^`]);
+  const changedFilesText = gitText(['diff-tree', '--no-commit-id', '--name-only', '-r', deploymentSha]);
+  if (!headSha || !parentSha || changedFilesText === null) return false;
+
+  const changedFiles = changedFilesText.split(/\r?\n/).filter(Boolean).sort();
+  const permittedCredentialFiles = [
+    'app/api/tb3/printful/diagnostic/route.ts',
+    'lib/tb3/printful-diagnostic-handler.ts',
+    'scripts/test-master-guard-contract.mjs',
+    'scripts/vercel-ignore-work-branches.mjs',
+    'specs/tb3-commerce-hq/spec.md',
+    'tests/tb3-printful-diagnostic.test.mts',
+  ];
+  return headSha === deploymentSha &&
+    parentSha === '731dca5aaa4b37b6bb11eb352433ded9e1988052' &&
+    JSON.stringify(changedFiles) === JSON.stringify(permittedCredentialFiles);
+}
+
 // Permit only the final candidate child of the committed policy revision.
 // It must retain the certified TB3 app and include only policy tests plus the
 // runtime package fix needed by the PayPal ledger. All other work/* refs and
 // all Production targets block.
 if (branch.startsWith('work/') &&
     !isApprovedTb3PreviewRevision() &&
-    !isApprovedTb3PrintfulDiagnosticPreviewRevision()) {
+    !isApprovedTb3PrintfulDiagnosticPreviewRevision() &&
+    !isApprovedTb3PrintfulCredentialPreviewRevision()) {
   console.log(`[EA Build Space] Ignoring Vercel deployment for local-only branch: ${branch}`);
   process.exit(0);
 }

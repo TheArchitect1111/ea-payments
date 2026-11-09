@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic';
 export const GET = createTb3PrintfulDiagnosticHandler({
   environment: () => ({ vercel: process.env.VERCEL_ENV, branch: process.env.VERCEL_GIT_COMMIT_REF }),
   authorize: (request) => authorize(request as NextRequest, false),
+  diagnosticTokenSha256: () => process.env.TB3_PRINTFUL_DIAGNOSTIC_TOKEN_SHA256,
   keyAvailable: () => Boolean(process.env.PRINTFUL_API_KEY?.trim()),
   readCatalogProduct: async (storeId, productId) => {
     if (storeId !== TB3_PRINTFUL_STORE_ID) throw new PrintfulError(0, 'Printful store context mismatch.');

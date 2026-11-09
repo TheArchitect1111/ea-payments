@@ -65,3 +65,11 @@ Any changed product/variant ID, price or size, missing/broken asset, visible act
 ## Completion evidence
 
 Focused evidence: catalog/HQ/PayPal integration suite 38/38 passed, including isolated SQL ledger adapter and fail-closed CLI checks; full TB3 Phase 2 Playwright suite 20/20 passed across desktop and mobile, followed by 4/4 affected catalog/checkout checks after the final UI repair; TB3 Phase 1 contract passed; scoped TypeScript diagnostics 0 (17 unrelated repository diagnostics excluded). Live Printful store identity, product/variant/SKU availability, artwork placements, pricing, shipping, and fulfillment funding remain external verification requirements.
+
+## Preview-only diagnostic authorization addendum (2026-11-09)
+
+The read-only Printful connectivity endpoint may accept either its existing Tarris HQ viewer/admin authorization or a separate high-entropy diagnostic token. The token is supplied only in the `x-tb3-printful-diagnostic-token` request header. Preview stores only its SHA-256 verifier as `TB3_PRINTFUL_DIAGNOSTIC_TOKEN_SHA256`; the raw token is never stored in source, returned, or logged. Token verification uses constant-time digest comparison and rejects malformed or missing verifiers.
+
+The alternate credential is valid only when both `VERCEL_ENV=preview` and `VERCEL_GIT_COMMIT_REF=work/tb3-commerce-hq-20261109`. The check precedes credential handling. It is confined to `/api/tb3/printful/diagnostic`; all other HQ routes retain their existing authorization. It does not bypass Vercel Deployment Protection. An invalid supplied token fails closed before key-presence checks or provider access. The endpoint remains one read-only catalog GET and cannot create or update Printful resources.
+
+Acceptance: valid test token permits this Preview diagnostic without HQ login; absent token preserves normal HQ authorization; wrong, malformed, or unconfigured tokens are denied without reading Printful configuration; Production, other Preview branches, and all other routes reject the test credential; the response contains no credential, provider payload, or error detail. Rollback: remove the Preview-only verifier configuration and revert the diagnostic authorization change. Checkout, PayPal live-payment, and Printful-order safeguards remain unchanged.
