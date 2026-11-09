@@ -1,22 +1,25 @@
-# Tasks: TB3 Commerce Reporting and Fulfillment Safety
+# Tasks: TB3 Canonical Printful Catalog
 
 ## Preparation
-
-- [x] T001 Confirm production commit, preserved certification branch, and exact manifest.
-- [x] T002 Capture Coming Soon, disabled-commerce, auth, RLS, idempotency, and no-production invariants.
-- [x] T003 Define isolated tests and Preview-only completion boundary.
+- [x] T001 Confirm existing commerce worktree, branch, current HEAD, client identity, and clean status.
+- [x] T002 Read constitution, security model, and existing TB3 commerce specification.
+- [x] T003 Compare the preserved 14/82 Printful manifest with the checkout mapping and verify source artwork files.
+- [x] T004 Record Coming Soon, disabled payment/fulfillment, no credentials, and no production changes as invariants.
 
 ## Implementation
+- [x] T010 Restore exact referenced mockup artwork from the preserved Printful asset ref.
+- [x] T011 Make the canonical Printful mapping the only catalog source for storefront, booking, checkout, and HQ.
+- [x] T012 Preserve all 14 products and 82 variants without adding IDs or SKUs.
+- [x] T013 Mark live fulfillment verification pending and reject purchases until a product mapping is verified.
+- [x] T014 Enrich HQ order item rendering from the canonical catalog while preserving historical fallback data.
 
-- [x] T010 Remove TB3-only Bonfire/Fourthwall/Stripe merchandise paths.
-- [x] T011 Add preserved catalog and strict 14/82 validation.
-- [x] T012 Add tenant-scoped viewer-only read/report endpoint and HQ UI.
-- [x] T013 Add read-only Printful shipment tracking enrichment and refund/net revenue reporting.
-- [x] T014 Guard all Printful mutations while disabled and preserve idempotency.
-- [x] T015 Run targeted integration, security, regression, and type checks; inspect final diff.
+## Verification
+- [x] T020 Run catalog and asset-contract tests.
+- [x] T021 Run focused PayPal/Printful integration regression tests using isolated fixtures.
+- [x] T022 Run TB3 Playwright browser checks for products/artwork/Coming Soon/checkout/access and desktop/mobile layouts.
+- [x] T023 Run affected TypeScript/build checks and inspect final diff for unrelated changes.
 
 ## Completion
-
-- [x] T020 Confirm Coming Soon and disabled checkout invariants.
-- [x] T021 Confirm no production/config/provider operation occurred.
-- [x] T022 Report local pass counts and external Preview/Printful checks still required.
+- [x] T030 Confirm no environment, credential, database, Vercel, PayPal, or Printful mutations occurred.
+- [x] T031 Commit only verified TB3 catalog, code, assets, tests, and specification files on the existing branch.
+- [x] T032 Report commit, test evidence, and live Printful checks still requiring authorized provider access.

@@ -1,66 +1,67 @@
-# TB3 Commerce Reporting and Fulfillment Safety
+# TB3 Commerce Catalog Convergence
 
-**Request:** Connect TB3's PayPal ledger and Printful fulfillment records to private HQ reporting, remove TB3 dependencies on Bonfire/Fourthwall/Stripe merchandise reporting, and validate the preserved Printful catalog.
+**Request:** Use one canonical Printful catalog across the TB3 storefront, PayPal checkout, and private HQ; restore exact local art where available; block unverified fulfillment mappings.
 **Project/tenant:** TB3 / tarris
 **Owner:** TB3 project owner
-**Status:** Implemented on isolated development branch; not deployed or Preview certified
+**Status:** Local implementation complete; live Printful verification remains external
 
 ## Intent
 
-TB3 commerce uses TB3 storefront → PayPal → Printful → TB3 HQ. HQ read views derive from the durable PayPal order ledger and Printful fulfillment records. The public storefront remains Coming Soon and all payment/fulfillment actions remain disabled.
+The public storefront, checkout resolver, and HQ merchandise report use one canonical 14-product / 82-variant catalog. Existing Printful IDs, variant IDs, catalog variant IDs, names, prices, sizes, and exact artwork references are preserved from an existing source ref. No provider identifiers or SKUs are synthesized. All products stay Coming Soon and fulfillment-unverified until a read-only live catalog check is completed.
 
 ## Scope
 
 ### In scope
-- [x] Isolated branch based on production commit plus preserved PayPal certification changes.
-- [x] Remove TB3-only Bonfire, Fourthwall, and Stripe merchandise-reporting paths.
-- [x] Read-only, tenant-scoped PayPal ledger and Printful shipment reconciliation in Tarris HQ.
-- [x] Validate all 14 product / 82 variant entries from the preserved manifest.
-- [x] Enforce fail-closed Printful mutation gate and idempotent reconciliation.
-- [x] Focused isolated tests.
+- [x] Converge the storefront and checkout catalogs on the existing 14-product / 82-variant Printful mapping.
+- [x] Reuse exact mockup files already present in the preserved TB3 Printful asset ref.
+- [x] Share canonical product/variant metadata with HQ order reporting.
+- [x] Fail closed for any product without explicit fulfillment mapping verification.
+- [x] Run focused catalog, browser, and integration regression checks.
 
 ### Out of scope
-- Production database/configuration changes, deployment, checkout activation, credentials, live PayPal, Printful submissions, separate contractual deposit system, unrelated client behavior.
+- Production data/configuration, deployments, credential access, real PayPal payments, Printful order or product mutations, and checkout activation.
 
 ## Source of truth
 
-- Production base: commit `4c4ef1418c3d395009f3b0a16812bba8a161fa3e`.
-- Preserved PayPal certification branch: `work/tb3-paypal-cert-20261107` and `specs/tb3-paypal/local-simulator-certification-20261107.md`.
-- Preserved manifest on that branch: `public/tb3/merch/manifest.json` (14 products / 82 variants).
-- Durable schema: `scripts/sql/tb3-paypal-ledger.sql`; previously applied production migration 20261108005642 is not repeated.
-- Authorization: `lib/tb3/server.ts`; Tarris org membership and viewer role are required for reads.
-- Security: `SECURITY-MODEL.md` and `.specify/memory/constitution.md`.
+- Authoritative client: clients/tb3/client.json (TB3 / tarris).
+- Existing checkout mapping: lib/tb3/printful-manifest.json at the pre-repair branch HEAD; removed after exact reconciliation into the canonical manifest.
+- Preserved exact manifest and mockup source: origin/assets/tb3-printful-20261024 at 04c0f1f316b2ae4137c07d145203e235113933cf; its 14 product IDs and 82 variant mappings were compared against the current checkout manifest and matched exactly.
+- Canonical source after repair: public/tb3/merch/manifest.json, imported through lib/tb3/merch-catalog.ts.
+- App safeguards: lib/tb3/paypal-config.ts, lib/tb3/paypal-runtime.ts, and lib/tb3/paypal-service.ts.
+- Governance: .specify/memory/constitution.md, SECURITY-MODEL.md, and the existing TB3 commerce spec.
 
 ## Protected invariants
 
-- Public merchandise remains Coming Soon; checkout and PayPal remain disabled.
-- No Printful draft/confirmation mutation unless explicitly enabled in the production runtime with existing approval/funding gates.
-- No production/database/configuration/provider access in this work.
-- Tarris reports are tenant-scoped and private, uncached, read-only, and do not expose shipping addresses or customer email.
-- Existing PayPal idempotency, webhook verification, forced RLS and least-privilege ledger controls remain intact.
-- Separate contractual deposit and unrelated client payment behavior remain intact.
+- Public merchandise stays Coming Soon; PayPal checkout stays disabled.
+- Printful remains the sole merchandise fulfillment provider; Printful ordering remains disabled.
+- No IDs, SKUs, catalog availability, shipping rates, or funding state are invented.
+- Products without an explicitly verified mapping cannot be purchased.
+- Existing PayPal idempotency, webhook verification, tenant authorization, ledger controls, and private HQ behavior remain intact.
+- No production or database changes; no unrelated clients, Stripe contractual deposits, or AYF work changes.
 
 ## Acceptance criteria
 
-1. No active TB3 dependency remains on Bonfire, Fourthwall, or Stripe merchandise reporting; shared unrelated Stripe code is unchanged.
-2. Authorized Tarris viewer can read orders, capture/payment state, fulfillment state, shipment tracking, refunds, and gross/net revenue derived from the PayPal ledger and Printful records.
-3. Unauthenticated and non-Tarris/non-viewer requests are rejected; response uses `private, no-store` and excludes unnecessary PII.
-4. The preserved catalog validates to 14 unique products and 82 unique mapped variants; each has required product/variant/catalog IDs and consistent variant/product price. Live Printful catalog checks are clearly called out as external.
-5. Retried or duplicate webhooks cannot create duplicate PayPal ledger rows or Printful orders; failed/held/refunded payments cannot initiate fulfillment.
-6. With commerce disabled, Printful draft and confirm POSTs are impossible and existing disabled checkout/Coming Soon UI remains.
-7. Focused integration, security, and regression tests pass in isolated local fixtures; prior 31 local PayPal tests are preserved and not re-run wholesale.
-8. No production deployment is performed; therefore Preview certification remains a separate follow-up.
+1. Storefront, checkout, booking inquiry, and HQ reporting reference one canonical product catalog.
+2. All 14 existing product records and 82 variant mappings retain their exact pre-repair Printful IDs, prices, currency, and sizes.
+3. No Printful SKU is added unless present in an authoritative source; the current absence is represented without synthetic values.
+4. Every mockup URL resolves to an existing verified asset where the preserved source ref contains the referenced asset.
+5. Products remain Coming Soon and the checkout cart resolver rejects products without explicit mapping verification.
+6. HQ reporting resolves order item display names/sizes from the canonical catalog when provider IDs match and safely retains historical snapshots when they do not.
+7. Focused catalog, browser, checkout safety, HQ integration, and affected regression tests pass.
+8. No production deployment, database/provider request, credential access, charge, Printful draft, or fulfillment submission occurs.
 
 ## Verification plan
 
-- Run catalog contract, ledger/report route tests, fulfillment mutation gate tests, existing focused PayPal HTTP case, TypeScript dependency diagnostics, and relevant Coming Soon regression.
-- Inspect final diff and branch ancestry; verify no provider/DB/env access in test commands.
-- Live Printful catalog/SKU/pricing/shipping and Preview/PayPal webhook checks remain external and are not attempted.
+- Compare canonical manifest IDs, variants, price, size, and assets against the pre-repair mapping and preserved asset ref.
+- Run catalog/HQ and focused PayPal regression tests with in-memory fixtures.
+- Run the TB3 Playwright browser suite for Coming Soon, all 14 product cards/artworks, checkout unavailability, and HQ rendering/access protections.
+- Run focused TypeScript/build checks where the isolated worktree permits.
+- Audit the final diff and commit only TB3 catalog, test, artwork, and spec files.
 
 ## Rollback condition
 
-Any loss of Coming Soon/disabled checkout, tenant/auth bypass, non-idempotent fulfillment, exposure of address/email, mutation attempted while disabled, or change to unrelated Stripe/deposit/client files blocks the release candidate. Revert only this branch's TB3 patch before preview.
+Any changed product/variant ID, price or size, missing/broken asset, visible active checkout, reachable payment runtime while disabled, Printful mutation, auth/tenant regression, or unrelated file change blocks the commit.
 
 ## Completion evidence
 
-Local evidence: 5/5 commerce/HQ tests passed; 12 focused PayPal regression tests passed; the TB3 Coming Soon contract passed; focused TypeScript check reported zero TB3 diagnostics (17 unrelated repository dependency diagnostics); focused ESLint passed with three existing `<img>` warnings in the HQ page and zero errors. The preserved suite's 31 passing local simulator tests were not repeated. The Desktop/mobile Playwright command could not start because Turbopack rejected the isolated worktree's shared `node_modules` junction as outside its filesystem root. No database/provider calls or deployment occurred. This source checkpoint is ready for Preview certification, but rerun the browser case in CI/standard checkout and complete real Preview/provider verification before certification.
+Focused evidence: catalog/HQ/PayPal integration suite 38/38 passed, including isolated SQL ledger adapter and fail-closed CLI checks; full TB3 Phase 2 Playwright suite 20/20 passed across desktop and mobile, followed by 4/4 affected catalog/checkout checks after the final UI repair; TB3 Phase 1 contract passed; scoped TypeScript diagnostics 0 (17 unrelated repository diagnostics excluded). Live Printful store identity, product/variant/SKU availability, artwork placements, pricing, shipping, and fulfillment funding remain external verification requirements.

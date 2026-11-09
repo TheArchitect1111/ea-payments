@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import catalog from "@/lib/tb3/printful-manifest.json";
+import { tb3MerchCatalog, isTb3ProductPurchaseReady, type Tb3MerchProduct } from "@/lib/tb3/merch-catalog";
 
 type ButtonInstance = {
   isEligible(): boolean;
@@ -70,7 +70,7 @@ async function post(action: string, input: unknown) {
     throw Error(result.error || "Payment could not be verified.");
   return result;
 }
-export default function PayPalCheckout() {
+export default function PayPalCheckout({ catalogOverride }: { catalogOverride?: Tb3MerchProduct[] } = {}) {
   const container = useRef<HTMLDivElement>(null),
     token = useRef(""),
     order = useRef(""),
@@ -106,12 +106,13 @@ export default function PayPalCheckout() {
       for (const button of buttons.current) button.close();
     };
   }, []);
-  const options = catalog.flatMap((product) =>
-    product.variants.map((v) => ({
+  const options = (catalogOverride ?? tb3MerchCatalog).flatMap((product) =>
+    product.variants.filter((variant) => isTb3ProductPurchaseReady(product, variant)).map((v) => ({
       id: v.id,
-      label: product.name + " · " + v.size + " · $" + v.price.toFixed(2),
+      label: product.name + " - " + v.size + " - $" + v.price.toFixed(2),
     })),
   );
+  if (!options.length) return <p role="status">Online checkout is not open yet. Product fulfillment is being verified.</p>;
   function receipt(result: { status: string; fulfillment?: string }) {
     if (result.fulfillment === "simulated") {
       setMessage(
@@ -350,7 +351,7 @@ export default function PayPalCheckout() {
             />
           </label>
           <button type="submit">
-            {busy ? "Preparing…" : "Continue to payment options"}
+            {busy ? "Preparing..." : "Continue to payment options"}
           </button>
         </fieldset>
       </form>

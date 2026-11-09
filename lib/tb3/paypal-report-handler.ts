@@ -1,5 +1,6 @@
 import type { PayPalIntent, PayPalObject } from "./paypal-types";
 import { paypalPaymentStatus, summarizeTb3Orders } from "./paypal-report";
+import { findTb3CatalogVariant } from "./merch-catalog";
 
 type Shipment = { status: string; trackingNumber: string; trackingUrl: string };
 function shipments(order: PayPalObject): Shipment[] {
@@ -53,7 +54,18 @@ export function createTb3CommerceReportHandler(ports: {
           fulfillmentStatus,
           fulfillmentSyncStatus,
           tracking,
-          items: row.lines.map((line) => ({ name: line.name, size: line.size, quantity: line.quantity, unitAmountCents: line.unitAmount })),
+          items: row.lines.map((line) => {
+            const match = findTb3CatalogVariant(line.productId, line.variantId, line.catalogVariantId);
+            return {
+              productId: line.productId,
+              variantId: line.variantId,
+              name: match?.product.name ?? line.name,
+              size: match?.variant.size ?? line.size,
+              image: match?.product.image ?? "",
+              quantity: line.quantity,
+              unitAmountCents: line.unitAmount,
+            };
+          }),
           createdAt: row.createdAt,
         };
       }));

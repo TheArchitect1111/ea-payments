@@ -1,5 +1,4 @@
 import { createHash } from "node:crypto";
-import { resolveTb3Cart } from "./merch-cart";
 import {
   CheckoutInput,
   cents,
@@ -22,6 +21,7 @@ const idOK = (x: unknown): x is string =>
   typeof x === "string" && /^[A-Za-z0-9]{6,64}$/.test(x);
 export type PayPalPorts = {
   ledger: PayPalLedger;
+  resolveCart: (input: unknown) => Lines;
   request: (
     path: string,
     method?: "GET" | "POST",
@@ -171,7 +171,7 @@ export function paypalService(config: PayPalConfig, ports: PayPalPorts) {
   async function create(raw: unknown) {
     const input = CheckoutInput.parse(raw);
     const id = localId(input.checkoutToken),
-      lines = resolveTb3Cart(input.cart);
+      lines = ports.resolveCart(input.cart);
     const inputHash = hash([input.email, input.recipient, lines]);
     await ports.ledger.lock(id, async (existing, save) => {
       let row = existing;
@@ -255,7 +255,6 @@ export function paypalService(config: PayPalConfig, ports: PayPalPorts) {
               },
               items: row.lines.map((x) => ({
                 name: (x.name + " " + x.size).slice(0, 127),
-                sku: String(x.variantId),
                 quantity: String(x.quantity),
                 unit_amount: {
                   currency_code: "USD",

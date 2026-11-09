@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { opportunityTypes, budgetRanges } from '@/lib/tb3/contracts';
-import merchCatalog from '@/public/tb3/merch/manifest.json';
+import { tb3MerchCatalog as merchCatalog } from '@/lib/tb3/merch-catalog';
 export default function BookingForm({manual=false,onSaved}:{manual?:boolean;onSaved?:()=>void}) {
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[saved,setSaved]=useState(false);
   const [merchandise,setMerchandise]=useState(false);

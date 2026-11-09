@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { tb3FilmAssets, tb3FilmUrl } from "../tb3-film";
 import tb3HqNavigation from "@/knowledge/eva-menu-sources/tb3-hq.json";
-import merchCatalog from "@/public/tb3/merch/manifest.json";
+import { tb3MerchCatalog as merchCatalog } from "@/lib/tb3/merch-catalog";
 import Tb3MerchSales from "@/app/portal/components/Tb3MerchSales";
 
 import { HqWorkspaceProvider, useHq, HqDialog, ModuleActions, ModuleTools, ProactiveEva, HqFocus, Upcoming, OpportunitySummary, OpportunityPipeline, EarningsValue, EarningsBreakdown, DocumentVault, OpportunityInbox, CalendarModule, EvaPanel, EvaFab, EvaCommandBar, BrandTools } from "./hq-workspace";

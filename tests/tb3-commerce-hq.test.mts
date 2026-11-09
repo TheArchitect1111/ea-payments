@@ -1,16 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import catalog from "../lib/tb3/printful-manifest.json";
-import publicCatalog from "../public/tb3/merch/manifest.json";
+import { tb3MerchCatalog as catalog } from "../lib/tb3/merch-catalog";
 import { validateTb3PrintfulCatalog } from "../lib/tb3/printful-catalog-validation";
-import { resolveTb3Cart } from "../lib/tb3/merch-cart";
+import { mapTb3CatalogSelection, resolveTb3Cart } from "../lib/tb3/merch-cart";
 import { summarizeTb3Orders } from "../lib/tb3/paypal-report";
 import { createTb3CommerceReportHandler } from "../lib/tb3/paypal-report-handler";
 import type { PayPalIntent } from "../lib/tb3/paypal-types";
 
-test("preserved Printful manifest validates all 14 products and 82 mapped variants", () => {
-  assert.deepEqual(validateTb3PrintfulCatalog(), { productCount: 14, variantCount: 82, liveCatalogVerified: false, skuFieldPresent: false });
+test("canonical catalog validates all 14 products and 82 mapped variants without authorizing unverified purchases", () => {
+  assert.deepEqual(validateTb3PrintfulCatalog(), { productCount: 14, variantCount: 82, liveCatalogVerified: false, skuFieldPresent: false, purchaseReadyProductCount: 0 });
   const productIds = new Set(catalog.map(x => x.printfulProductId));
   const variants = catalog.flatMap(x => x.variants);
   assert.equal(productIds.size, 14);
@@ -18,19 +17,23 @@ test("preserved Printful manifest validates all 14 products and 82 mapped varian
   assert.equal(new Set(variants.map(x => x.id)).size, 82);
   assert.equal(new Set(variants.map(x => x.catalogVariantId)).size, 56);
   for (const variant of variants) {
-    const line = resolveTb3Cart([{ variantId: variant.id, quantity: 1 }])[0]!;
+    const line = mapTb3CatalogSelection([{ variantId: variant.id, quantity: 1 }])[0]!;
     assert.equal(line.variantId, variant.id);
     assert.equal(line.catalogVariantId, variant.catalogVariantId);
     assert.equal(line.productId, catalog.find(p => p.variants.some(v => v.id === variant.id))!.printfulProductId);
   }
-  assert.equal(publicCatalog.length, 14);
-  assert.ok(publicCatalog.every((product: { status: string; fourthwall_url?: string }) => product.status === "coming_soon" && !product.fourthwall_url));
+  assert.ok(catalog.every((product) => product.status === "coming_soon" && product.fulfillmentMappingVerified === false));
+  assert.throws(() => resolveTb3Cart([{ variantId: variants[0].id, quantity: 1 }]), /mapping is not verified/);
+  assert.equal(readFileSync("app/tarris/page.tsx", "utf8").includes("@/lib/tb3/merch-catalog"), true);
+  assert.equal(readFileSync("app/tarris/paypal-checkout/PayPalCheckout.tsx", "utf8").includes("@/lib/tb3/merch-catalog"), true);
+  assert.equal(readFileSync("app/tarris/future/page.tsx", "utf8").includes("@/lib/tb3/merch-catalog"), true);
+  assert.equal(readFileSync("app/tarris/book/booking-form.tsx", "utf8").includes("@/lib/tb3/merch-catalog"), true);
 });
 
 const order: PayPalIntent = {
   id: "a".repeat(64), tenant: "tarris", mode: "live", merchantId: "M123456", inputHash: "h", createdAt: "2026-11-09T12:00:00.000Z",
   email: "private@example.test", recipient: { name: "Private Buyer", address1: "1 Private St", city: "Test", state_code: "NC", zip: "28201", country_code: "US" },
-  lines: [{ productId: 485112609, variantId: 5593588451, catalogVariantId: 9527, name: "TB3 Signature Tee", size: "XS", image: "", quantity: 1, unitAmount: 5000, currency: "usd" }],
+  lines: [{ productId: 485112609, variantId: 5593588451, catalogVariantId: 9527, name: "TB3 Signature Tee - Black", size: "XS", image: "/tb3/merch/mockups/tb3-signature-tee-black.png", quantity: 1, unitAmount: 5000, currency: "usd" }],
   subtotal: 5000, shipping: 500, tax: 0, shippingMethod: "GROUND", total: 5500, paypalId: "PAYPAL123", captureId: "CAPTURE123", state: "paid", printfulId: 123, fulfillment: "confirmed",
   refundStatus: "partial", refundTotalCents: 1000,
 };
@@ -62,6 +65,7 @@ test("actual HQ report handler rejects unauthorized access and reconciles safe t
   assert.equal(result.source, "paypal-ledger+printful");
   assert.deepEqual(result.summary, { orderCount: 1, capturedOrderCount: 1, grossCapturedCents: 5500, refundedCents: 1000, netAfterRefundsCents: 4500, reconciliation: "ledger totals reconciled" });
   assert.equal(result.orders[0].paymentStatus, "partially_refunded");
+  assert.deepEqual(result.orders[0].items[0], { productId: 485112609, variantId: 5593588451, name: "TB3 Signature Tee - Black", size: "XS", image: "/tb3/merch/mockups/tb3-signature-tee-black.png", quantity: 1, unitAmountCents: 5000 });
   assert.equal(result.orders[0].fulfillmentStatus, "fulfilled");
   assert.equal(result.orders[0].fulfillmentSyncStatus, "current");
   assert.deepEqual(result.orders[0].tracking, [

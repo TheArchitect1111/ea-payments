@@ -5,6 +5,8 @@ import { paypalService } from "./paypal-service";
 import { paypalLedger } from "./paypal-ledger";
 import { paypalDatabaseUrl } from "./paypal-database-config";
 import { tb3Printful } from "./printful-client";
+import { isTb3ProductPurchaseReady, tb3MerchCatalog } from "./merch-catalog";
+import { resolveTb3Cart } from "./merch-cart";
 import { cents, type Lines, type PayPalIntent } from "./paypal-types";
 
 const states = new Set(
@@ -83,12 +85,14 @@ export async function quotePayPalOrder(
 }
 export function getPayPalRuntime() {
   const config = paypalConfig();
-  if (config?.mode === "sandbox") {
+  if (!config || !tb3MerchCatalog.some((product) => isTb3ProductPurchaseReady(product))) return null;
+  if (config.mode === "sandbox") {
     if (!paypalDatabaseUrl()) return null;
     const request = paypalTransport(config);
     const service = paypalService(config, {
       ledger: paypalLedger,
       request,
+      resolveCart: resolveTb3Cart,
       quote: async () => {
         throw Error("Sandbox must not request a provider quote");
       },
@@ -124,6 +128,7 @@ export function getPayPalRuntime() {
   const service = paypalService(config, {
     ledger: paypalLedger,
     request,
+    resolveCart: resolveTb3Cart,
     quote: quotePayPalOrder,
     printful: tb3Printful,
     autoConfirm: process.env.TB3_PAYPAL_AUTO_FULFILLMENT_APPROVED === "true",

@@ -1,32 +1,33 @@
-# Implementation Plan: TB3 Commerce Reporting and Fulfillment Safety
+# Implementation Plan: TB3 Canonical Printful Catalog
 
 ## Constitution check
 
-- Approved intent and authoritative source identified: production base plus preserved PayPal certification manifest.
-- Protected invariants: Coming Soon, disabled checkout/Printful, tenant isolation, existing RLS/idempotency, unrelated client and deposit paths untouched.
-- Rollback: discard this isolated development branch changes; production branch remains unchanged.
-- Production verification is defined but intentionally not run without deployment approval.
-- Affected HQ report UI stays responsive through existing portal layout; preserve existing public assets.
+- Approved source and exact 14/82 mapping source verified locally.
+- Protected invariants: Coming Soon, disabled checkout/Printful, no invented provider identifiers, tenant/auth protections, unrelated work untouched.
+- Rollback: revert only this local commit on the existing TB3 commerce branch; no production deployment occurs.
+- Production verification remains explicitly out of scope.
+- Visual verification uses existing exact Printful mockups and browser asset requests.
 
 ## Architecture
 
-Keep public card manifest focused on Coming Soon presentation. Preserve Printful catalog mappings in a server-only manifest consumed by cart resolution and validation. Add a viewer-authorized read-only HQ endpoint that lists the Tarris PayPal ledger and enriches known Printful IDs with safe shipment status/tracking fields. Never use Stripe or Bonfire for merchandise reporting. Enforce disabled commerce before any Printful mutation.
+Use the preserved Printful mapping as the single public JSON source. Import it through a client-safe shared catalog module in storefront, booking, checkout, cart validation, and HQ report enrichment. Restore only artwork files whose exact paths and PNG bytes are present in the preserved local Git ref. Store fulfillment verification as false until live provider data is checked. The production cart resolver must require both an available product and verified mapping; test-only provider fixtures may exercise the existing ID map without changing canonical readiness. Do not send fabricated SKU values to PayPal.
 
 ## Execution sequence
 
-1. Remove TB3 Bonfire routes/data helpers and Fourthwall links; preserve Coming Soon UI.
-2. Add static server-side Printful catalog mapping and strict mapping validator.
-3. Extend ledger read adapter and add Tarris HQ report handler/UI.
-4. Add refund/reconciliation fields and fail-closed Printful mutations, preserving payment idempotency.
-5. Run focused offline tests, dependency type diagnostics, and final diff audit.
-6. Do not deploy. Preview acceptance is a separate authorized step.
+1. Confirm branch/worktree status and exact manifest/asset provenance.
+2. Update this specification, plan, and tasks before implementation.
+3. Restore the verified mockup files and converge the canonical manifest.
+4. Replace duplicate imports with the shared catalog module; make cart and HQ read through it.
+5. Add fail-closed verification gating without changing PayPal or Printful production settings.
+6. Run focused catalog/integration tests, Playwright browser tests, and affected build checks.
+7. Review the diff for unrelated files and commit only verified TB3 changes locally.
 
 ## Risk and rollback
 
-- Risks: changing catalog file boundaries, reporting mapping mismatch, external Printful status shape variation.
-- Rollback trigger: authorization failure, tenant leak, active checkout, or any mutation while disabled.
-- Rollback method: revert only this isolated branch's uncommitted TB3 commerce changes; production base remains untouched.
+- Risks: catalog display changes to match the pre-existing mapped Printful collection; import/asset regressions; tests that assumed unverified products could be purchased.
+- Rollback trigger: loss of Coming Soon or checkout blocking, identifier/price drift, missing artwork, or access-control regression.
+- Rollback: revert the local commit only; do not switch branches or touch production.
 
 ## Production proof
 
-Not available in this task by explicit restriction. The deliverable is a Preview candidate only, subject to real Preview/provider catalog/webhook checks after approval.
+Not authorized in this task. Preview deployment, live store verification, and actual provider availability remain separate gates.

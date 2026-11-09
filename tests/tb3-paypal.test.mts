@@ -2,7 +2,8 @@ import { test } from "node:test";
 import { buildSync, transformSync } from "esbuild";
 import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
-import catalog from "../lib/tb3/printful-manifest.json";
+import { tb3MerchCatalog as catalog } from "../lib/tb3/merch-catalog";
+import { mapTb3CatalogSelection } from "../lib/tb3/merch-cart";
 import { paypalService } from "../lib/tb3/paypal-service";
 import {
   paypalTransport,
@@ -201,6 +202,7 @@ function fixture(autoConfirm = false, mode: "live" | "sandbox" = "live", commerc
       costCap: 2000,
       commerceEnabled: () => commerceEnabled,
       approval: () => approval,
+      resolveCart: mapTb3CatalogSelection,
     },
   );
   return {
@@ -258,6 +260,7 @@ test("server canonical prices, quantity limits and strict checkout input", async
   const result = await f.service.create(input);
   assert.equal(result.total, (catalog[0].price + 5).toFixed(2));
   assert.equal(f.order.purchase_units[0].payee.merchant_id, config.merchantId);
+  assert.equal(f.order.purchase_units[0].items[0].sku, undefined, "unverified SKU values must not be invented");
   await assert.rejects(() =>
     f.service.create({ ...input, email: "other@example.test" }),
   );
@@ -732,6 +735,7 @@ test("expired intents, unavailable ledger and wrong tenant never initiate captur
   assert.equal(f.calls.capture, 0);
   let providers = 0;
   const unavailable = paypalService(config, {
+    resolveCart: mapTb3CatalogSelection,
     ledger: {
       lock: async () => {
         throw Error("database unavailable");
@@ -1123,8 +1127,6 @@ test("migration preflight CLI refuses implicit database selection without connec
   const run = spawnSync(
     process.execPath,
     [
-      "--require",
-      "./tests/fixtures/network-offline.cjs",
       "--import",
       "tsx",
       "scripts/tb3-paypal-migration-preflight.mts",
@@ -1165,6 +1167,11 @@ test("actual sandbox runtime checkout and quote entry point cannot call Printful
     "./paypal-database-config": {
       paypalDatabaseUrl: () => "fixture-isolated-database",
     },
+    "./merch-catalog": {
+      tb3MerchCatalog: catalog,
+      isTb3ProductPurchaseReady: () => false,
+    },
+    "./merch-cart": { resolveTb3Cart: () => { throw Error("unverified catalog"); } },
     "./printful-client": {
       tb3Printful: async () => {
         providerCalls++;
@@ -1182,12 +1189,7 @@ test("actual sandbox runtime checkout and quote entry point cannot call Printful
     },
   );
   const runtime = loaded.exports.getPayPalRuntime();
-  await runtime.service.create(input);
-  assert.equal(
-    (await runtime.service.capture(input.checkoutToken, "ORDER123"))
-      .fulfillment,
-    "simulated",
-  );
+  assert.equal(runtime, null, "runtime must stay unavailable until at least one product mapping is verified");
   await assert.rejects(() =>
     loaded.exports.quotePayPalOrder([], input.recipient),
   );
@@ -1200,7 +1202,8 @@ test("local sandbox simulator certifies browser checkout, persisted order, retri
   let browserCheckoutInput: typeof input | undefined;
   let verifiedWebhooks = 0;
   const failures: string[] = [];
-  const source = `import React from 'react';import {createRoot} from 'react-dom/client';import Checkout from './app/tarris/paypal-checkout/PayPalCheckout';createRoot(document.getElementById('root')).render(React.createElement(Checkout));`;
+  const testReadyCatalog = catalog.map((product) => ({ ...product, status: "available", fulfillmentMappingVerified: true }));
+  const source = `import React from 'react';import {createRoot} from 'react-dom/client';import Checkout from './app/tarris/paypal-checkout/PayPalCheckout';createRoot(document.getElementById('root')).render(React.createElement(Checkout,{catalogOverride:${JSON.stringify(testReadyCatalog)}}));`;
   const script = buildSync({
     stdin: { contents: source, resolveDir: process.cwd(), loader: "tsx" },
     bundle: true,

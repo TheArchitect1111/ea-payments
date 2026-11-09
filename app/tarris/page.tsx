@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { ChassisPreview } from "./chassis-preview";
 import BookingForm from "./book/booking-form";
-import merchCatalog from "@/public/tb3/merch/manifest.json";
+import { tb3MerchCatalog as merchCatalog } from "@/lib/tb3/merch-catalog";
 import { Tb3FilmGrid } from "./tb3-film";
 import { useEffect, type ReactNode } from "react";
 
