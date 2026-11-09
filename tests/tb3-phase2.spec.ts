@@ -19,19 +19,20 @@ test('public navigation and CTAs resolve on each device',async({page})=>{
   await expect(page).toHaveURL(/#merch$/);
   await expect(page.locator('#merch-store')).toBeVisible();
 });
-test('14 approved product prices, artwork and inquiry buttons',async({page,request})=>{
+test('14 product prices, artwork and Coming Soon controls',async({page,request})=>{
   await enter(page);
   await expect(page.locator('#merch-store article[data-product-id]')).toHaveCount(14);
   for(const item of catalog){
     const card=page.locator('#merch-store article[data-product-id="'+item.id+'"]');
     await expect(card).toContainText(item.name);
     await expect(card).toContainText('$'+item.price.toFixed(2)+' USD');
-    await expect(card.getByRole('link',{name:'Ask about this item'})).toHaveAttribute('href','/tarris/book?type=merch&product='+encodeURIComponent(item.id));
+    await expect(card.locator('[aria-label="Merchandise ordering coming soon"]')).toBeVisible();
     const artwork=await request.head(item.image);
     expect(artwork.status(),item.image).toBe(200);
     expect(artwork.headers()['content-type']).toMatch(/^image\//);
   }
-  await expect(page.locator('#merch')).toContainText('Online orders will open after payment and fulfillment approval');
+  await expect(page.locator('#merch')).toContainText('COMING SOON');
+  await expect(page.locator('#merch')).toContainText('Online checkout is not open yet');
   await expect(page.getByRole('button',{name:/buy now|secure checkout|pay now/i})).toHaveCount(0);
 });
 test('item-specific inquiry follows existing booking tracking contract',async({page})=>{
@@ -109,12 +110,16 @@ test('HQ tracking panels and all 14 products render in isolated local UI fixture
   await page.route('**/api/calendar/events',r=>r.fulfill({contentType:'application/json',body:'{"ok":true,"events":[]}'}));
   await page.route('**/api/opportunities/list',r=>r.fulfill({contentType:'application/json',body:'{"ok":true,"opportunities":[]}'}));
   await page.route('**/api/tarris/workspace',r=>r.fulfill({contentType:'application/json',body:'{"ok":true,"logs":[],"impact":[],"documents":[],"contacts":[],"academic":[],"notifications":[]}'}));
+  await page.route('**/api/tb3/paypal/report',r=>r.fulfill({contentType:'application/json',headers:{'Cache-Control':'private, no-store'},body:JSON.stringify({source:'paypal-ledger+printful',summary:{orderCount:1,capturedOrderCount:1,grossCapturedCents:5500,refundedCents:0,netAfterRefundsCents:5500,reconciliation:'ledger totals reconciled'},orders:[{orderReference:'PAYPAL-FIXTURE',paymentStatus:'captured',capturedCents:5500,refundStatus:'none',refundedCents:0,fulfillmentStatus:'shipped',tracking:[{status:'shipped',trackingNumber:'TRACK-FIXTURE',trackingUrl:'https://carrier.example/fixture'}],items:[{name:'TB3 Tee',size:'M',quantity:1,unitAmountCents:5000}],createdAt:'2026-11-09T12:00:00.000Z'}]})}));
   await page.goto('/tarris/future',{waitUntil:'domcontentloaded'});
   await expect(page.locator('#hq-home')).toBeVisible();
   await expect(page.locator('#nil-brand-module')).toHaveCount(1);
   await expect(page.locator('#earnings-tracker')).toHaveCount(1);
   await expect(page.locator('#tb3-store article')).toHaveCount(14);
   await expect(page.locator('#tb3-store')).toContainText('Online checkout stays disabled');
+  await page.getByRole('button',{name:'Merchandise orders'}).click();
+  await expect(page.locator('#tb3-store')).toContainText('PAYPAL-FIXTURE');
+  await expect(page.locator('#tb3-store')).toContainText('TRACK-FIXTURE');
   await expect(page.locator('#recent-media')).toContainText('Drive and Defense');
 });
 test('no horizontal page overflow',async({page})=>{

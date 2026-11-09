@@ -36,6 +36,7 @@ export type PayPalPorts = {
   autoConfirm: boolean;
   fundingVerified: boolean;
   costCap: number;
+  commerceEnabled?: () => boolean;
   approval?: () => {
     autoConfirm: boolean;
     fundingVerified: boolean;
@@ -50,6 +51,8 @@ const normalize = (x: unknown) =>
 export function paypalService(config: PayPalConfig, ports: PayPalPorts) {
   const printful = async (path: string, init?: RequestInit) => {
     if (config.mode !== "live") throw Error("Sandbox cannot access Printful");
+    if (ports.commerceEnabled?.() !== true)
+      throw Error("TB3 commerce is disabled");
     return ports.printful(path, init);
   };
   const approved = (cost: PayPalObject, row: PayPalIntent) => {
@@ -210,6 +213,9 @@ export function paypalService(config: PayPalConfig, ports: PayPalPorts) {
           shippingMethod: q.shippingMethod,
           total,
           state: "creating",
+          refundStatus: "none",
+          refundTotalCents: 0,
+          refundEventIds: [],
           fulfillment: "pending",
         };
         await save(row);
@@ -290,7 +296,7 @@ export function paypalService(config: PayPalConfig, ports: PayPalPorts) {
       if (!row || row.paypalId !== expectedOrderId)
         throw Error("Order unavailable");
       provenance(row);
-      if (row.state === "hold") throw Error("Payment requires review");
+      if (row.state === "hold" || row.state === "refunded" || row.state === "failed" || row.refundStatus === "partial" || row.refundStatus === "review") throw Error("Payment requires review");
       const order = await ports.request("/v2/checkout/orders/" + row.paypalId);
       unit(order, row);
       if (row.state !== "paid" && order.status === "APPROVED") {
@@ -364,7 +370,7 @@ export function paypalService(config: PayPalConfig, ports: PayPalPorts) {
   }
   async function fulfill(id: string) {
     const action = await ports.ledger.lock(id, async (row, save) => {
-      if (!row || row.state !== "paid")
+      if (!row || row.state !== "paid" || row.refundStatus === "partial" || row.refundStatus === "review")
         throw Error("Verified paid order required");
       provenance(row);
       if (!(await verified(row))) throw Error("Payment no longer completed");
@@ -426,6 +432,8 @@ export function paypalService(config: PayPalConfig, ports: PayPalPorts) {
         if (
           !row ||
           row.state !== "paid" ||
+          row.refundStatus === "partial" ||
+          row.refundStatus === "review" ||
           row.fulfillment !== "confirming" ||
           !(await verified(row))
         )
@@ -471,12 +479,10 @@ export function paypalService(config: PayPalConfig, ports: PayPalPorts) {
   async function webhook(event: PayPalObject) {
     const approved = event.event_type === "CHECKOUT.ORDER.APPROVED",
       completed = event.event_type === "PAYMENT.CAPTURE.COMPLETED";
-    const hold = [
-      "PAYMENT.CAPTURE.REFUNDED",
-      "PAYMENT.CAPTURE.REVERSED",
-      "PAYMENT.CAPTURE.DENIED",
-    ].includes(event.event_type);
-    if (!approved && !completed && !hold) return { ignored: true };
+    const refund = event.event_type === "PAYMENT.CAPTURE.REFUNDED";
+    const reversed = event.event_type === "PAYMENT.CAPTURE.REVERSED";
+    const denied = event.event_type === "PAYMENT.CAPTURE.DENIED";
+    if (!approved && !completed && !reversed && !denied && !refund) return { ignored: true };
     const resource = event.resource || {},
       orderId = approved
         ? resource.id
@@ -515,12 +521,56 @@ export function paypalService(config: PayPalConfig, ports: PayPalPorts) {
     );
     if (!row) return { ignored: true };
     provenance(row);
-    if (hold) {
+    if (refund) {
+      const eventId = typeof event.id === "string" && /^[A-Za-z0-9_-]{6,128}$/.test(event.id) ? event.id : "";
+      if (!eventId || !row.captureId || resource.id !== row.captureId)
+        throw Error("Refund identity requires review");
+      const capture = await ports.request("/v2/payments/captures/" + row.captureId);
+      if (capture.id !== row.captureId || capture.amount?.currency_code !== "USD" || cents(capture.amount.value) !== row.total || !["PARTIALLY_REFUNDED", "REFUNDED"].includes(capture.status))
+        throw Error("Refund settlement requires review");
+      await ports.ledger.lock(row.id, async (current, save) => {
+        if (!current || current.captureId !== row.captureId) throw Error("Refund ledger identity changed");
+        const seen = current.refundEventIds || [];
+        if (seen.includes(eventId)) return;
+        const full = capture.status === "REFUNDED";
+        let amount: number | null = full ? current.total : null;
+        const explicit = resource.refund_amount?.value ?? resource.refund?.amount?.value;
+        if (!full && typeof explicit === "string") {
+          try { amount = cents(explicit); } catch { amount = null; }
+          if (resource.refund_amount?.currency_code && resource.refund_amount.currency_code !== "USD") amount = null;
+          if (resource.refund?.amount?.currency_code && resource.refund.amount.currency_code !== "USD") amount = null;
+        }
+        const previous = current.refundTotalCents;
+        const nextAmount = amount === null || previous === null || amount <= 0 ? null : (previous || 0) + amount;
+        const overRefunded = nextAmount !== null && nextAmount > current.total;
+        await save({
+          ...current,
+          state: overRefunded ? "hold" : full || nextAmount === current.total ? "refunded" : "paid",
+          refundStatus: overRefunded || nextAmount === null ? "review" : (full || nextAmount === current.total ? "refunded" : "partial"),
+          refundTotalCents: overRefunded ? null : nextAmount,
+          refundEventIds: [...seen, eventId].slice(-100),
+          fulfillment: current.fulfillment === "confirmed" ? "confirmed" : (overRefunded || !full && nextAmount !== current.total ? "review" : current.fulfillment),
+        });
+      });
+      return { held: true, refund: true };
+    }
+    if (denied) {
+      if (!row.captureId || resource.id !== row.captureId) throw Error("Failed capture identity requires review");
+      const actual = await ports.request("/v2/payments/captures/" + row.captureId);
+      if (actual.id !== row.captureId || !["DECLINED", "FAILED"].includes(actual.status) || actual.amount?.currency_code !== "USD" || cents(actual.amount.value) !== row.total)
+        throw Error("Failed capture requires PayPal verification");
+      await ports.ledger.lock(row.id, async (current, save) => {
+        if (current && current.captureId === row.captureId) await save({ ...current, state: "failed", fulfillment: "pending" });
+      });
+      return { failed: true };
+    }
+    if (reversed) {
       await ports.ledger.lock(row.id, async (current, save) => {
         if (current)
           await save({
             ...current,
             state: "hold",
+            refundStatus: "review",
             fulfillment:
               current.fulfillment === "confirmed" ? "confirmed" : "review",
           });
@@ -541,7 +591,7 @@ export function paypalService(config: PayPalConfig, ports: PayPalPorts) {
       async (row, save) => {
         if (!row || row.paypalId !== orderId) throw Error("Order unavailable");
         provenance(row);
-        if (row.state === "hold")
+        if (row.state === "hold" || row.state === "refunded" || row.state === "failed" || row.refundStatus === "partial" || row.refundStatus === "review")
           return { status: "review", fulfillment: row.fulfillment };
         const paid = await verified(row);
         if (paid) {

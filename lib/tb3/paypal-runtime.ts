@@ -133,6 +133,7 @@ export function getPayPalRuntime() {
       autoConfirm: process.env.TB3_PAYPAL_AUTO_FULFILLMENT_APPROVED === "true",
       fundingVerified: process.env.TB3_PRINTFUL_FUNDING_VERIFIED === "true",
       costCap: Number(process.env.TB3_MERCH_MAX_PRINTFUL_COST_CENTS),
+      commerceEnabled: () => process.env.TB3_PAYPAL_ENABLED === "true" && process.env.VERCEL_ENV === "production",
     }),
   });
   return {

@@ -38,7 +38,10 @@ export type PayPalIntent = {
   total: number;
   paypalId?: string;
   captureId?: string;
-  state: "creating" | "created" | "paid" | "hold";
+  state: "creating" | "created" | "paid" | "hold" | "refunded" | "failed";
+  refundStatus?: "none" | "partial" | "refunded" | "review";
+  refundTotalCents?: number | null;
+  refundEventIds?: string[];
   printfulId?: number;
   fulfillment:
     | "pending"
@@ -61,6 +64,7 @@ export interface PayPalLedger {
     ) => Promise<T>,
   ): Promise<T>;
   find(orderId: string, captureId?: string): Promise<PayPalIntent | null>;
+  list(limit: number): Promise<PayPalIntent[]>;
 }
 export function cents(value: unknown): number {
   if (typeof value !== "string" || !/^(0|[1-9]\d*)(\.\d{1,2})?$/.test(value))

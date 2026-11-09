@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { tb3FilmAssets, tb3FilmUrl } from "../tb3-film";
 import tb3HqNavigation from "@/knowledge/eva-menu-sources/tb3-hq.json";
 import merchCatalog from "@/public/tb3/merch/manifest.json";
+import Tb3MerchSales from "@/app/portal/components/Tb3MerchSales";
 
 import { HqWorkspaceProvider, useHq, HqDialog, ModuleActions, ModuleTools, ProactiveEva, HqFocus, Upcoming, OpportunitySummary, OpportunityPipeline, EarningsValue, EarningsBreakdown, DocumentVault, OpportunityInbox, CalendarModule, EvaPanel, EvaFab, EvaCommandBar, BrandTools } from "./hq-workspace";
 
@@ -282,6 +283,7 @@ function TarrisHqContent() {
             </article>)}
           </div>
           <a href="/tarris#merch" className="mt-5 inline-flex min-h-11 items-center rounded-lg border border-black px-5 py-3 text-xs font-bold">Explore the TB3 collection</a>
+          <div className="mt-6"><Tb3MerchSales /></div>
         </section>
 
         <footer className="mt-8 border-t border-white/10 py-7">

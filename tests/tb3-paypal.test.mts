@@ -2,7 +2,7 @@ import { test } from "node:test";
 import { buildSync, transformSync } from "esbuild";
 import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
-import catalog from "../public/tb3/merch/manifest.json";
+import catalog from "../lib/tb3/printful-manifest.json";
 import { paypalService } from "../lib/tb3/paypal-service";
 import {
   paypalTransport,
@@ -50,7 +50,7 @@ const input = {
     country_code: "US",
   },
 };
-function fixture(autoConfirm = false, mode: "live" | "sandbox" = "live") {
+function fixture(autoConfirm = false, mode: "live" | "sandbox" = "live", commerceEnabled = true) {
   let quotes = 0;
   const rows = new Map<string, PayPalIntent>();
   let queue = Promise.resolve();
@@ -77,6 +77,9 @@ function fixture(autoConfirm = false, mode: "live" | "sandbox" = "live") {
           (x) => x.paypalId === order || (!!capture && x.captureId === capture),
         ) || null,
       );
+    },
+    async list(limit) {
+      return structuredClone([...rows.values()].slice(0, limit));
     },
   };
   let order: PayPalObject, capture: PayPalObject, pf: PayPalObject;
@@ -196,6 +199,7 @@ function fixture(autoConfirm = false, mode: "live" | "sandbox" = "live") {
       autoConfirm,
       fundingVerified: true,
       costCap: 2000,
+      commerceEnabled: () => commerceEnabled,
       approval: () => approval,
     },
   );
@@ -310,6 +314,17 @@ test("declined and pending payments never reach fulfillment", async () => {
     assert.notEqual([...f.rows.values()][0].state, "paid");
   }
 });
+test("disabled commerce cannot submit even a Printful draft after a valid capture", async () => {
+  const f = fixture(false, "live", false);
+  await f.service.create(input);
+  await assert.rejects(() => f.service.capture(input.checkoutToken, "ORDER123"), /commerce is disabled/i);
+  assert.equal(f.calls.draft, 0);
+  assert.equal(f.calls.confirm, 0);
+  assert.equal(f.reads.length, 0);
+  const row = [...f.rows.values()][0]!;
+  assert.equal(row.state, "paid");
+  assert.equal(row.fulfillment, "pending");
+});
 test("merchant, amount, address, currency and ownership tampering fail closed", async () => {
   for (const mutate of [
     (u: PayPalObject) => (u.payee.merchant_id = "OTHER123"),
@@ -349,6 +364,59 @@ test("refund hold and cancellation prohibit subsequent capture", async () => {
     paid.service.capture(input.checkoutToken, "ORDER123"),
   );
   assert.equal([...paid.rows.values()][0].state, "hold");
+});
+test("full and partial PayPal refund webhooks are idempotent and block further fulfillment", async () => {
+  const full = fixture();
+  await full.service.create(input);
+  await full.service.capture(input.checkoutToken, "ORDER123");
+  full.capture.status = "REFUNDED";
+  const event = { id: "WH-REFUND-FULL-123", event_type: "PAYMENT.CAPTURE.REFUNDED", resource: { id: "CAPTURE123", status: "REFUNDED", supplementary_data: { related_ids: { order_id: "ORDER123" } } } };
+  await full.service.webhook(event);
+  await full.service.webhook(event);
+  const fullyRefunded = [...full.rows.values()][0]!;
+  assert.equal(fullyRefunded.state, "refunded");
+  assert.equal(fullyRefunded.refundTotalCents, fullyRefunded.total);
+  assert.deepEqual(fullyRefunded.refundEventIds, [event.id]);
+  await assert.rejects(() => full.service.capture(input.checkoutToken, "ORDER123"));
+
+  const partial = fixture();
+  await partial.service.create(input);
+  await partial.service.capture(input.checkoutToken, "ORDER123");
+  partial.capture.status = "PARTIALLY_REFUNDED";
+  await partial.service.webhook({
+    id: "WH-REFUND-PART-123",
+    event_type: "PAYMENT.CAPTURE.REFUNDED",
+    resource: { id: "CAPTURE123", status: "PARTIALLY_REFUNDED", refund_amount: { value: "3.00", currency_code: "USD" }, supplementary_data: { related_ids: { order_id: "ORDER123" } } },
+  });
+  const partiallyRefunded = [...partial.rows.values()][0]!;
+  assert.equal(partiallyRefunded.state, "paid");
+  assert.equal(partiallyRefunded.refundStatus, "partial");
+  assert.equal(partiallyRefunded.refundTotalCents, 300);
+  assert.equal(partiallyRefunded.fulfillment, "review");
+  await assert.rejects(() => partial.service.capture(input.checkoutToken, "ORDER123"));
+  await partial.service.webhook({
+    id: "WH-REFUND-OVER-123",
+    event_type: "PAYMENT.CAPTURE.REFUNDED",
+    resource: { id: "CAPTURE123", status: "PARTIALLY_REFUNDED", refund_amount: { value: "53.00", currency_code: "USD" }, supplementary_data: { related_ids: { order_id: "ORDER123" } } },
+  });
+  const overRefunded = [...partial.rows.values()][0]!;
+  assert.equal(overRefunded.state, "hold");
+  assert.equal(overRefunded.refundStatus, "review");
+  assert.equal(overRefunded.refundTotalCents, null);
+});
+test("verified PayPal capture-denied webhook marks the order failed without Printful access", async () => {
+  const f = fixture(false, "live", false);
+  await f.service.create(input);
+  await f.service.capture(input.checkoutToken, "ORDER123").catch(() => undefined);
+  f.capture.status = "DECLINED";
+  await f.service.webhook({
+    id: "WH-CAPTURE-DENIED-123",
+    event_type: "PAYMENT.CAPTURE.DENIED",
+    resource: { id: "CAPTURE123", status: "DECLINED", supplementary_data: { related_ids: { order_id: "ORDER123" } } },
+  });
+  assert.equal([...f.rows.values()][0]!.state, "failed");
+  assert.equal(f.calls.draft, 0);
+  assert.equal(f.calls.confirm, 0);
 });
 test("HTTP origin, disabled gate and webhook verification precede writes", async () => {
   const f = fixture();
@@ -669,6 +737,7 @@ test("expired intents, unavailable ledger and wrong tenant never initiate captur
         throw Error("database unavailable");
       },
       find: async () => null,
+      list: async () => [],
     },
     request: async () => {
       providers++;

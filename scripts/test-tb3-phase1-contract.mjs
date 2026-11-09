@@ -25,9 +25,9 @@ for (const item of catalog) {
 assert.match(publicSite, /merchCatalog\.map|merchProducts\.map/);
 assert.match(publicSite, /merchProducts = merchCatalog/);
 assert.match(publicSite, /data-product-id=\{product\.id\}/);
-assert.match(publicSite, /Ask about this item/);
-assert.match(publicSite, /type=merch&product=/);
-assert.match(publicSite, /Online orders will open after payment and fulfillment approval/);
+assert.doesNotMatch(publicSite, /Ask about this item|type=merch&product=/, 'Coming Soon storefront must not expose order inquiry CTAs');
+assert.match(publicSite, /COMING SOON\. Explore the TB3 collection/);
+assert.match(publicSite, /Online checkout is not open yet/);
 assert.doesNotMatch(publicSite, /Add to Cart|Secure checkout|checkout\.stripe\.com/);
 assert.match(booking, /merchCatalog\.find\(/);
 assert.match(booking, /requestedProduct/);
@@ -40,4 +40,4 @@ assert.match(auth, /portal\/login\?next=%2Ftarris%2Ffuture/);
 assert.match(auth, /redirect\('\/tarris\?hq=private'\)/);
 assert.match(seo, /14-piece lineup/);
 assert.doesNotMatch(seo, /Bonfire/);
-console.log('PASS: TB3 phase 1 catalog, prices, public links, inquiry tracking, HQ login, private access and payment-disabled safety');
+console.log('PASS: TB3 Phase 1 catalog, prices, Coming Soon storefront, HQ login, private access and payment-disabled safety');

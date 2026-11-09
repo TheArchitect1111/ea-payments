@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import catalog from "@/public/tb3/merch/manifest.json";
+import catalog from "@/lib/tb3/printful-manifest.json";
 
 type ButtonInstance = {
   isEligible(): boolean;

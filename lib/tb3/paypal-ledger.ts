@@ -93,4 +93,15 @@ export const paypalLedger: PayPalLedger = {
       return row(found.rows[0]?.payload);
     });
   },
+  async list(limit) {
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 200)
+      throw Error("Invalid ledger page size");
+    return database(async (client) => {
+      const found = await client.query(
+        "SELECT payload FROM public.tb3_paypal_orders WHERE tenant_slug=$1 ORDER BY updated_at DESC LIMIT $2",
+        ["tarris", limit],
+      );
+      return found.rows.map((x) => row(x.payload)).filter((x): x is PayPalIntent => x !== null);
+    });
+  },
 };
