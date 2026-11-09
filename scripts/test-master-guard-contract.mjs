@@ -52,13 +52,13 @@ assert.equal(finalShaResult.status, 0, 'final candidate commit must be available
 const finalSha = finalShaResult.stdout.trim();
 const parentShaResult = spawnSync('git', ['rev-parse', `${finalSha}^`], { encoding: 'utf8' });
 assert.equal(parentShaResult.status, 0, 'final candidate must have a parent');
-assert.equal(parentShaResult.stdout.trim(), '5720a3f1c8cf722d50a7d174e4976424db03118a', 'candidate must preserve the certified application commit as parent');
+assert.equal(parentShaResult.stdout.trim(), 'fe484be6f6fc0d362e36326189106dd1ead63dfe', 'candidate must be the direct child of the pushed policy revision');
 const changedFilesResult = spawnSync('git', ['diff-tree', '--no-commit-id', '--name-only', '-r', finalSha], { encoding: 'utf8' });
 assert.equal(changedFilesResult.status, 0, 'final candidate change list must be available');
 assert.deepEqual(
   changedFilesResult.stdout.trim().split(/\r?\n/).filter(Boolean).sort(),
-  ['scripts/test-master-guard-contract.mjs', 'scripts/vercel-ignore-work-branches.mjs'],
-  'final candidate may contain only the ignored-build exception and its regression tests',
+  ['package-lock.json', 'package.json', 'scripts/test-master-guard-contract.mjs', 'scripts/vercel-ignore-work-branches.mjs'],
+  'final candidate may contain only the required pg runtime dependency and ignored-build policy tests',
 );
 
 const tb3Preview = runIgnoreGuard('work/tb3-commerce-hq-20261109', finalSha, 'preview');

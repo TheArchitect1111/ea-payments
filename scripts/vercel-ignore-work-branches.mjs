@@ -27,17 +27,20 @@ function isApprovedTb3PreviewRevision() {
 
   const changedFiles = changedFilesText.split(/\r?\n/).filter(Boolean).sort();
   const permittedPolicyFiles = [
+    'package-lock.json',
+    'package.json',
     'scripts/test-master-guard-contract.mjs',
     'scripts/vercel-ignore-work-branches.mjs',
   ];
   return headSha === deploymentSha &&
-    parentSha === '5720a3f1c8cf722d50a7d174e4976424db03118a' &&
+    parentSha === 'fe484be6f6fc0d362e36326189106dd1ead63dfe' &&
     JSON.stringify(changedFiles) === JSON.stringify(permittedPolicyFiles);
 }
 
-// Permit only the final policy-only child of the certified TB3 app revision.
-// This validates the Vercel deployment SHA at build time without embedding a
-// self-referential SHA. All other work/* refs and all Production targets block.
+// Permit only the final candidate child of the committed policy revision.
+// It must retain the certified TB3 app and include only policy tests plus the
+// runtime package fix needed by the PayPal ledger. All other work/* refs and
+// all Production targets block.
 if (branch.startsWith('work/') && !isApprovedTb3PreviewRevision()) {
   console.log(`[EA Build Space] Ignoring Vercel deployment for local-only branch: ${branch}`);
   process.exit(0);
