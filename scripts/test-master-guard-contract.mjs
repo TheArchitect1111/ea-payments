@@ -52,20 +52,16 @@ assert.equal(finalShaResult.status, 0, 'final candidate commit must be available
 const finalSha = finalShaResult.stdout.trim();
 const parentShaResult = spawnSync('git', ['rev-parse', `${finalSha}^`], { encoding: 'utf8' });
 assert.equal(parentShaResult.status, 0, 'final candidate must have a parent');
-assert.equal(parentShaResult.stdout.trim(), '731dca5aaa4b37b6bb11eb352433ded9e1988052', 'diagnostic credential candidate must be the direct child of the committed diagnostic revision');
+assert.equal(parentShaResult.stdout.trim(), '24ac06dfcced1be09849c4edc39f650b943ae11c', 'ledger diagnostic guard revision must be the direct child of the committed diagnostic');
 const changedFilesResult = spawnSync('git', ['diff-tree', '--no-commit-id', '--name-only', '-r', finalSha], { encoding: 'utf8' });
 assert.equal(changedFilesResult.status, 0, 'final candidate change list must be available');
 assert.deepEqual(
   changedFilesResult.stdout.trim().split(/\r?\n/).filter(Boolean).sort(),
   [
-    'app/api/tb3/printful/diagnostic/route.ts',
-    'lib/tb3/printful-diagnostic-handler.ts',
     'scripts/test-master-guard-contract.mjs',
     'scripts/vercel-ignore-work-branches.mjs',
-    'specs/tb3-commerce-hq/spec.md',
-    'tests/tb3-printful-diagnostic.test.mts',
   ],
-  'final candidate may contain only the TB3 Printful diagnostic credential, specification and exact Preview guard policy',
+  'final candidate may contain only the exact TB3 Preview guard policy and its contract test',
 );
 
 const tb3Preview = runIgnoreGuard('work/tb3-commerce-hq-20261109', finalSha, 'preview');
