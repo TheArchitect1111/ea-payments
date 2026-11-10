@@ -52,16 +52,18 @@ assert.equal(finalShaResult.status, 0, 'final candidate commit must be available
 const finalSha = finalShaResult.stdout.trim();
 const parentShaResult = spawnSync('git', ['rev-parse', `${finalSha}^`], { encoding: 'utf8' });
 assert.equal(parentShaResult.status, 0, 'final candidate must have a parent');
-assert.equal(parentShaResult.stdout.trim(), '24ac06dfcced1be09849c4edc39f650b943ae11c', 'ledger diagnostic guard revision must be the direct child of the committed diagnostic');
+assert.equal(parentShaResult.stdout.trim(), 'c2a727dc62501ab21b31c65427dc91bc77303945', 'schema-detail diagnostic revision must be the direct child of the deployed read-only ledger diagnostic');
 const changedFilesResult = spawnSync('git', ['diff-tree', '--no-commit-id', '--name-only', '-r', finalSha], { encoding: 'utf8' });
 assert.equal(changedFilesResult.status, 0, 'final candidate change list must be available');
 assert.deepEqual(
   changedFilesResult.stdout.trim().split(/\r?\n/).filter(Boolean).sort(),
   [
+    'lib/tb3/paypal-ledger-diagnostic-handler.ts',
     'scripts/test-master-guard-contract.mjs',
     'scripts/vercel-ignore-work-branches.mjs',
+    'tests/tb3-paypal-ledger-diagnostic.test.mts',
   ],
-  'final candidate may contain only the exact TB3 Preview guard policy and its contract test',
+  'final candidate may contain only the TB3 read-only schema diagnostic, focused tests, and exact Preview guard contract',
 );
 
 const tb3Preview = runIgnoreGuard('work/tb3-commerce-hq-20261109', finalSha, 'preview');

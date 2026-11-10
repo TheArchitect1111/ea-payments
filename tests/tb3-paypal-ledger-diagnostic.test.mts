@@ -23,11 +23,24 @@ function fixture(overrides: Record<string, unknown> = {}) {
     async query(sql) {
       calls.push(sql);
       if (sql === "BEGIN READ ONLY" || sql === "ROLLBACK") return { rows: [] };
-      if (sql.includes("FROM pg_class c JOIN pg_namespace")) return { rows: [{ rls: true, forced: true, columns: ["id", "tenant_slug", "payload", "paypal_id", "capture_id", "updated_at"] }] };
-      if (sql.includes("FROM pg_index i")) return { rows: [
-        { primary: true, unique: true, columns: ["id"] },
-        { primary: false, unique: true, columns: ["paypal_id"] },
-        { primary: false, unique: true, columns: ["capture_id"] },
+      if (sql.includes("array_agg(a.attname") && sql.includes("relrowsecurity")) return { rows: [{ rls: true, forced: true, columns: ["id", "tenant_slug", "payload", "paypal_id", "capture_id", "updated_at"] }] };
+      if (sql.includes("format_type(a.atttypid")) return { rows: [
+        { name: "id", data_type: "text", not_null: true, generated: "", expression: null },
+        { name: "tenant_slug", data_type: "text", not_null: true, generated: "", expression: null },
+        { name: "payload", data_type: "jsonb", not_null: true, generated: "", expression: null },
+        { name: "paypal_id", data_type: "text", not_null: false, generated: "s", expression: "(payload ->> 'paypalId'::text)" },
+        { name: "capture_id", data_type: "text", not_null: false, generated: "s", expression: "(payload ->> 'captureId'::text)" },
+        { name: "updated_at", data_type: "timestamp with time zone", not_null: true, generated: "", expression: null },
+      ] };
+      if (sql.includes("FROM pg_constraint con")) return { rows: [
+        { name: "tb3_paypal_orders_pkey", type: "p", columns: ["id"], definition: "PRIMARY KEY (id)" },
+        { name: "tb3_paypal_orders_paypal_id_key", type: "u", columns: ["paypal_id"], definition: "UNIQUE (paypal_id)" },
+        { name: "tb3_paypal_orders_capture_id_key", type: "u", columns: ["capture_id"], definition: "UNIQUE (capture_id)" },
+      ] };
+      if (sql.includes("FROM pg_index ix")) return { rows: [
+        { name: "tb3_paypal_orders_pkey", primary: true, unique: true, valid: true, ready: true, partial: false, columns: ["id"] },
+        { name: "tb3_paypal_orders_paypal_id_key", primary: false, unique: true, valid: true, ready: true, partial: false, columns: ["paypal_id"] },
+        { name: "tb3_paypal_orders_capture_id_key", primary: false, unique: true, valid: true, ready: true, partial: false, columns: ["capture_id"] },
       ] };
       if (sql.includes("FROM pg_policies")) return { rows: [{ policyname: "tb3_paypal_server_only", roles: ["ea_merchant_api"], cmd: "ALL", qual: "(tenant_slug = 'tarris'::text)", with_check: "(tenant_slug = 'tarris'::text)" }] };
       if (sql.includes("has_table_privilege")) return { rows: [{ actual_role: "ea_merchant_api", api_select: true, api_insert: true, api_update: true, api_delete: false, api_truncate: false, api_references: false, api_trigger: false, anon_select: false, anon_insert: false, anon_update: false, anon_delete: false, authenticated_select: false, authenticated_insert: false, authenticated_update: false, authenticated_delete: false, service_select: false, service_insert: false, service_update: false, service_delete: false, public_acl: false }] };
@@ -133,12 +146,34 @@ test("connected database ledger, RLS, tenant policy, and least privilege pass wi
       ledgerExists: true,
       requiredColumns: true,
       primaryAndProviderUniqueKeys: true,
+      generatedIdentityColumns: true,
+      identityConstraints: true,
       rlsEnabled: true,
       rlsForced: true,
       tenantPolicy: true,
       restrictedRoleAccess: true,
       checkoutDisabled: true,
       printfulSubmissionDisabled: true,
+    },
+    schemaMetadata: {
+      columns: [
+        { name: "id", type: "text", notNull: true, generated: false, expression: null },
+        { name: "tenant_slug", type: "text", notNull: true, generated: false, expression: null },
+        { name: "payload", type: "jsonb", notNull: true, generated: false, expression: null },
+        { name: "paypal_id", type: "text", notNull: false, generated: true, expression: "(payload ->> 'paypalId'::text)" },
+        { name: "capture_id", type: "text", notNull: false, generated: true, expression: "(payload ->> 'captureId'::text)" },
+        { name: "updated_at", type: "timestamp with time zone", notNull: true, generated: false, expression: null },
+      ],
+      constraints: [
+        { name: "tb3_paypal_orders_pkey", type: "p", columns: ["id"], definition: "PRIMARY KEY (id)" },
+        { name: "tb3_paypal_orders_paypal_id_key", type: "u", columns: ["paypal_id"], definition: "UNIQUE (paypal_id)" },
+        { name: "tb3_paypal_orders_capture_id_key", type: "u", columns: ["capture_id"], definition: "UNIQUE (capture_id)" },
+      ],
+      indexes: [
+        { name: "tb3_paypal_orders_pkey", primary: true, unique: true, valid: true, ready: true, partial: false, columns: ["id"] },
+        { name: "tb3_paypal_orders_paypal_id_key", primary: false, unique: true, valid: true, ready: true, partial: false, columns: ["paypal_id"] },
+        { name: "tb3_paypal_orders_capture_id_key", primary: false, unique: true, valid: true, ready: true, partial: false, columns: ["capture_id"] },
+      ],
     },
   });
   assert.equal(f.calls[0], "CONNECT");

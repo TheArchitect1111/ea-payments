@@ -48,14 +48,32 @@ const TABLE_SQL = `SELECT c.relrowsecurity AS rls, c.relforcerowsecurity AS forc
   WHERE n.nspname='public' AND c.relname='tb3_paypal_orders'
   GROUP BY c.relrowsecurity,c.relforcerowsecurity`;
 
-const INDEX_SQL = `SELECT i.indisprimary AS primary, i.indisunique AS unique,
-  array_agg(a.attname ORDER BY k.ordinality) AS columns
-  FROM pg_index i JOIN pg_class t ON t.oid=i.indrelid
+const COLUMN_DETAILS_SQL = `SELECT a.attname AS name,format_type(a.atttypid,a.atttypmod) AS data_type,
+  a.attnotnull AS not_null,a.attgenerated AS generated,pg_get_expr(d.adbin,d.adrelid) AS expression
+  FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+  JOIN pg_attribute a ON a.attrelid=c.oid
+  LEFT JOIN pg_attrdef d ON d.adrelid=c.oid AND d.adnum=a.attnum
+  WHERE n.nspname='public' AND c.relname='tb3_paypal_orders'
+    AND a.attnum>0 AND NOT a.attisdropped ORDER BY a.attnum`;
+
+const CONSTRAINT_SQL = `SELECT con.conname AS name,con.contype AS type,
+  ARRAY(SELECT a.attname FROM unnest(con.conkey) WITH ORDINALITY k(attnum,ord)
+    JOIN pg_attribute a ON a.attrelid=con.conrelid AND a.attnum=k.attnum ORDER BY k.ord) AS columns,
+  pg_get_constraintdef(con.oid) AS definition
+  FROM pg_constraint con JOIN pg_class c ON c.oid=con.conrelid
+  JOIN pg_namespace n ON n.oid=c.relnamespace
+  WHERE n.nspname='public' AND c.relname='tb3_paypal_orders' ORDER BY con.conname`;
+
+const INDEX_SQL = `SELECT i.relname AS name,ix.indisprimary AS primary,ix.indisunique AS unique,
+  ix.indisvalid AS valid,ix.indisready AS ready,(ix.indpred IS NOT NULL) AS partial,
+  array_agg(a.attname ORDER BY k.ordinality) FILTER (WHERE k.ordinality<=ix.indnkeyatts AND a.attname IS NOT NULL) AS columns
+  FROM pg_index ix JOIN pg_class t ON t.oid=ix.indrelid
   JOIN pg_namespace n ON n.oid=t.relnamespace
-  JOIN unnest(i.indkey) WITH ORDINALITY k(attnum, ordinality) ON true
-  JOIN pg_attribute a ON a.attrelid=t.oid AND a.attnum=k.attnum
+  JOIN pg_class i ON i.oid=ix.indexrelid
+  JOIN unnest(ix.indkey) WITH ORDINALITY k(attnum, ordinality) ON true
+  LEFT JOIN pg_attribute a ON a.attrelid=t.oid AND a.attnum=k.attnum
   WHERE n.nspname='public' AND t.relname='tb3_paypal_orders'
-  GROUP BY i.indexrelid,i.indisprimary,i.indisunique`;
+  GROUP BY i.relname,ix.indisprimary,ix.indisunique,ix.indisvalid,ix.indisready,ix.indpred,ix.indnkeyatts`;
 
 const POLICY_SQL = `SELECT policyname, roles::text[] AS roles, cmd, qual, with_check
   FROM pg_policies WHERE schemaname='public' AND tablename='tb3_paypal_orders'`;
@@ -161,19 +179,37 @@ export function createTb3PayPalLedgerDiagnosticHandler(deps: {
       preflightChecks.databaseConnected = true;
       await client.query("BEGIN READ ONLY");
       inTransaction = true;
-      const [tableResult, indexResult, policiesResult, accessResult] = await Promise.all([
-        client.query(TABLE_SQL), client.query(INDEX_SQL), client.query(POLICY_SQL), client.query(ACCESS_SQL),
+      const [tableResult, columnResult, constraintResult, indexResult, policiesResult, accessResult] = await Promise.all([
+        client.query(TABLE_SQL), client.query(COLUMN_DETAILS_SQL), client.query(CONSTRAINT_SQL),
+        client.query(INDEX_SQL), client.query(POLICY_SQL), client.query(ACCESS_SQL),
       ]);
       await client.query("ROLLBACK");
       inTransaction = false;
 
       const table = tableResult.rows[0];
       const columns = Array.isArray(table?.columns) ? table.columns.map(String) : [];
+      const columnDetails = columnResult.rows.map((row) => ({
+        name: String(row.name),
+        type: String(row.data_type),
+        notNull: row.not_null === true,
+        generated: row.generated === "s",
+        expression: typeof row.expression === "string" ? row.expression : null,
+      }));
       const indexRows = indexResult.rows;
       const indexes = indexRows.map((row) => ({
+        name: String(row.name),
         primary: row.primary === true,
         unique: row.unique === true,
+        valid: row.valid === true,
+        ready: row.ready === true,
+        partial: row.partial === true,
         columns: Array.isArray(row.columns) ? row.columns.map(String) : [],
+      }));
+      const constraints = constraintResult.rows.map((row) => ({
+        name: String(row.name),
+        type: String(row.type),
+        columns: Array.isArray(row.columns) ? row.columns.map(String) : [],
+        definition: String(row.definition),
       }));
       const policy = policiesResult.rows.find((row) => row.policyname === "tb3_paypal_server_only");
       const roles = Array.isArray(policy?.roles) ? policy.roles.map(String) : [];
@@ -188,6 +224,24 @@ export function createTb3PayPalLedgerDiagnosticHandler(deps: {
         && access.authenticated_select === false && access.authenticated_insert === false && access.authenticated_update === false && access.authenticated_delete === false
         && access.service_select === false && access.service_insert === false && access.service_update === false && access.service_delete === false
         && access.public_acl === false;
+      const normalizeExpression = (expression: string | null) => (expression ?? "")
+        .toLowerCase().replace(/::text/g, "").replace(/[\s()'\"]/g, "");
+      const generatedIdentityColumns = {
+        paypal_id: columnDetails.some((column) => column.name === "paypal_id" && column.generated
+          && normalizeExpression(column.expression) === "payload->>paypalid"),
+        capture_id: columnDetails.some((column) => column.name === "capture_id" && column.generated
+          && normalizeExpression(column.expression) === "payload->>captureid"),
+      };
+      const identityConstraints = {
+        primaryId: constraints.some((constraint) => constraint.type === "p" && constraint.columns.join(",") === "id"),
+        uniquePaypalId: constraints.some((constraint) => constraint.type === "u" && constraint.columns.join(",") === "paypal_id"),
+        uniqueCaptureId: constraints.some((constraint) => constraint.type === "u" && constraint.columns.join(",") === "capture_id"),
+      };
+      const identityIndexes = {
+        primaryId: indexes.some((index) => index.primary && index.unique && index.valid && index.ready && !index.partial && index.columns.join(",") === "id"),
+        uniquePaypalId: indexes.some((index) => !index.primary && index.unique && index.valid && index.ready && !index.partial && index.columns.join(",") === "paypal_id"),
+        uniqueCaptureId: indexes.some((index) => !index.primary && index.unique && index.valid && index.ready && !index.partial && index.columns.join(",") === "capture_id"),
+      };
       const resultChecks = {
         previewBranch: true,
         sandboxProject: parsed.project === TB3_LEDGER_DIAGNOSTIC_SANDBOX_PROJECT,
@@ -195,9 +249,9 @@ export function createTb3PayPalLedgerDiagnosticHandler(deps: {
         databaseConnected: preflightChecks.databaseConnected,
         ledgerExists: !!table,
         requiredColumns: REQUIRED_COLUMNS.every((column) => columns.includes(column)),
-        primaryAndProviderUniqueKeys: indexes.some((index) => index.primary && index.columns.join(",") === "id")
-          && indexes.some((index) => index.unique && index.columns.join(",") === "paypal_id")
-          && indexes.some((index) => index.unique && index.columns.join(",") === "capture_id"),
+        primaryAndProviderUniqueKeys: Object.values(identityIndexes).every(Boolean),
+        generatedIdentityColumns: Object.values(generatedIdentityColumns).every(Boolean),
+        identityConstraints: Object.values(identityConstraints).every(Boolean),
         rlsEnabled: table?.rls === true,
         rlsForced: table?.forced === true,
         tenantPolicy,
@@ -206,7 +260,11 @@ export function createTb3PayPalLedgerDiagnosticHandler(deps: {
         printfulSubmissionDisabled,
       };
       const status = Object.values(resultChecks).every(Boolean) ? "PASS" : "FAIL";
-      return json({ status, checks: resultChecks }, status === "PASS" ? 200 : 503);
+      return json({
+        status,
+        checks: resultChecks,
+        schemaMetadata: { columns: columnDetails, constraints, indexes },
+      }, status === "PASS" ? 200 : 503);
     } catch {
       return json({
         status: "FAIL",
