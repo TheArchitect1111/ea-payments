@@ -251,7 +251,6 @@ export function createTb3PayPalLedgerDiagnosticHandler(deps: {
         requiredColumns: REQUIRED_COLUMNS.every((column) => columns.includes(column)),
         primaryAndProviderUniqueKeys: Object.values(identityIndexes).every(Boolean),
         generatedIdentityColumns: Object.values(generatedIdentityColumns).every(Boolean),
-        identityConstraints: Object.values(identityConstraints).every(Boolean),
         rlsEnabled: table?.rls === true,
         rlsForced: table?.forced === true,
         tenantPolicy,
@@ -263,7 +262,12 @@ export function createTb3PayPalLedgerDiagnosticHandler(deps: {
       return json({
         status,
         checks: resultChecks,
-        schemaMetadata: { columns: columnDetails, constraints, indexes },
+        schemaMetadata: {
+          columns: columnDetails,
+          constraints,
+          indexes,
+          identityConstraintsBacked: Object.values(identityConstraints).every(Boolean),
+        },
       }, status === "PASS" ? 200 : 503);
     } catch {
       return json({

@@ -16,7 +16,7 @@ const request = () => new Request("https://preview.example/api/tb3/paypal/ledger
   headers: { "x-tb3-ledger-diagnostic-token": token },
 });
 
-function fixture(overrides: Record<string, unknown> = {}) {
+function fixture(overrides: Record<string, unknown> = {}, schemaOverrides: { constraints?: Record<string, unknown>[]; indexes?: Record<string, unknown>[] } = {}) {
   const calls: string[] = [];
   const client: Tb3LedgerDiagnosticClient = {
     async connect() { calls.push("CONNECT"); },
@@ -32,12 +32,12 @@ function fixture(overrides: Record<string, unknown> = {}) {
         { name: "capture_id", data_type: "text", not_null: false, generated: "s", expression: "(payload ->> 'captureId'::text)" },
         { name: "updated_at", data_type: "timestamp with time zone", not_null: true, generated: "", expression: null },
       ] };
-      if (sql.includes("FROM pg_constraint con")) return { rows: [
+      if (sql.includes("FROM pg_constraint con")) return { rows: schemaOverrides.constraints ?? [
         { name: "tb3_paypal_orders_pkey", type: "p", columns: ["id"], definition: "PRIMARY KEY (id)" },
         { name: "tb3_paypal_orders_paypal_id_key", type: "u", columns: ["paypal_id"], definition: "UNIQUE (paypal_id)" },
         { name: "tb3_paypal_orders_capture_id_key", type: "u", columns: ["capture_id"], definition: "UNIQUE (capture_id)" },
       ] };
-      if (sql.includes("FROM pg_index ix")) return { rows: [
+      if (sql.includes("FROM pg_index ix")) return { rows: schemaOverrides.indexes ?? [
         { name: "tb3_paypal_orders_pkey", primary: true, unique: true, valid: true, ready: true, partial: false, columns: ["id"] },
         { name: "tb3_paypal_orders_paypal_id_key", primary: false, unique: true, valid: true, ready: true, partial: false, columns: ["paypal_id"] },
         { name: "tb3_paypal_orders_capture_id_key", primary: false, unique: true, valid: true, ready: true, partial: false, columns: ["capture_id"] },
@@ -147,7 +147,6 @@ test("connected database ledger, RLS, tenant policy, and least privilege pass wi
       requiredColumns: true,
       primaryAndProviderUniqueKeys: true,
       generatedIdentityColumns: true,
-      identityConstraints: true,
       rlsEnabled: true,
       rlsForced: true,
       tenantPolicy: true,
@@ -174,6 +173,7 @@ test("connected database ledger, RLS, tenant policy, and least privilege pass wi
         { name: "tb3_paypal_orders_paypal_id_key", primary: false, unique: true, valid: true, ready: true, partial: false, columns: ["paypal_id"] },
         { name: "tb3_paypal_orders_capture_id_key", primary: false, unique: true, valid: true, ready: true, partial: false, columns: ["capture_id"] },
       ],
+      identityConstraintsBacked: true,
     },
   });
   assert.equal(f.calls[0], "CONNECT");
@@ -182,6 +182,34 @@ test("connected database ledger, RLS, tenant policy, and least privilege pass wi
   assert.equal(f.calls.filter((sql) => /^(INSERT|UPDATE|DELETE|COMMIT)/i.test(sql)).length, 0);
   assert.equal(f.calls.filter((sql) => /SELECT\s+payload\s+FROM\s+public\.tb3_paypal_orders/i.test(sql)).length, 0);
   assert.doesNotMatch(JSON.stringify(result), /fixture|password|postgresql|jkoasrnjlehjziynxfrn/);
+});
+
+test("valid primary and provider unique indexes pass without redundant UNIQUE constraint entries", async () => {
+  const f = fixture({}, {
+    constraints: [
+      { name: "tb3_paypal_orders_pkey", type: "p", columns: ["id"], definition: "PRIMARY KEY (id)" },
+    ],
+  });
+  const response = await f.handler(request());
+  const result = await response.json();
+  assert.equal(response.status, 200, JSON.stringify(result));
+  assert.equal(result.status, "PASS");
+  assert.equal(result.checks.primaryAndProviderUniqueKeys, true);
+  assert.equal(result.schemaMetadata.identityConstraintsBacked, false);
+});
+
+test("invalid provider unique index still fails closed", async () => {
+  const f = fixture({}, {
+    indexes: [
+      { name: "tb3_paypal_orders_pkey", primary: true, unique: true, valid: true, ready: true, partial: false, columns: ["id"] },
+      { name: "tb3_paypal_orders_paypal_id_key", primary: false, unique: true, valid: true, ready: true, partial: false, columns: ["paypal_id"] },
+      { name: "tb3_paypal_orders_capture_id_key", primary: false, unique: true, valid: false, ready: true, partial: false, columns: ["capture_id"] },
+    ],
+  });
+  const response = await f.handler(request());
+  const result = await response.json();
+  assert.equal(response.status, 503);
+  assert.equal(result.checks.primaryAndProviderUniqueKeys, false);
 });
 
 test("local route is Preview-only, imports no payment/fulfillment provider, and never returns row payloads", () => {
