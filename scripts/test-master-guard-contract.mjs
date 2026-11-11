@@ -29,6 +29,7 @@ for (const needle of [
 
 assert(vercelIgnore.includes("branch === 'master' && target === 'production'"), 'Vercel production master gate missing');
 assert(vercelIgnore.includes('verify-production-gate.mjs'), 'Vercel production gate verifier missing');
+assert(vercelIgnore.includes('isApprovedTb3SandboxCheckoutPreviewRevision'), 'TB3 Sandbox checkout Preview exception missing');
 assert(productionVerifier.includes("changedFiles.filter((file) => !allowed.has(file))"), 'production gate must reject non-manifest files');
 
 const runIgnoreGuard = (branch, commit, target, vercelEnv = '') => spawnSync(
@@ -52,7 +53,7 @@ assert.equal(finalShaResult.status, 0, 'final candidate commit must be available
 const finalSha = finalShaResult.stdout.trim();
 const parentShaResult = spawnSync('git', ['rev-parse', `${finalSha}^`], { encoding: 'utf8' });
 assert.equal(parentShaResult.status, 0, 'final candidate must have a parent');
-assert.equal(parentShaResult.stdout.trim(), 'c41e3b8f9a85ba1aab4b6f93adc918b63ca443c1', 'diagnostic guard revision must be the direct child of the verified local correction');
+assert.equal(parentShaResult.stdout.trim(), 'd4451f33156cf243575923758758d882a381b82e', 'Sandbox checkout deployment guard must be the direct child of its verified implementation');
 const changedFilesResult = spawnSync('git', ['diff-tree', '--no-commit-id', '--name-only', '-r', finalSha], { encoding: 'utf8' });
 assert.equal(changedFilesResult.status, 0, 'final candidate change list must be available');
 assert.deepEqual(
@@ -61,7 +62,7 @@ assert.deepEqual(
     'scripts/test-master-guard-contract.mjs',
     'scripts/vercel-ignore-work-branches.mjs',
   ],
-  'final candidate may contain only the exact TB3 Preview guard exception and its contract test',
+  'final candidate may contain only the exact TB3 Sandbox Preview guard exception and its contract test',
 );
 
 const tb3Preview = runIgnoreGuard('work/tb3-commerce-hq-20261109', finalSha, 'preview');
