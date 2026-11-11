@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { tb3MerchCatalog, isTb3ProductPurchaseReady, type Tb3MerchProduct } from "@/lib/tb3/merch-catalog";
+import { TB3_PAYPAL_SANDBOX_TEST_VARIANT_ID } from "@/lib/tb3/paypal-sandbox-test-constants";
 
 type ButtonInstance = {
   isEligible(): boolean;
@@ -70,7 +71,7 @@ async function post(action: string, input: unknown) {
     throw Error(result.error || "Payment could not be verified.");
   return result;
 }
-export default function PayPalCheckout({ catalogOverride }: { catalogOverride?: Tb3MerchProduct[] } = {}) {
+export default function PayPalCheckout({ catalogOverride, sandboxTestItem = false }: { catalogOverride?: Tb3MerchProduct[]; sandboxTestItem?: boolean } = {}) {
   const container = useRef<HTMLDivElement>(null),
     token = useRef(""),
     order = useRef(""),
@@ -106,7 +107,9 @@ export default function PayPalCheckout({ catalogOverride }: { catalogOverride?: 
       for (const button of buttons.current) button.close();
     };
   }, []);
-  const options = (catalogOverride ?? tb3MerchCatalog).flatMap((product) =>
+  const options = sandboxTestItem
+    ? [{ id: TB3_PAYPAL_SANDBOX_TEST_VARIANT_ID, label: "Certification item — $0.01 (no fulfillment)" }]
+    : (catalogOverride ?? tb3MerchCatalog).flatMap((product) =>
     product.variants.filter((variant) => isTb3ProductPurchaseReady(product, variant)).map((v) => ({
       id: v.id,
       label: product.name + " - " + v.size + " - $" + v.price.toFixed(2),
@@ -146,11 +149,11 @@ export default function PayPalCheckout({ catalogOverride }: { catalogOverride?: 
   }
   return (
     <>
-      <p>
+      {sandboxTestItem ? <p>Preview Sandbox certification only. This is a synthetic $0.01 item; no real merchandise ships and no Printful request or order is made. Sandbox shipping is a fixed $5.00 fixture.</p> : <p>
         Pay with PayPal or an eligible debit/credit card. Available methods are
         determined by PayPal. Shipping and any applicable tax must be verified
         before approval.
-      </p>
+      </p>}
       <form
         onSubmit={async (event) => {
           event.preventDefault();
@@ -287,20 +290,22 @@ export default function PayPalCheckout({ catalogOverride }: { catalogOverride?: 
               name="quantity"
               type="number"
               min="1"
-              max="10"
+              max={sandboxTestItem ? "1" : "10"}
               defaultValue="1"
+              readOnly={sandboxTestItem}
               required
             />
           </label>
           <label>
             Email
-            <input name="email" type="email" autoComplete="email" required />
+            <input name="email" type="email" autoComplete="email" defaultValue={sandboxTestItem ? "sandbox-buyer@example.invalid" : undefined} required />
           </label>
           <label>
             Delivery name
             <input
               name="name"
               autoComplete="shipping name"
+              defaultValue={sandboxTestItem ? "Sandbox Test Buyer" : undefined}
               minLength={2}
               maxLength={100}
               required
@@ -311,6 +316,7 @@ export default function PayPalCheckout({ catalogOverride }: { catalogOverride?: 
             <input
               name="address1"
               autoComplete="shipping address-line1"
+              defaultValue={sandboxTestItem ? "1 Sandbox Test Way" : undefined}
               maxLength={150}
               required
             />
@@ -328,6 +334,7 @@ export default function PayPalCheckout({ catalogOverride }: { catalogOverride?: 
             <input
               name="city"
               autoComplete="shipping address-level2"
+              defaultValue={sandboxTestItem ? "New York" : undefined}
               required
             />
           </label>
@@ -336,6 +343,7 @@ export default function PayPalCheckout({ catalogOverride }: { catalogOverride?: 
             <input
               name="state_code"
               autoComplete="shipping address-level1"
+              defaultValue={sandboxTestItem ? "NY" : undefined}
               minLength={2}
               maxLength={2}
               required
@@ -346,6 +354,7 @@ export default function PayPalCheckout({ catalogOverride }: { catalogOverride?: 
             <input
               name="zip"
               autoComplete="shipping postal-code"
+              defaultValue={sandboxTestItem ? "10001" : undefined}
               pattern="[0-9]{5}(-[0-9]{4})?"
               required
             />

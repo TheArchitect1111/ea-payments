@@ -4,6 +4,7 @@ import { paypalTransport, verifyPayPalWebhook } from "./paypal-transport";
 import { paypalService } from "./paypal-service";
 import { paypalLedger } from "./paypal-ledger";
 import { paypalDatabaseUrl } from "./paypal-database-config";
+import { isTb3SandboxTestCheckoutEnabled, resolveTb3SandboxTestCart } from "./paypal-sandbox-test-item";
 import { tb3Printful } from "./printful-client";
 import { isTb3ProductPurchaseReady, tb3MerchCatalog } from "./merch-catalog";
 import { resolveTb3Cart } from "./merch-cart";
@@ -85,14 +86,26 @@ export async function quotePayPalOrder(
 }
 export function getPayPalRuntime() {
   const config = paypalConfig();
-  if (!config || !tb3MerchCatalog.some((product) => isTb3ProductPurchaseReady(product))) return null;
+  const databaseUrl = paypalDatabaseUrl();
+  const sandboxTestItem = config?.mode === "sandbox" && isTb3SandboxTestCheckoutEnabled({
+    vercelEnv: process.env.VERCEL_ENV,
+    branch: process.env.VERCEL_GIT_COMMIT_REF,
+    paypalEnv: process.env.TB3_PAYPAL_ENV,
+    checkoutEnabled: process.env.TB3_PAYPAL_ENABLED,
+    testItemEnabled: process.env.TB3_PAYPAL_SANDBOX_TEST_ITEM_ENABLED,
+    databaseUrl,
+    printfulDraftApproved: process.env.TB3_MERCH_DRAFT_FULFILLMENT_APPROVED,
+    printfulAutoApproved: process.env.TB3_PAYPAL_AUTO_FULFILLMENT_APPROVED,
+  });
+  if (!config || (!sandboxTestItem && !tb3MerchCatalog.some((product) => isTb3ProductPurchaseReady(product)))) return null;
+  const resolveCart = sandboxTestItem ? resolveTb3SandboxTestCart : resolveTb3Cart;
   if (config.mode === "sandbox") {
-    if (!paypalDatabaseUrl()) return null;
+    if (!databaseUrl) return null;
     const request = paypalTransport(config);
     const service = paypalService(config, {
       ledger: paypalLedger,
       request,
-      resolveCart: resolveTb3Cart,
+      resolveCart,
       quote: async () => {
         throw Error("Sandbox must not request a provider quote");
       },
@@ -106,6 +119,7 @@ export function getPayPalRuntime() {
     return {
       config,
       service,
+      sandboxTestItem,
       verify: (headers: Headers, event: unknown) =>
         verifyPayPalWebhook(headers, event, config, request),
     };
@@ -128,7 +142,7 @@ export function getPayPalRuntime() {
   const service = paypalService(config, {
     ledger: paypalLedger,
     request,
-    resolveCart: resolveTb3Cart,
+    resolveCart,
     quote: quotePayPalOrder,
     printful: tb3Printful,
     autoConfirm: process.env.TB3_PAYPAL_AUTO_FULFILLMENT_APPROVED === "true",
@@ -144,6 +158,7 @@ export function getPayPalRuntime() {
   return {
     config,
     service,
+    sandboxTestItem,
     verify: (headers: Headers, event: unknown) =>
       verifyPayPalWebhook(headers, event, config, request),
   };

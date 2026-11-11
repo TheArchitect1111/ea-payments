@@ -4,7 +4,7 @@ import PayPalCheckout from "./PayPalCheckout";
 export const dynamic = "force-dynamic";
 export default function Page() {
   const runtime = getPayPalRuntime();
-  if (!runtime) notFound();
+  if (!runtime || runtime.sandboxTestItem) notFound();
   return (
     <main style={{ maxWidth: 760, margin: "40px auto", padding: 20 }}>
       <h1>TB3 merchandise checkout</h1>

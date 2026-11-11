@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { expiredSandboxTestCookieHeader, issueTb3SandboxTestCookie, sandboxTestCookieHeader, TB3_SANDBOX_TEST_TOKEN_ENV } from "./paypal-sandbox-test-session";
 import type { paypalService } from "./paypal-service";
 import type { PayPalConfig } from "./paypal-config";
 import { PayPalError } from "./paypal-transport";
@@ -7,6 +8,7 @@ export type PayPalRuntime = {
   config: PayPalConfig;
   service: ReturnType<typeof paypalService>;
   verify: (headers: Headers, event: unknown) => Promise<boolean>;
+  sandboxTestItem?: boolean;
 };
 const reply = (body: unknown, status = 200) =>
   Response.json(body, {
@@ -43,13 +45,44 @@ async function read(req: Request, limit: number) {
 export function createPayPalHandlers(
   getRuntime: () => PayPalRuntime | null,
   rateAllowed: (key: string) => boolean = () => true,
+  authorizeSandboxTest?: (request: Request) => Promise<unknown>,
+  sandboxTestTokenVerifier: () => string | undefined = () => process.env[TB3_SANDBOX_TEST_TOKEN_ENV],
 ) {
+  const sandboxTestAuthorized = async (request: Request, runtime: PayPalRuntime) => {
+    if (!runtime.sandboxTestItem) return true;
+    if (!authorizeSandboxTest) return false;
+    try {
+      await authorizeSandboxTest(request);
+      return true;
+    } catch {
+      return false;
+    }
+  };
   const buyer = (req: Request, rt: PayPalRuntime) =>
     req.headers.get("origin") === rt.config.origin &&
     new URL(req.url).origin === rt.config.origin;
   return {
-    async config() {
+    async sandboxTestSession(req: Request) {
       const rt = getRuntime();
+      if (!rt?.sandboxTestItem || rt.config.mode !== "sandbox") return reply({ error: "Sandbox certification is unavailable." }, 404);
+      if (new URL(req.url).origin !== rt.config.origin || req.headers.get("origin") !== rt.config.origin)
+        return reply({ error: "Request origin denied." }, 403);
+      if (!rateAllowed("sandbox-session")) return reply({ error: "Please wait before trying again." }, 429);
+      if (req.method === "DELETE") {
+        return new Response(null, { status: 204, headers: { "Cache-Control": "no-store", "Set-Cookie": expiredSandboxTestCookieHeader() } });
+      }
+      let body: unknown;
+      try { body = await read(req, 1024); } catch { return reply({ error: "Sandbox test access was not accepted." }, 400); }
+      if (!body || typeof body !== "object" || Object.keys(body).length !== 1 || typeof (body as { token?: unknown }).token !== "string")
+        return reply({ error: "Sandbox test access was not accepted." }, 401);
+      const session = issueTb3SandboxTestCookie((body as { token: string }).token, sandboxTestTokenVerifier());
+      if (!session) return reply({ error: "Sandbox test access was not accepted." }, 401);
+      return new Response(null, { status: 204, headers: { "Cache-Control": "no-store", "Set-Cookie": sandboxTestCookieHeader(session.value, session.maxAge) } });
+    },
+    async config(req?: Request) {
+      const rt = getRuntime();
+      if (rt?.sandboxTestItem && (!req || !(await sandboxTestAuthorized(req, rt))))
+        return reply({ available: false }, 403);
       return reply(
         rt
           ? { available: true, clientId: rt.config.clientId, currency: "USD" }
@@ -59,6 +92,8 @@ export function createPayPalHandlers(
     async create(req: Request) {
       const rt = getRuntime();
       if (!rt) return reply({ error: "PayPal checkout is unavailable." }, 503);
+      if (!(await sandboxTestAuthorized(req, rt)))
+        return reply({ error: "Private Sandbox certification access required." }, 403);
       if (!buyer(req, rt))
         return reply({ error: "Request origin denied." }, 403);
       if (
@@ -79,6 +114,8 @@ export function createPayPalHandlers(
     async capture(req: Request) {
       const rt = getRuntime();
       if (!rt) return reply({ error: "PayPal checkout is unavailable." }, 503);
+      if (!(await sandboxTestAuthorized(req, rt)))
+        return reply({ error: "Private Sandbox certification access required." }, 403);
       if (!buyer(req, rt))
         return reply({ error: "Request origin denied." }, 403);
       if (
@@ -136,6 +173,8 @@ export function createPayPalHandlers(
     async cancel(req: Request) {
       const rt = getRuntime();
       if (!rt) return reply({ error: "PayPal checkout is unavailable." }, 503);
+      if (!(await sandboxTestAuthorized(req, rt)))
+        return reply({ error: "Private Sandbox certification access required." }, 403);
       if (!buyer(req, rt))
         return reply({ error: "Request origin denied." }, 403);
       if (

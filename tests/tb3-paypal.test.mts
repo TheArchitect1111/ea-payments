@@ -13,6 +13,7 @@ import { createPayPalHandlers } from "../lib/tb3/paypal-http";
 import { renderPayPalButtons } from "../app/tarris/paypal-checkout/PayPalCheckout";
 import { paypalConfig } from "../lib/tb3/paypal-config";
 import { paypalDatabaseUrl } from "../lib/tb3/paypal-database-config";
+import { TB3_PAYPAL_SANDBOX_TEST_VARIANT_ID, isTb3SandboxTestCheckoutEnabled, resolveTb3SandboxTestCart } from "../lib/tb3/paypal-sandbox-test-item";
 import { spawnSync } from "node:child_process";
 import { createServer } from "node:http";
 import { chromium } from "playwright";
@@ -1167,6 +1168,10 @@ test("actual sandbox runtime checkout and quote entry point cannot call Printful
     "./paypal-database-config": {
       paypalDatabaseUrl: () => "fixture-isolated-database",
     },
+    "./paypal-sandbox-test-item": {
+      isTb3SandboxTestCheckoutEnabled: () => false,
+      resolveTb3SandboxTestCart,
+    },
     "./merch-catalog": {
       tb3MerchCatalog: catalog,
       isTb3ProductPurchaseReady: () => false,
@@ -1195,6 +1200,66 @@ test("actual sandbox runtime checkout and quote entry point cannot call Printful
   );
   assert.equal(providerCalls, 0);
   assert.equal(f.reads.length, 0);
+});
+test("Preview-only synthetic Sandbox checkout writes one ledger intent and never calls Printful", async () => {
+  const f = fixture(false, "sandbox");
+  const previousEnv = {
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    VERCEL_GIT_COMMIT_REF: process.env.VERCEL_GIT_COMMIT_REF,
+    TB3_PAYPAL_ENV: process.env.TB3_PAYPAL_ENV,
+    TB3_PAYPAL_ENABLED: process.env.TB3_PAYPAL_ENABLED,
+    TB3_PAYPAL_SANDBOX_TEST_ITEM_ENABLED: process.env.TB3_PAYPAL_SANDBOX_TEST_ITEM_ENABLED,
+  };
+  Object.assign(process.env, {
+    VERCEL_ENV: "preview",
+    VERCEL_GIT_COMMIT_REF: "work/tb3-commerce-hq-20261109",
+    TB3_PAYPAL_ENV: "sandbox",
+    TB3_PAYPAL_ENABLED: "true",
+    TB3_PAYPAL_SANDBOX_TEST_ITEM_ENABLED: "true",
+  });
+  try {
+    const source = readFileSync(new URL("../lib/tb3/paypal-runtime.ts", import.meta.url), "utf8");
+    const code = transformSync(source, { loader: "ts", format: "cjs", target: "node22" }).code;
+    let printfulCalls = 0;
+    const modules: Record<string, unknown> = {
+      "server-only": {},
+      "./paypal-config": { paypalConfig: () => ({ ...config, mode: "sandbox" }) },
+      "./paypal-transport": { paypalTransport: () => f.request, verifyPayPalWebhook: async () => true },
+      "./paypal-service": { paypalService },
+      "./paypal-ledger": { paypalLedger: f.ledger },
+      "./paypal-database-config": { paypalDatabaseUrl: () => "postgresql://ea_merchant_api.jkoasrnjlehjziynxfrn:fixture@aws-0-us-east-2.pooler.supabase.com/postgres?sslmode=require" },
+      "./paypal-sandbox-test-item": { isTb3SandboxTestCheckoutEnabled, resolveTb3SandboxTestCart },
+      "./merch-catalog": { tb3MerchCatalog: catalog, isTb3ProductPurchaseReady: () => false },
+      "./merch-cart": { resolveTb3Cart: () => { throw Error("Unverified catalog must remain unavailable"); } },
+      "./printful-client": { tb3Printful: async () => { printfulCalls++; throw Error("Printful forbidden in Sandbox"); } },
+      "./paypal-types": {},
+    };
+    const loaded = { exports: {} as { getPayPalRuntime: () => { service: ReturnType<typeof paypalService>; sandboxTestItem: boolean } | null } };
+    new Function("module", "exports", "require", code)(loaded, loaded.exports, (name: string) => {
+      assert.ok(name in modules, "Unexpected runtime dependency: " + name);
+      return modules[name];
+    });
+    const runtime = loaded.exports.getPayPalRuntime();
+    assert.ok(runtime);
+    assert.equal(runtime.sandboxTestItem, true);
+    const created = await runtime.service.create({ ...input, cart: [{ variantId: TB3_PAYPAL_SANDBOX_TEST_VARIANT_ID, quantity: 1 }] });
+    assert.equal(created.total, "5.01");
+    assert.equal(f.order.purchase_units[0].items[0].name, "TB3 Sandbox certification test item No fulfillment");
+    const captured = await runtime.service.capture(input.checkoutToken, "ORDER123");
+    assert.equal(captured.fulfillment, "simulated");
+    const row = await f.ledger.find("ORDER123", "CAPTURE123");
+    assert.equal(row?.lines[0]?.productId, 0);
+    assert.equal(row?.state, "paid");
+    assert.equal(printfulCalls, 0);
+    assert.deepEqual(f.reads, []);
+    assert.equal(f.calls.draft, 0);
+    assert.equal(f.calls.confirm, 0);
+  } finally {
+    for (const [key, value] of Object.entries(previousEnv)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
 });
 test("local sandbox simulator certifies browser checkout, persisted order, retries, duplicate protection and failures through HTTP handlers", async () => {
   const f = fixture(false, "sandbox");
