@@ -3,12 +3,14 @@ import { expiredSandboxTestCookieHeader, issueTb3SandboxTestCookie, sandboxTestC
 import type { paypalService } from "./paypal-service";
 import type { PayPalConfig } from "./paypal-config";
 import { PayPalError } from "./paypal-transport";
+import { TB3_PAYPAL_SANDBOX_TEST_BRANCH } from "./paypal-sandbox-test-item";
 
 export type PayPalRuntime = {
   config: PayPalConfig;
   service: ReturnType<typeof paypalService>;
   verify: (headers: Headers, event: unknown) => Promise<boolean>;
   sandboxTestItem?: boolean;
+  sandboxPayeeDiagnostic?: () => Promise<unknown>;
 };
 const reply = (body: unknown, status = 200) =>
   Response.json(body, {
@@ -18,6 +20,25 @@ const reply = (body: unknown, status = 200) =>
       "X-Content-Type-Options": "nosniff",
     },
   });
+function safePayeeDiagnosticResult(value: unknown) {
+  if (!value || typeof value !== "object") throw new Error("Invalid diagnostic result");
+  const result = value as Record<string, unknown>;
+  const status = ["CREATED", "PAYER_ACTION_REQUIRED", "APPROVED", "COMPLETED", "VOIDED", "OTHER"];
+  const source = ["create_response", "readback", "not_returned"];
+  return {
+    orderCreated: result.orderCreated === true,
+    orderStatus: typeof result.orderStatus === "string" && status.includes(result.orderStatus) ? result.orderStatus : "OTHER",
+    intentCapture: result.intentCapture === true,
+    purchaseUnitCount: Number.isInteger(result.purchaseUnitCount) && Number(result.purchaseUnitCount) >= 0 ? Number(result.purchaseUnitCount) : 0,
+    explicitPayeeOmitted: result.explicitPayeeOmitted === true,
+    amountMatches: result.amountMatches === true,
+    fixtureBreakdownMatches: result.fixtureBreakdownMatches === true,
+    paymentCaptured: result.paymentCaptured === true,
+    merchantIdentityReturned: result.merchantIdentityReturned === true,
+    merchantMatchesExpected: result.merchantMatchesExpected === true || result.merchantMatchesExpected === false ? result.merchantMatchesExpected : null,
+    merchantIdentitySource: typeof result.merchantIdentitySource === "string" && source.includes(result.merchantIdentitySource) ? result.merchantIdentitySource : "not_returned",
+  };
+}
 async function read(req: Request, limit: number) {
   if (
     !req.headers
@@ -47,6 +68,9 @@ export function createPayPalHandlers(
   rateAllowed: (key: string) => boolean = () => true,
   authorizeSandboxTest?: (request: Request) => Promise<unknown>,
   sandboxTestTokenVerifier: () => string | undefined = () => process.env[TB3_SANDBOX_TEST_TOKEN_ENV],
+  sandboxPayeeDiagnosticScope: () => boolean = () =>
+    process.env.VERCEL_ENV === "preview" &&
+    process.env.VERCEL_GIT_COMMIT_REF === TB3_PAYPAL_SANDBOX_TEST_BRANCH,
 ) {
   const sandboxTestAuthorized = async (request: Request, runtime: PayPalRuntime) => {
     if (!runtime.sandboxTestItem) return true;
@@ -62,6 +86,29 @@ export function createPayPalHandlers(
     req.headers.get("origin") === rt.config.origin &&
     new URL(req.url).origin === rt.config.origin;
   return {
+    async sandboxPayeeDiagnostic(req: Request) {
+      if (!sandboxPayeeDiagnosticScope()) return reply({ error: "Not found." }, 404);
+      const rt = getRuntime();
+      if (!rt?.sandboxTestItem || rt.config.mode !== "sandbox" || !rt.sandboxPayeeDiagnostic)
+        return reply({ error: "Sandbox diagnostic unavailable." }, 404);
+      if (!buyer(req, rt)) return reply({ error: "Request origin denied." }, 403);
+      if (!(await sandboxTestAuthorized(req, rt)))
+        return reply({ error: "Private Sandbox certification access required." }, 403);
+      if (!rateAllowed("sandbox-payee-diagnostic"))
+        return reply({ error: "Diagnostic rate limit reached." }, 429);
+      try {
+        return reply(safePayeeDiagnosticResult(await rt.sandboxPayeeDiagnostic()));
+      } catch (error) {
+        const safeIssue = error instanceof PayPalError && /^[A-Z_]{1,40}$/.test(error.issue)
+          ? error.issue
+          : "DIAGNOSTIC_FAILED";
+        return reply({
+          orderCreated: false,
+          error: safeIssue,
+          providerStatus: error instanceof PayPalError ? error.status : null,
+        }, 502);
+      }
+    },
     async sandboxTestSession(req: Request) {
       const rt = getRuntime();
       if (!rt?.sandboxTestItem || rt.config.mode !== "sandbox") return reply({ error: "Sandbox certification is unavailable." }, 404);

@@ -178,6 +178,36 @@ function isApprovedTb3SandboxCheckoutPreviewRevision() {
     JSON.stringify(changedFiles) === JSON.stringify(permittedSandboxCheckoutFiles);
 }
 
+function isApprovedTb3NoPayeeDiagnosticPreviewRevision() {
+  if (
+    branch !== 'work/tb3-commerce-hq-20261109' ||
+    target !== 'preview' ||
+    !/^[a-f0-9]{40}$/i.test(deploymentSha)
+  ) return false;
+
+  const headSha = gitText(['rev-parse', 'HEAD']);
+  const parentSha = gitText(['rev-parse', `${deploymentSha}^`]);
+  const changedFilesText = gitText(['diff-tree', '--no-commit-id', '--name-only', '-r', deploymentSha]);
+  if (!headSha || !parentSha || changedFilesText === null) return false;
+
+  const changedFiles = changedFilesText.split(/\r?\n/).filter(Boolean).sort();
+  const permittedDiagnosticFiles = [
+    'app/api/tb3/paypal/sandbox-payee-diagnostic/route.ts',
+    'lib/tb3/paypal-http.ts',
+    'lib/tb3/paypal-routes.ts',
+    'lib/tb3/paypal-runtime.ts',
+    'lib/tb3/paypal-sandbox-payee-diagnostic.ts',
+    'scripts/tb3-paypal-typecheck.mjs',
+    'scripts/test-master-guard-contract.mjs',
+    'scripts/vercel-ignore-work-branches.mjs',
+    'specs/tb3-commerce-hq/spec.md',
+    'tests/tb3-paypal-sandbox-certification.test.mts',
+  ];
+  return headSha === deploymentSha &&
+    parentSha === 'f6573d85dccc6668f2be138f14a5f449d5effaf9' &&
+    JSON.stringify(changedFiles) === JSON.stringify(permittedDiagnosticFiles);
+}
+
 // Work branches remain ignored unless an exact, SHA-bound Preview exception
 // below matches its approved parent and complete changed-file set.
 if (branch.startsWith('work/') &&
@@ -187,7 +217,8 @@ if (branch.startsWith('work/') &&
     !isApprovedTb3LedgerDiagnosticPreviewRevision() &&
     !isApprovedTb3LedgerSchemaDetailPreviewRevision() &&
     !isApprovedTb3LedgerDiagnosticCorrectionPreviewRevision() &&
-    !isApprovedTb3SandboxCheckoutPreviewRevision()) {
+    !isApprovedTb3SandboxCheckoutPreviewRevision() &&
+    !isApprovedTb3NoPayeeDiagnosticPreviewRevision()) {
   console.log(`[EA Build Space] Ignoring Vercel deployment for local-only branch: ${branch}`);
   process.exit(0);
 }

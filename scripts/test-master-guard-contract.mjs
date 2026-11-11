@@ -30,6 +30,7 @@ for (const needle of [
 assert(vercelIgnore.includes("branch === 'master' && target === 'production'"), 'Vercel production master gate missing');
 assert(vercelIgnore.includes('verify-production-gate.mjs'), 'Vercel production gate verifier missing');
 assert(vercelIgnore.includes('isApprovedTb3SandboxCheckoutPreviewRevision'), 'TB3 Sandbox checkout Preview exception missing');
+assert(vercelIgnore.includes('isApprovedTb3NoPayeeDiagnosticPreviewRevision'), 'TB3 no-payee diagnostic Preview exception missing');
 assert(productionVerifier.includes("changedFiles.filter((file) => !allowed.has(file))"), 'production gate must reject non-manifest files');
 
 const runIgnoreGuard = (branch, commit, target, vercelEnv = '') => spawnSync(
@@ -53,16 +54,24 @@ assert.equal(finalShaResult.status, 0, 'final candidate commit must be available
 const finalSha = finalShaResult.stdout.trim();
 const parentShaResult = spawnSync('git', ['rev-parse', `${finalSha}^`], { encoding: 'utf8' });
 assert.equal(parentShaResult.status, 0, 'final candidate must have a parent');
-assert.equal(parentShaResult.stdout.trim(), 'd4451f33156cf243575923758758d882a381b82e', 'Sandbox checkout deployment guard must be the direct child of its verified implementation');
+assert.equal(parentShaResult.stdout.trim(), 'f6573d85dccc6668f2be138f14a5f449d5effaf9', 'No-payee diagnostic deployment guard must be the direct child of its verified Preview deployment');
 const changedFilesResult = spawnSync('git', ['diff-tree', '--no-commit-id', '--name-only', '-r', finalSha], { encoding: 'utf8' });
 assert.equal(changedFilesResult.status, 0, 'final candidate change list must be available');
 assert.deepEqual(
   changedFilesResult.stdout.trim().split(/\r?\n/).filter(Boolean).sort(),
   [
+    'app/api/tb3/paypal/sandbox-payee-diagnostic/route.ts',
+    'lib/tb3/paypal-http.ts',
+    'lib/tb3/paypal-routes.ts',
+    'lib/tb3/paypal-runtime.ts',
+    'lib/tb3/paypal-sandbox-payee-diagnostic.ts',
+    'scripts/tb3-paypal-typecheck.mjs',
     'scripts/test-master-guard-contract.mjs',
     'scripts/vercel-ignore-work-branches.mjs',
+    'specs/tb3-commerce-hq/spec.md',
+    'tests/tb3-paypal-sandbox-certification.test.mts',
   ],
-  'final candidate may contain only the exact TB3 Sandbox Preview guard exception and its contract test',
+  'final candidate may contain only the exact TB3 no-payee Preview diagnostic, regression tests, specification, and guard exception',
 );
 
 const tb3Preview = runIgnoreGuard('work/tb3-commerce-hq-20261109', finalSha, 'preview');
@@ -79,6 +88,7 @@ for (const [branch, commit, target, vercelEnv] of [
   ['work/tb3-commerce-hq-20261109', finalSha, 'production', 'preview'],
   ['work/tb3-commerce-hq-20261109', finalSha, '', 'development'],
   ['work/tb3-commerce-hq-20261109', '5720a3f1c8cf722d50a7d174e4976424db03118a', 'preview', ''],
+  ['work/tb3-commerce-hq-20261109', finalSha, 'production', ''],
   ['work/tb3-commerce-hq-20261109', '1111111111111111111111111111111111111111', 'preview', ''],
 ]) {
   const blocked = runIgnoreGuard(branch, commit, target, vercelEnv);

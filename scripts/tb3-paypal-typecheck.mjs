@@ -29,6 +29,7 @@ const roots = [
   "app/tarris/book/booking-form.tsx",
   "app/tarris/future/page.tsx",
   "tests/tb3-paypal.test.mts",
+  "tests/tb3-paypal-sandbox-certification.test.mts",
   "scripts/tb3-paypal-migration-preflight.mts",
 ];
 const program = ts.createProgram(roots, {
@@ -37,7 +38,7 @@ const program = ts.createProgram(roots, {
   noEmit: true,
 });
 const allDiagnostics = ts.getPreEmitDiagnostics(program);
-const relevantRoots = ["app/api/tb3/paypal/", "app/tarris/paypal-checkout/", "app/tarris/future/page.tsx", "app/portal/components/Tb3MerchSales.tsx", "lib/tb3/", "tests/tb3-commerce-hq.test.mts", "tests/tb3-phase2.spec.ts", "tests/tb3-paypal.test.mts", "scripts/tb3-paypal-migration-preflight.mts"];
+const relevantRoots = ["app/api/tb3/paypal/", "app/tarris/paypal-checkout/", "app/tarris/future/page.tsx", "app/portal/components/Tb3MerchSales.tsx", "lib/tb3/", "tests/tb3-commerce-hq.test.mts", "tests/tb3-phase2.spec.ts", "tests/tb3-paypal.test.mts", "tests/tb3-paypal-sandbox-certification.test.mts", "scripts/tb3-paypal-migration-preflight.mts"];
 const diagnostics = allDiagnostics.filter((diagnostic) => {
   const file = diagnostic.file ? path.relative(process.cwd(), diagnostic.file.fileName).replaceAll("\\", "/") : "";
   return relevantRoots.some((root) => file.startsWith(root));
