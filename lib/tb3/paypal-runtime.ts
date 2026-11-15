@@ -10,6 +10,7 @@ import { isTb3ProductPurchaseReady, tb3MerchCatalog } from "./merch-catalog";
 import { resolveTb3Cart } from "./merch-cart";
 import { cents, type Lines, type PayPalIntent } from "./paypal-types";
 import { runTb3SandboxPayeeDiagnostic } from "./paypal-sandbox-payee-diagnostic";
+import { runTb3SandboxOrderReadDiagnostic } from "./paypal-sandbox-order-read-diagnostic";
 
 const states = new Set(
   "AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY".split(
@@ -122,6 +123,7 @@ export function getPayPalRuntime() {
       service,
       sandboxTestItem,
       ...(sandboxTestItem ? { sandboxPayeeDiagnostic: () => runTb3SandboxPayeeDiagnostic(request, config.merchantId) } : {}),
+      ...(sandboxTestItem ? { sandboxOrderReadDiagnostic: () => runTb3SandboxOrderReadDiagnostic(request, config.merchantId) } : {}),
       verify: (headers: Headers, event: unknown) =>
         verifyPayPalWebhook(headers, event, config, request),
     };
@@ -165,3 +167,4 @@ export function getPayPalRuntime() {
       verifyPayPalWebhook(headers, event, config, request),
   };
 }
+

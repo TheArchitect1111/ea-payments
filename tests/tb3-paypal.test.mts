@@ -1172,6 +1172,12 @@ test("actual sandbox runtime checkout and quote entry point cannot call Printful
       isTb3SandboxTestCheckoutEnabled: () => false,
       resolveTb3SandboxTestCart,
     },
+    "./paypal-sandbox-payee-diagnostic": {
+      runTb3SandboxPayeeDiagnostic: async () => ({ status: "not-run" }),
+    },
+    "./paypal-sandbox-order-read-diagnostic": {
+      runTb3SandboxOrderReadDiagnostic: async () => ({ orderStatus: "OTHER", buyerApproved: false, capturePresent: false, merchantMatches: false }),
+    },
     "./merch-catalog": {
       tb3MerchCatalog: catalog,
       isTb3ProductPurchaseReady: () => false,
@@ -1229,6 +1235,8 @@ test("Preview-only synthetic Sandbox checkout writes one ledger intent and never
       "./paypal-ledger": { paypalLedger: f.ledger },
       "./paypal-database-config": { paypalDatabaseUrl: () => "postgresql://ea_merchant_api.jkoasrnjlehjziynxfrn:fixture@aws-0-us-east-2.pooler.supabase.com/postgres?sslmode=require" },
       "./paypal-sandbox-test-item": { isTb3SandboxTestCheckoutEnabled, resolveTb3SandboxTestCart },
+      "./paypal-sandbox-payee-diagnostic": { runTb3SandboxPayeeDiagnostic: async () => ({ status: "not-run" }) },
+      "./paypal-sandbox-order-read-diagnostic": { runTb3SandboxOrderReadDiagnostic: async () => ({ orderStatus: "OTHER", buyerApproved: false, capturePresent: false, merchantMatches: false }) },
       "./merch-catalog": { tb3MerchCatalog: catalog, isTb3ProductPurchaseReady: () => false },
       "./merch-cart": { resolveTb3Cart: () => { throw Error("Unverified catalog must remain unavailable"); } },
       "./printful-client": { tb3Printful: async () => { printfulCalls++; throw Error("Printful forbidden in Sandbox"); } },
@@ -1479,3 +1487,4 @@ test("local sandbox simulator certifies browser checkout, persisted order, retri
     );
   }
 });
+

@@ -31,6 +31,7 @@ assert(vercelIgnore.includes("branch === 'master' && target === 'production'"), 
 assert(vercelIgnore.includes('verify-production-gate.mjs'), 'Vercel production gate verifier missing');
 assert(vercelIgnore.includes('isApprovedTb3SandboxCheckoutPreviewRevision'), 'TB3 Sandbox checkout Preview exception missing');
 assert(vercelIgnore.includes('isApprovedTb3NoPayeeDiagnosticPreviewRevision'), 'TB3 no-payee diagnostic Preview exception missing');
+assert(vercelIgnore.includes('isApprovedTb3SandboxOrderReadDiagnosticPreviewRevision'), 'TB3 order-read diagnostic Preview exception missing');
 assert(productionVerifier.includes("changedFiles.filter((file) => !allowed.has(file))"), 'production gate must reject non-manifest files');
 
 const runIgnoreGuard = (branch, commit, target, vercelEnv = '') => spawnSync(
@@ -54,12 +55,11 @@ assert.equal(finalShaResult.status, 0, 'final candidate commit must be available
 const finalSha = finalShaResult.stdout.trim();
 const parentShaResult = spawnSync('git', ['rev-parse', `${finalSha}^`], { encoding: 'utf8' });
 assert.equal(parentShaResult.status, 0, 'final candidate must have a parent');
-assert.equal(parentShaResult.stdout.trim(), 'f6573d85dccc6668f2be138f14a5f449d5effaf9', 'No-payee diagnostic deployment guard must be the direct child of its verified Preview deployment');
+const finalParentSha = parentShaResult.stdout.trim();
 const changedFilesResult = spawnSync('git', ['diff-tree', '--no-commit-id', '--name-only', '-r', finalSha], { encoding: 'utf8' });
 assert.equal(changedFilesResult.status, 0, 'final candidate change list must be available');
-assert.deepEqual(
-  changedFilesResult.stdout.trim().split(/\r?\n/).filter(Boolean).sort(),
-  [
+const finalChangedFiles = changedFilesResult.stdout.trim().split(/\r?\n/).filter(Boolean).sort();
+const noPayeeDiagnosticFiles = [
     'app/api/tb3/paypal/sandbox-payee-diagnostic/route.ts',
     'lib/tb3/paypal-http.ts',
     'lib/tb3/paypal-routes.ts',
@@ -70,9 +70,24 @@ assert.deepEqual(
     'scripts/vercel-ignore-work-branches.mjs',
     'specs/tb3-commerce-hq/spec.md',
     'tests/tb3-paypal-sandbox-certification.test.mts',
-  ],
-  'final candidate may contain only the exact TB3 no-payee Preview diagnostic, regression tests, specification, and guard exception',
-);
+  ];
+const orderReadDiagnosticFiles = [
+  'app/api/tb3/paypal/sandbox-order-read-diagnostic/route.ts',
+  'lib/tb3/paypal-http.ts',
+  'lib/tb3/paypal-routes.ts',
+  'lib/tb3/paypal-runtime.ts',
+  'lib/tb3/paypal-sandbox-order-read-diagnostic.ts',
+  'scripts/test-master-guard-contract.mjs',
+  'scripts/vercel-ignore-work-branches.mjs',
+  'tests/tb3-paypal-sandbox-order-read-diagnostic.test.mts',
+  'tests/tb3-paypal.test.mts',
+];
+if (finalParentSha === 'f6573d85dccc6668f2be138f14a5f449d5effaf9') {
+  assert.deepEqual(finalChangedFiles, noPayeeDiagnosticFiles, 'verified no-payee diagnostic commit contents changed');
+} else {
+  assert.equal(finalParentSha, '239027511a852f03aef48f24c190c3249f40f2f5', 'order-read diagnostic must directly follow the verified commerce Preview commit');
+  assert.deepEqual(finalChangedFiles, orderReadDiagnosticFiles, 'order-read diagnostic commit may contain only the exact route, handler, transport adapter, and security tests');
+}
 
 const tb3Preview = runIgnoreGuard('work/tb3-commerce-hq-20261109', finalSha, 'preview');
 assert.equal(tb3Preview.status, 1, 'the exact final TB3 policy revision must continue to Preview build');
@@ -100,3 +115,4 @@ const otherBranch = runIgnoreGuard('feature/ordinary-preview', '1111111111111111
 assert.equal(otherBranch.status, 1, 'non-work preview branch behavior must remain unchanged');
 
 console.log('EA compensating master guard contract passed.');
+

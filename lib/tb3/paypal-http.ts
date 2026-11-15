@@ -4,6 +4,7 @@ import type { paypalService } from "./paypal-service";
 import type { PayPalConfig } from "./paypal-config";
 import { PayPalError } from "./paypal-transport";
 import { TB3_PAYPAL_SANDBOX_TEST_BRANCH } from "./paypal-sandbox-test-item";
+import { hasTb3SandboxTestSession } from "./paypal-sandbox-test-session";
 
 export type PayPalRuntime = {
   config: PayPalConfig;
@@ -11,6 +12,7 @@ export type PayPalRuntime = {
   verify: (headers: Headers, event: unknown) => Promise<boolean>;
   sandboxTestItem?: boolean;
   sandboxPayeeDiagnostic?: () => Promise<unknown>;
+  sandboxOrderReadDiagnostic?: () => Promise<unknown>;
 };
 const reply = (body: unknown, status = 200) =>
   Response.json(body, {
@@ -37,6 +39,17 @@ function safePayeeDiagnosticResult(value: unknown) {
     merchantIdentityReturned: result.merchantIdentityReturned === true,
     merchantMatchesExpected: result.merchantMatchesExpected === true || result.merchantMatchesExpected === false ? result.merchantMatchesExpected : null,
     merchantIdentitySource: typeof result.merchantIdentitySource === "string" && source.includes(result.merchantIdentitySource) ? result.merchantIdentitySource : "not_returned",
+  };
+}
+function safeSandboxOrderReadResult(value: unknown) {
+  if (!value || typeof value !== "object") throw new Error("Invalid diagnostic result");
+  const result = value as Record<string, unknown>;
+  const statuses = ["CREATED", "SAVED", "PAYER_ACTION_REQUIRED", "APPROVED", "COMPLETED", "VOIDED", "OTHER"];
+  return {
+    orderStatus: typeof result.orderStatus === "string" && statuses.includes(result.orderStatus) ? result.orderStatus : "OTHER",
+    buyerApproved: result.buyerApproved === true,
+    capturePresent: result.capturePresent === true,
+    merchantMatches: result.merchantMatches === true,
   };
 }
 async function read(req: Request, limit: number) {
@@ -107,6 +120,23 @@ export function createPayPalHandlers(
           error: safeIssue,
           providerStatus: error instanceof PayPalError ? error.status : null,
         }, 502);
+      }
+    },
+    async sandboxOrderReadDiagnostic(req: Request) {
+      if (!sandboxPayeeDiagnosticScope()) return reply({ error: "Not found." }, 404);
+      if (req.method !== "GET") return reply({ error: "Method not allowed." }, 405);
+      const rt = getRuntime();
+      if (!rt?.sandboxTestItem || rt.config.mode !== "sandbox" || !rt.sandboxOrderReadDiagnostic)
+        return reply({ error: "Sandbox diagnostic unavailable." }, 404);
+      if (!buyer(req, rt)) return reply({ error: "Request origin denied." }, 403);
+      if (!hasTb3SandboxTestSession(req, sandboxTestTokenVerifier()))
+        return reply({ error: "Private Sandbox certification access required." }, 403);
+      if (!rateAllowed("sandbox-order-read-diagnostic"))
+        return reply({ error: "Diagnostic rate limit reached." }, 429);
+      try {
+        return reply(safeSandboxOrderReadResult(await rt.sandboxOrderReadDiagnostic()));
+      } catch {
+        return reply({ error: "Sandbox order diagnostic unavailable." }, 502);
       }
     },
     async sandboxTestSession(req: Request) {
@@ -253,3 +283,4 @@ export function createPayPalHandlers(
     },
   };
 }
+

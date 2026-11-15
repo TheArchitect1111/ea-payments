@@ -208,6 +208,35 @@ function isApprovedTb3NoPayeeDiagnosticPreviewRevision() {
     JSON.stringify(changedFiles) === JSON.stringify(permittedDiagnosticFiles);
 }
 
+function isApprovedTb3SandboxOrderReadDiagnosticPreviewRevision() {
+  if (
+    branch !== 'work/tb3-commerce-hq-20261109' ||
+    target !== 'preview' ||
+    !/^[a-f0-9]{40}$/i.test(deploymentSha)
+  ) return false;
+
+  const headSha = gitText(['rev-parse', 'HEAD']);
+  const parentSha = gitText(['rev-parse', `${deploymentSha}^`]);
+  const changedFilesText = gitText(['diff-tree', '--no-commit-id', '--name-only', '-r', deploymentSha]);
+  if (!headSha || !parentSha || changedFilesText === null) return false;
+
+  const changedFiles = changedFilesText.split(/\r?\n/).filter(Boolean).sort();
+  const permittedDiagnosticFiles = [
+    'app/api/tb3/paypal/sandbox-order-read-diagnostic/route.ts',
+    'lib/tb3/paypal-http.ts',
+    'lib/tb3/paypal-routes.ts',
+    'lib/tb3/paypal-runtime.ts',
+    'lib/tb3/paypal-sandbox-order-read-diagnostic.ts',
+    'scripts/test-master-guard-contract.mjs',
+    'scripts/vercel-ignore-work-branches.mjs',
+    'tests/tb3-paypal-sandbox-order-read-diagnostic.test.mts',
+    'tests/tb3-paypal.test.mts',
+  ];
+  return headSha === deploymentSha &&
+    parentSha === '239027511a852f03aef48f24c190c3249f40f2f5' &&
+    JSON.stringify(changedFiles) === JSON.stringify(permittedDiagnosticFiles);
+}
+
 // Work branches remain ignored unless an exact, SHA-bound Preview exception
 // below matches its approved parent and complete changed-file set.
 if (branch.startsWith('work/') &&
@@ -218,7 +247,8 @@ if (branch.startsWith('work/') &&
     !isApprovedTb3LedgerSchemaDetailPreviewRevision() &&
     !isApprovedTb3LedgerDiagnosticCorrectionPreviewRevision() &&
     !isApprovedTb3SandboxCheckoutPreviewRevision() &&
-    !isApprovedTb3NoPayeeDiagnosticPreviewRevision()) {
+    !isApprovedTb3NoPayeeDiagnosticPreviewRevision() &&
+    !isApprovedTb3SandboxOrderReadDiagnosticPreviewRevision()) {
   console.log(`[EA Build Space] Ignoring Vercel deployment for local-only branch: ${branch}`);
   process.exit(0);
 }
@@ -240,3 +270,4 @@ if (branch === 'master' && target === 'production') {
 
 console.log(`[EA Build Space] Vercel deployment allowed for branch: ${branch || '(unknown)'} target: ${target || '(unknown)'}`);
 process.exit(1); // Vercel ignoreCommand: 1 means continue deployment.
+
