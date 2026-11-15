@@ -145,14 +145,35 @@ export default function TarrisPublicPage() {
           <div id="merch-store" className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">{merchProducts.map((product, index) => <MerchProductCard key={product.id} product={product} index={index} />)}</div>
           <aside className="mt-8 grid overflow-hidden rounded-2xl bg-[#101114] text-white sm:mt-12 sm:grid-cols-[1fr_auto] sm:items-center"><div className="p-6 sm:p-9"><p className="text-[9px] font-bold tracking-[0.24em] text-[#E2475D]">THE FIRST DROP</p><h3 className="mt-2 font-serif text-3xl sm:text-4xl">Get the release note.</h3><p className="mt-2 max-w-xl text-xs leading-6 text-white/55">Join the first-access list and we’ll share availability when Drop 01 is ready.</p></div><Link href="/tarris/book?type=merch" className="m-4 inline-flex min-h-12 items-center justify-center gap-4 rounded-lg bg-[#C41E3A] px-5 text-[10px] font-bold tracking-[0.16em] transition hover:bg-[#a51c30] sm:m-8">DROP ALERT <span aria-hidden="true">↗</span></Link></aside>
         </section>
-        <section id="connect" aria-labelledby="tb3-connect-title" className="my-12 rounded-[1.75rem] bg-[#101114] px-6 py-10 text-white sm:px-12 sm:py-14">
-          <div className="flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-end">
-            <div className="max-w-2xl">
-              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E2475D]">TB3 | OPPORTUNITIES</p>
-              <h2 id="tb3-connect-title" className="mt-4 font-serif text-4xl leading-tight tracking-tight sm:text-5xl">Let's build something bigger.</h2>
-              <p className="mt-4 max-w-xl text-sm leading-7 text-white/60">Appearances, brand partnerships, and new collaborations begin with one conversation. Choose your opportunity in our private inquiry experience.</p>
+        <section id="connect" aria-labelledby="tb3-connect-title" className="my-12 scroll-mt-5 overflow-hidden rounded-[1.75rem] bg-[#101114] text-white shadow-[0_24px_70px_rgba(0,0,0,0.12)]">
+          <div className="grid lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+            <div className="flex flex-col justify-center px-6 py-10 sm:px-10 sm:py-14 lg:px-14 lg:py-16">
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#E2475D]">TB3 | Beyond the game</p>
+              <h2 id="tb3-connect-title" className="mt-5 max-w-2xl font-serif text-4xl leading-[1.08] tracking-tight sm:text-5xl xl:text-6xl">Partner with Tarris.</h2>
+              <p className="mt-5 max-w-xl text-sm leading-7 text-white/70">From appearances and speaking engagements to brand partnerships and community impact, create something meaningful with Tarris Bouie III.</p>
+              <div className="mt-8 grid grid-cols-3 gap-2" aria-label="Ways to work with Tarris">
+                {[
+                  ["01", "Book Tarris", "Appearances"],
+                  ["02", "Brand Deals", "Partnerships"],
+                  ["03", "Collaborate", "Community"],
+                ].map(([number, label, detail]) => (
+                  <Link key={number} href="/tarris/book" className="group flex min-h-24 flex-col justify-between rounded-xl border border-white/15 bg-white/[0.06] p-3 transition hover:border-[#E2475D]/80 hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                    <span className="text-[10px] font-bold tracking-[0.18em] text-[#E2475D]">{number}</span>
+                    <span><span className="block text-[11px] font-bold leading-5 text-white sm:text-xs">{label}</span><span className="block text-[9px] text-white/55">{detail}</span></span>
+                  </Link>
+                ))}
+              </div>
+              <Link href="/tarris/book" className="mt-8 inline-flex min-h-12 w-full items-center justify-center gap-5 rounded-xl bg-[#C41E3A] px-7 py-4 text-xs font-bold uppercase tracking-[0.14em] transition hover:bg-[#a51c30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:w-fit">Explore opportunities <span aria-hidden="true">↗</span></Link>
+              <p className="mt-4 text-xs text-white/45">Private inquiries, personally reviewed by the TB3 team.</p>
             </div>
-            <Link href="/tarris/book" className="inline-flex min-h-12 items-center justify-center gap-5 rounded-xl bg-[#C41E3A] px-7 py-4 text-xs font-bold uppercase tracking-[0.14em] transition hover:bg-[#a51c30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">Explore opportunities <span aria-hidden="true">↗</span></Link>
+            <div className="relative min-h-[360px] overflow-hidden bg-[#202126] sm:min-h-[500px] lg:min-h-full">
+              <img src="/images/tb3-official/OFFICIAL_13_BLAZER_CHAIR.png" alt="Tarris Bouie III seated in a blazer, ready to connect with brands and community partners" className="absolute inset-0 h-full w-full object-cover object-[center_22%]" loading="lazy" decoding="async" />
+              <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#101114]/85 via-transparent to-transparent lg:bg-gradient-to-r lg:from-[#101114]/35 lg:via-transparent lg:to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between gap-3 sm:bottom-9 sm:left-9 sm:right-9">
+                <div><p className="text-[10px] font-bold tracking-[0.25em] text-white/75">TARRIS BOUIE III</p><p className="mt-1 font-serif text-2xl italic text-white sm:text-3xl">More than a game.</p></div>
+                <span className="text-5xl font-black tracking-tighter text-white/80 sm:text-7xl" aria-hidden="true">04</span>
+              </div>
+            </div>
           </div>
         </section>
       </main>
