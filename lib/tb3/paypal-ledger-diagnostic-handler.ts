@@ -9,7 +9,7 @@ const REQUIRED_COLUMNS = ["id", "tenant_slug", "payload", "paypal_id", "capture_
 
 type QueryResult = { rows: Record<string, unknown>[] };
 export type Tb3LedgerDiagnosticClient = {
-  connect(): Promise<void>;
+  connect(): Promise<unknown>;
   query(sql: string): Promise<QueryResult>;
   end(): Promise<void>;
 };
@@ -21,6 +21,10 @@ export function verifyTb3LedgerDiagnosticToken(token: string | null, expectedHex
     createHash("sha256").update(token, "utf8").digest(),
     Buffer.from(expectedHex, "hex"),
   );
+}
+
+function isProductionProject(project: string): boolean {
+  return project === TB3_LEDGER_DIAGNOSTIC_PRODUCTION_PROJECT;
 }
 
 function projectFromUrl(url: URL): { project: string; role: string; safeUrl: string } | null {
@@ -165,9 +169,9 @@ export function createTb3PayPalLedgerDiagnosticHandler(deps: {
     if (!raw) return json({ status: "FAIL", checks: preflightChecks }, 503);
     let parsed: ReturnType<typeof projectFromUrl> = null;
     try { parsed = projectFromUrl(new URL(raw)); } catch { parsed = null; }
-    if (!parsed || parsed.project !== TB3_LEDGER_DIAGNOSTIC_SANDBOX_PROJECT || parsed.project === TB3_LEDGER_DIAGNOSTIC_PRODUCTION_PROJECT) {
+    if (!parsed || parsed.project !== TB3_LEDGER_DIAGNOSTIC_SANDBOX_PROJECT || isProductionProject(parsed.project)) {
       preflightChecks.sandboxProject = parsed?.project === TB3_LEDGER_DIAGNOSTIC_SANDBOX_PROJECT;
-      preflightChecks.productionExcluded = !!parsed && parsed.project !== TB3_LEDGER_DIAGNOSTIC_PRODUCTION_PROJECT;
+      preflightChecks.productionExcluded = !!parsed && !isProductionProject(parsed.project);
       return json({ status: "FAIL", checks: preflightChecks }, 503);
     }
 
@@ -245,7 +249,7 @@ export function createTb3PayPalLedgerDiagnosticHandler(deps: {
       const resultChecks = {
         previewBranch: true,
         sandboxProject: parsed.project === TB3_LEDGER_DIAGNOSTIC_SANDBOX_PROJECT,
-        productionExcluded: parsed.project !== TB3_LEDGER_DIAGNOSTIC_PRODUCTION_PROJECT,
+        productionExcluded: !isProductionProject(parsed.project),
         databaseConnected: preflightChecks.databaseConnected,
         ledgerExists: !!table,
         requiredColumns: REQUIRED_COLUMNS.every((column) => columns.includes(column)),

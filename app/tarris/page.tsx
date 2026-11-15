@@ -3,7 +3,6 @@
 // WIRED: TB3 / -> /tarris -> ENTER TB3 HQ -> /tarris/future.
 import Link from "next/link";
 import { ChassisPreview } from "./chassis-preview";
-import BookingForm from "./book/booking-form";
 import { tb3MerchCatalog as merchCatalog } from "@/lib/tb3/merch-catalog";
 import { Tb3FilmGrid } from "./tb3-film";
 import { useEffect, type ReactNode } from "react";
@@ -57,15 +56,12 @@ function ImageSlot({ id, asset, alt, ratio = "aspect-[4/5]", hero = false }: Ima
   </div>;
 }
 function MerchProductCard({ product, index }: { product: (typeof merchProducts)[number]; index: number }) {
-  return <article className="min-w-0" data-product-id={product.id}>
-    <div id={`merch-${index + 1}`} className="aspect-square overflow-hidden bg-[#E5E5E5] p-[10px]">
-      <img src={product.image} alt={product.name} className="h-full w-full object-contain" loading="lazy" />
+  return <article className="min-w-0 overflow-hidden rounded-2xl border border-black/[0.08] bg-white transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_45px_rgba(0,0,0,.1)]" data-product-id={product.id}>
+    <div id={`merch-${index + 1}`} className="relative aspect-[4/5] overflow-hidden bg-[#F1F0ED] p-4 sm:p-6">
+      <span className="absolute left-3 top-3 z-10 rounded-full border border-black/10 bg-white/85 px-2.5 py-1 text-[8px] font-bold tracking-[0.16em] text-black/60">TB3 · DROP 01</span>
+      <img src={product.image} alt={product.name} className="h-full w-full object-contain object-center transition duration-500 hover:scale-[1.03]" loading="lazy" decoding="async" />
     </div>
-    <p className="mt-3 text-xs font-bold tracking-wide">{product.name} <span className="font-normal">${product.price.toFixed(2)} USD</span></p>
-    <span aria-label="Merchandise ordering coming soon"
-      className="mt-3 inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center rounded-md bg-[#A51C30]/80 px-3 py-2 text-xs font-bold tracking-[0.12em] text-white">
-      COMING SOON
-    </span>
+    <div className="p-4 sm:p-5"><h3 className="min-h-10 text-sm font-bold leading-5 tracking-tight sm:text-base">{product.name}</h3><p className="mt-2 text-xs font-semibold tracking-wide text-black/55">${product.price.toFixed(2)} USD</p><Link href={`/tarris/book?type=merch&product=${encodeURIComponent(product.id)}`} className="mt-4 flex min-h-11 items-center justify-between rounded-lg border border-black/10 px-3 text-[9px] font-bold tracking-[0.14em] transition hover:border-[#A51C30]/50 hover:text-[#A51C30]"><span>REQUEST FIRST ACCESS</span><span aria-hidden="true">↗</span></Link><p aria-label="Merchandise ordering coming soon" className="mt-3 text-[8px] font-bold tracking-[0.18em] text-[#A51C30]">RELEASE IN PREPARATION · COMING SOON</p></div>
   </article>;
 }
 function ActionLink({ children, className = "", href = "/tarris/future" }: { children: ReactNode; className?: string; href?: string }) {
@@ -122,13 +118,12 @@ export default function TarrisPublicPage() {
           <HQLink />
         </div>
       </header>
-      <a id="book-tarris-sticky" href="#book-tarris-form" className="fixed right-4 top-20 z-50 rounded-lg bg-[#C41E3A] px-4 py-3 text-xs font-bold text-white">BOOK TARRIS / PARTNER WITH TB3</a>
       <main className="mx-auto max-w-[1440px] px-5 lg:px-10">
         <section id="original-hero" style={{ height: "92vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#070707" }}>
           <img src="/images/tb3-official/OFFICIAL_00_HERO_TB3_MORE_THAN_A_GAME.png" alt="Tarris Bouie Logo" style={{ maxWidth: "560px", width: "82vw", height: "auto" }} />
         </section>
         <section aria-label="Five pillars" className="grid gap-6 border-b border-black/20 py-10 sm:grid-cols-2 lg:grid-cols-5">
-          {pillars.map(([title, copy, action]) => <article key={title} id={title.toLowerCase()} className="flex scroll-mt-5 flex-col"><div className={`grid gap-2 ${title === "BRAND" || title === "ATHLETE" || title === "COMMUNITY" ? "grid-cols-2" : "grid-cols-1"}`}>{(pillarAssets[title] ?? []).map((asset) => <ImageSlot key={asset.id} {...asset} />)}</div><h2 className="mt-4 text-xl font-black tracking-tight">{title}</h2><p className="mt-2 flex-1 text-xs leading-6 text-black/65">{copy}</p><ActionLink href={title === "NIL" ? "/tarris/book" : "/tarris/future"} className="mt-4 self-start border-b border-[#A51C30] pb-2 text-[9px] font-bold tracking-widest text-[#A51C30]">{action} →</ActionLink><a href="#book-tarris-form" className="mt-3 text-xs font-bold text-[#C41E3A]">Book Tarris for this →</a></article>)}
+          {pillars.map(([title, copy, action]) => <article key={title} id={title.toLowerCase()} className="flex scroll-mt-5 flex-col"><div className={`grid gap-2 ${title === "BRAND" || title === "ATHLETE" || title === "COMMUNITY" ? "grid-cols-2" : "grid-cols-1"}`}>{(pillarAssets[title] ?? []).map((asset) => <ImageSlot key={asset.id} {...asset} />)}</div><h2 className="mt-4 text-xl font-black tracking-tight">{title}</h2><p className="mt-2 flex-1 text-xs leading-6 text-black/65">{copy}</p><ActionLink href={title === "NIL" ? "/tarris/book" : "/tarris/future"} className="mt-4 self-start border-b border-[#A51C30] pb-2 text-[9px] font-bold tracking-widest text-[#A51C30]">{action} →</ActionLink><a href="/tarris/book" className="mt-3 text-xs font-bold text-[#C41E3A]">Book Tarris for this →</a></article>)}
         </section>
         <section id="media" className="scroll-mt-5 border-b border-black/20 py-10">
           <div className="mb-6 flex flex-wrap items-end justify-between gap-3"><div><p className="text-[9px] tracking-[0.2em] text-[#A51C30]">TB3 MEDIA</p><h2 className="text-2xl font-black tracking-tight sm:text-3xl">STUDENT FIRST.<br /><span className="text-[#A51C30]">DEVELOPMENT ALWAYS.</span></h2></div></div>
@@ -137,7 +132,7 @@ export default function TarrisPublicPage() {
             <div className="grid grid-cols-2 gap-4"><ImageSlot id="film" asset="OFFICIAL_07_FILM_TABLET.png" alt="Game film on a tablet" ratio="aspect-[4/3]" /><ImageSlot id="nutrition" asset="OFFICIAL_11_KITCHEN_NUTRITION.png" alt="Nutrition and wellness preparation" ratio="aspect-[4/3]" /></div>
           </div>
           <Tb3FilmGrid />
-          <a href="#book-tarris-form" className="mt-4 inline-block text-xs font-bold text-[#C41E3A]">Book Tarris for this →</a>
+          <a href="/tarris/book" className="mt-4 inline-block text-xs font-bold text-[#C41E3A]">Book Tarris for this →</a>
         </section>
         <ChassisPreview />
         <section id="future" aria-label="Enterprise and future" className="grid scroll-mt-5 gap-6 border-b border-black/20 py-10 md:grid-cols-3">
@@ -146,21 +141,20 @@ export default function TarrisPublicPage() {
           <article className="flex flex-col justify-between bg-[#141414] p-7 text-white"><div><p className="text-[9px] tracking-[0.3em] text-white/60">THE NEXT CHAPTER</p><h2 className="mt-6 text-4xl font-black leading-none tracking-tight">PLAYER<br /><span className="text-[#A51C30]">ONE.</span></h2><p className="mt-5 text-xs leading-6 text-white/70">Same vision. Higher purpose.<br />Build what comes next.</p></div><div className="mt-8"><HQLink dark /></div></article>
         </section>
         <section id="merch" className="scroll-mt-5 py-10">
-          <div className="mb-6"><p className="text-[9px] tracking-[0.25em] text-[#A51C30]">TB3 STORE</p><h2 className="mt-2 text-3xl font-black tracking-tight">WEAR THE VISION.</h2><p className="mt-3 text-sm text-black/70">COMING SOON. Explore the TB3 collection while we prepare the first drop. Online checkout is not open yet. Follow the launch for the release announcement.</p></div>
-          <div id="merch-store" className="relative isolate overflow-hidden">
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4" aria-hidden="true">{merchProducts.map((product, index) => <MerchProductCard key={product.id} product={product} index={index} />)}</div>
-            {/* Launch campaign takeover: the merchandise stays in the DOM and visible underneath, but ordering is not yet open. */}
-            <div className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center overflow-hidden bg-black/40 pt-16 backdrop-blur-[1px] sm:items-center sm:pt-0" aria-label="TB3 Drop Alert. The first TB3 merch release is coming. One of one, built different.">
-              <img
-                src="/tb3/merch/tb3-drop-alert.svg"
-                alt="TB3 exclusive collection. DROP ALERT. The first TB3 merch release is coming. DROP 01. 1 of 1. Built Different. Season starts now. The gear drops next. Get first access. TB3.online."
-                className="relative block h-auto w-[114%] max-w-none -rotate-[5deg] drop-shadow-[0_30px_65px_rgba(0,0,0,0.9)] sm:w-[110%]"
-                loading="eager"
-              />
+          <div className="mb-8 flex flex-col gap-5 sm:mb-10 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-[9px] font-bold tracking-[0.25em] text-[#A51C30]">TB3 STORE · RELEASE 01</p><h2 className="mt-3 font-serif text-4xl tracking-tight sm:text-6xl">WEAR THE VISION.</h2><p className="mt-4 max-w-xl text-sm leading-6 text-black/60">A considered collection built around the work, the story, and what comes next.</p></div><span className="inline-flex w-fit items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-2 text-[9px] font-bold tracking-[0.15em]">FIRST RELEASE · IN PREPARATION</span></div>
+          <div id="merch-store" className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">{merchProducts.map((product, index) => <MerchProductCard key={product.id} product={product} index={index} />)}</div>
+          <aside className="mt-8 grid overflow-hidden rounded-2xl bg-[#101114] text-white sm:mt-12 sm:grid-cols-[1fr_auto] sm:items-center"><div className="p-6 sm:p-9"><p className="text-[9px] font-bold tracking-[0.24em] text-[#E2475D]">THE FIRST DROP</p><h3 className="mt-2 font-serif text-3xl sm:text-4xl">Get the release note.</h3><p className="mt-2 max-w-xl text-xs leading-6 text-white/55">Join the first-access list and we’ll share availability when Drop 01 is ready.</p></div><Link href="/tarris/book?type=merch" className="m-4 inline-flex min-h-12 items-center justify-center gap-4 rounded-lg bg-[#C41E3A] px-5 text-[10px] font-bold tracking-[0.16em] transition hover:bg-[#a51c30] sm:m-8">DROP ALERT <span aria-hidden="true">↗</span></Link></aside>
+        </section>
+        <section id="connect" aria-labelledby="tb3-connect-title" className="my-12 rounded-[1.75rem] bg-[#101114] px-6 py-10 text-white sm:px-12 sm:py-14">
+          <div className="flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-end">
+            <div className="max-w-2xl">
+              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#E2475D]">TB3 | OPPORTUNITIES</p>
+              <h2 id="tb3-connect-title" className="mt-4 font-serif text-4xl leading-tight tracking-tight sm:text-5xl">Let's build something bigger.</h2>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-white/60">Appearances, brand partnerships, and new collaborations begin with one conversation. Choose your opportunity in our private inquiry experience.</p>
             </div>
+            <Link href="/tarris/book" className="inline-flex min-h-12 items-center justify-center gap-5 rounded-xl bg-[#C41E3A] px-7 py-4 text-xs font-bold uppercase tracking-[0.14em] transition hover:bg-[#a51c30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">Explore opportunities <span aria-hidden="true">↗</span></Link>
           </div>
         </section>
-        <BookingForm/>
       </main>
       <footer className="border-t border-black/20"><div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-6 px-5 py-8 lg:px-10"><a href="#home" aria-label="TB3 home" className="text-4xl font-black tracking-[-0.1em] text-[#A51C30]">TB3</a><div className="flex flex-wrap gap-4 text-[9px] font-semibold tracking-wider"><a href="#home">HOME</a>{["ABOUT", "CONTACT", "PRIVACY", "TERMS"].map((label) => <ActionLink key={label} href={label === "ABOUT" ? "/tarris#story" : label === "CONTACT" ? "/tarris/book" : label === "PRIVACY" ? "/privacy" : "/terms"}>{label}</ActionLink>)}</div><ActionLink href="/tarris#media" className="text-[9px] tracking-wider">SOCIAL</ActionLink><span className="font-serif text-2xl italic text-[#A51C30]">Different On Purpose. Not affiliated with University of Alabama. Official NIL merchandise of Tarris Bouie.</span></div></footer>
     </div>

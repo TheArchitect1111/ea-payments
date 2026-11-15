@@ -1183,6 +1183,7 @@ test("actual sandbox runtime checkout and quote entry point cannot call Printful
         throw Error("Real Printful forbidden");
       },
     },
+    "./paypal-sandbox-payee-diagnostic": { runTb3SandboxPayeeDiagnostic: async () => { throw Error("Diagnostic not exercised in this fixture"); } },
     "./paypal-types": {},
   };
   new Function("module", "exports", "require", code)(
@@ -1232,6 +1233,7 @@ test("Preview-only synthetic Sandbox checkout writes one ledger intent and never
       "./merch-catalog": { tb3MerchCatalog: catalog, isTb3ProductPurchaseReady: () => false },
       "./merch-cart": { resolveTb3Cart: () => { throw Error("Unverified catalog must remain unavailable"); } },
       "./printful-client": { tb3Printful: async () => { printfulCalls++; throw Error("Printful forbidden in Sandbox"); } },
+      "./paypal-sandbox-payee-diagnostic": { runTb3SandboxPayeeDiagnostic: async () => { throw Error("Diagnostic not exercised in this fixture"); } },
       "./paypal-types": {},
     };
     const loaded = { exports: {} as { getPayPalRuntime: () => { service: ReturnType<typeof paypalService>; sandboxTestItem: boolean } | null } };

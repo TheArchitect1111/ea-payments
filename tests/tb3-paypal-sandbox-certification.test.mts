@@ -73,7 +73,9 @@ test("private test page remains gated and storefront Coming Soon remains untouch
   assert.match(checkoutPage, /runtime\.sandboxTestItem\) notFound\(\)/);
   const storefront = readFileSync("app/tarris/page.tsx", "utf8");
   assert.match(storefront, /COMING SOON/);
-  assert.match(storefront, /Online checkout is not open yet/);
+  assert.match(storefront, /Merchandise ordering coming soon/);
+  assert.match(storefront, /REQUEST FIRST ACCESS/);
+  assert.doesNotMatch(storefront, /href=\{?["\x27]\/tarris\/paypal-checkout/);
   assert.doesNotMatch(storefront, /sandbox-certification/);
 });
 
