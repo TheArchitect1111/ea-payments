@@ -19,8 +19,6 @@ const hash = (x: unknown) =>
   createHash("sha256").update(JSON.stringify(x)).digest("hex");
 const idOK = (x: unknown): x is string =>
   typeof x === "string" && /^[A-Za-z0-9]{6,64}$/.test(x);
-const TB3_SANDBOX_RECOVERY_ORDER = "7EJ853085V886142J";
-const TB3_SANDBOX_RECOVERY_TOTAL_CENTS = 501;
 export type PayPalPorts = {
   ledger: PayPalLedger;
   resolveCart: (input: unknown) => Lines;
@@ -477,49 +475,6 @@ export function paypalService(config: PayPalConfig, ports: PayPalPorts) {
     if (!settled.paid) return { status: "pending", fulfillment: "pending" };
     return { status: "paid", fulfillment: await fulfill(settled.row.id) };
   }
-  async function recoverApprovedSandboxOrder(orderId: string) {
-    if (config.mode !== "sandbox" || orderId !== TB3_SANDBOX_RECOVERY_ORDER)
-      throw Error("Recovery target unavailable");
-    const initial = await ports.ledger.find(orderId);
-    if (!initial || initial.paypalId !== orderId) throw Error("Recovery ledger row unavailable");
-    provenance(initial);
-    if (
-      initial.total !== TB3_SANDBOX_RECOVERY_TOTAL_CENTS ||
-      initial.state !== "created" ||
-      initial.refundStatus !== "none" ||
-      (initial.refundTotalCents ?? 0) !== 0 ||
-      (initial.refundEventIds ?? []).length !== 0 ||
-      initial.captureId
-    ) throw Error("Recovery ledger precondition failed");
-    active(initial);
-    const fresh = await ports.request("/v2/checkout/orders/" + orderId, "GET");
-    const purchaseUnit = unit(fresh, initial);
-    const providerCaptures = purchaseUnit.payments?.captures;
-    if (
-      fresh.status !== "APPROVED" ||
-      (Array.isArray(providerCaptures) && providerCaptures.length !== 0)
-    ) throw Error("Recovery provider precondition failed");
-
-    // settle takes the original ledger row lock, rereads the provider order, and
-    // uses the existing deterministic PayPal request id for one idempotent capture.
-    const settled = await settle(initial.id, orderId);
-    if (!settled.paid || !settled.row.captureId) throw Error("Recovery capture not completed");
-    const durable = await ports.ledger.find(orderId);
-    if (
-      !durable || durable.id !== initial.id || durable.tenant !== "tarris" ||
-      durable.mode !== "sandbox" || durable.merchantId !== config.merchantId ||
-      durable.total !== TB3_SANDBOX_RECOVERY_TOTAL_CENTS ||
-      durable.state !== "paid" || durable.captureId !== settled.row.captureId
-    ) throw Error("Recovery durable capture verification failed");
-    const fulfillment = await fulfill(durable.id);
-    return {
-      orderStatus: "COMPLETED" as const,
-      captureCompleted: true,
-      durableCaptureRecorded: true,
-      fulfillment,
-      printfulRequested: false as const,
-    };
-  }
   async function webhook(event: PayPalObject) {
     const approved = event.event_type === "CHECKOUT.ORDER.APPROVED",
       completed = event.event_type === "PAYMENT.CAPTURE.COMPLETED";
@@ -663,5 +618,5 @@ export function paypalService(config: PayPalConfig, ports: PayPalPorts) {
       };
     return result;
   }
-  return { create, capture, recoverApprovedSandboxOrder, cancel, webhook };
+  return { create, capture, cancel, webhook };
 }

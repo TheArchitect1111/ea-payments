@@ -260,7 +260,7 @@ function isApprovedTb3SandboxOrderReadDiagnosticCleanupPreviewRevision() {
     JSON.stringify(changedFiles) === JSON.stringify(permittedCleanupFiles);
 }
 
-function isApprovedTb3SandboxRecoveryPreviewRevision() {
+function isApprovedTb3SandboxRecoveryCleanupPreviewRevision() {
   if (
     branch !== 'work/tb3-commerce-hq-20261109' ||
     target !== 'preview' ||
@@ -273,7 +273,7 @@ function isApprovedTb3SandboxRecoveryPreviewRevision() {
   if (!headSha || !parentSha || changedFilesText === null) return false;
 
   const changedFiles = changedFilesText.split(/\r?\n/).filter(Boolean).sort();
-  const permittedRecoveryFiles = [
+  const permittedCleanupFiles = [
     'app/api/tb3/paypal/sandbox-recovery/route.ts',
     'lib/tb3/paypal-http.ts',
     'lib/tb3/paypal-routes.ts',
@@ -284,8 +284,8 @@ function isApprovedTb3SandboxRecoveryPreviewRevision() {
     'tests/tb3-paypal.test.mts',
   ];
   return headSha === deploymentSha &&
-    parentSha === 'd98c4452278c96e4dd572562372f1ed62ba29eff' &&
-    JSON.stringify(changedFiles) === JSON.stringify(permittedRecoveryFiles);
+    parentSha === '16c879e7fb493e049967144e62948bf05c5b93e7' &&
+    JSON.stringify(changedFiles) === JSON.stringify(permittedCleanupFiles);
 }
 
 // Work branches remain ignored unless an exact, SHA-bound Preview exception
@@ -301,7 +301,7 @@ if (branch.startsWith('work/') &&
     !isApprovedTb3NoPayeeDiagnosticPreviewRevision() &&
     !isApprovedTb3SandboxOrderReadDiagnosticPreviewRevision() &&
     !isApprovedTb3SandboxOrderReadDiagnosticCleanupPreviewRevision() &&
-    !isApprovedTb3SandboxRecoveryPreviewRevision()) {
+    !isApprovedTb3SandboxRecoveryCleanupPreviewRevision()) {
   console.log(`[EA Build Space] Ignoring Vercel deployment for local-only branch: ${branch}`);
   process.exit(0);
 }

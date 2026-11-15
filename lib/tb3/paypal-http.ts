@@ -139,39 +139,6 @@ export function createPayPalHandlers(
         return reply({ error: "Sandbox order diagnostic unavailable." }, 502);
       }
     },
-    async sandboxOrderRecovery(req: Request) {
-      if (!sandboxPayeeDiagnosticScope()) return reply({ error: "Not found." }, 404);
-      if (req.method !== "POST") return reply({ error: "Recovery request rejected." }, 400);
-      const length = req.headers.get("content-length");
-      if (length && length !== "0") return reply({ error: "Recovery request rejected." }, 400);
-      if (req.body) {
-        const reader = req.body.getReader();
-        const first = await reader.read();
-        await reader.cancel();
-        if (!first.done && first.value?.byteLength)
-          return reply({ error: "Recovery request rejected." }, 400);
-      }
-      const rt = getRuntime();
-      if (!rt?.sandboxTestItem || rt.config.mode !== "sandbox")
-        return reply({ error: "Sandbox recovery unavailable." }, 404);
-      if (!buyer(req, rt)) return reply({ error: "Request origin denied." }, 403);
-      if (!hasTb3SandboxTestSession(req, sandboxTestTokenVerifier()))
-        return reply({ error: "Private Sandbox certification access required." }, 403);
-      if (!rateAllowed("sandbox-recovery"))
-        return reply({ error: "Recovery rate limit reached." }, 429);
-      try {
-        const result = await rt.service.recoverApprovedSandboxOrder("7EJ853085V886142J");
-        return reply({
-          orderStatus: result.orderStatus,
-          captureCompleted: result.captureCompleted,
-          durableCaptureRecorded: result.durableCaptureRecorded,
-          fulfillment: result.fulfillment === "simulated" ? "simulated" : "review",
-          printfulRequested: result.printfulRequested,
-        });
-      } catch {
-        return reply({ error: "Sandbox recovery preconditions were not satisfied." }, 409);
-      }
-    },
     async sandboxTestSession(req: Request) {
       const rt = getRuntime();
       if (!rt?.sandboxTestItem || rt.config.mode !== "sandbox") return reply({ error: "Sandbox certification is unavailable." }, 404);
