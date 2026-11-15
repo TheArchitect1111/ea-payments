@@ -32,6 +32,7 @@ assert(vercelIgnore.includes('verify-production-gate.mjs'), 'Vercel production g
 assert(vercelIgnore.includes('isApprovedTb3SandboxCheckoutPreviewRevision'), 'TB3 Sandbox checkout Preview exception missing');
 assert(vercelIgnore.includes('isApprovedTb3NoPayeeDiagnosticPreviewRevision'), 'TB3 no-payee diagnostic Preview exception missing');
 assert(vercelIgnore.includes('isApprovedTb3SandboxOrderReadDiagnosticPreviewRevision'), 'TB3 order-read diagnostic Preview exception missing');
+assert(vercelIgnore.includes('isApprovedTb3SandboxOrderReadDiagnosticCleanupPreviewRevision'), 'TB3 order-read diagnostic cleanup Preview exception missing');
 assert(productionVerifier.includes("changedFiles.filter((file) => !allowed.has(file))"), 'production gate must reject non-manifest files');
 
 const runIgnoreGuard = (branch, commit, target, vercelEnv = '') => spawnSync(
@@ -84,9 +85,15 @@ const orderReadDiagnosticFiles = [
 ];
 if (finalParentSha === 'f6573d85dccc6668f2be138f14a5f449d5effaf9') {
   assert.deepEqual(finalChangedFiles, noPayeeDiagnosticFiles, 'verified no-payee diagnostic commit contents changed');
-} else {
-  assert.equal(finalParentSha, '239027511a852f03aef48f24c190c3249f40f2f5', 'order-read diagnostic must directly follow the verified commerce Preview commit');
+} else if (finalParentSha === '239027511a852f03aef48f24c190c3249f40f2f5') {
   assert.deepEqual(finalChangedFiles, orderReadDiagnosticFiles, 'order-read diagnostic commit may contain only the exact route, handler, transport adapter, and security tests');
+} else {
+  assert.equal(finalParentSha, '84bf3899bc39c2872b6054121cf6e1a80b3e9466', 'order-read diagnostic cleanup must directly follow its verified Preview deployment');
+  assert.deepEqual(finalChangedFiles, [
+    'app/api/tb3/paypal/sandbox-order-read-diagnostic/route.ts',
+    'scripts/test-master-guard-contract.mjs',
+    'scripts/vercel-ignore-work-branches.mjs',
+  ], 'diagnostic cleanup commit may contain only route removal and its scoped Preview deployment guard');
 }
 
 const tb3Preview = runIgnoreGuard('work/tb3-commerce-hq-20261109', finalSha, 'preview');
