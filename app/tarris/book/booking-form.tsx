@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { opportunityTypes, budgetRanges } from '@/lib/tb3/contracts';
 import { tb3MerchCatalog as merchCatalog } from '@/lib/tb3/merch-catalog';
 export default function BookingForm({manual=false,onSaved}:{manual?:boolean;onSaved?:()=>void}) {
@@ -9,6 +9,8 @@ export default function BookingForm({manual=false,onSaved}:{manual?:boolean;onSa
   const [inquiry,setInquiry]=useState('');
   const [panelOpen,setPanelOpen]=useState(false);
   const dialogRef=useRef<HTMLDivElement>(null);
+  const busyRef=useRef(false);
+  busyRef.current=busy;
   const triggerRef=useRef<HTMLButtonElement|null>(null);
   useEffect(()=>{
     const params = new URLSearchParams(window.location.search);
@@ -28,8 +30,8 @@ export default function BookingForm({manual=false,onSaved}:{manual?:boolean;onSa
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     dialogRef.current?.focus();
-    const onEscape = (event: globalThis.KeyboardEvent) => {
-      if (event.key === 'Escape' && !busy) setPanelOpen(false);
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !busyRef.current) setPanelOpen(false);
     };
     window.addEventListener('keydown', onEscape);
     return () => {
@@ -37,7 +39,7 @@ export default function BookingForm({manual=false,onSaved}:{manual?:boolean;onSa
       window.removeEventListener('keydown', onEscape);
       triggerRef.current?.focus();
     };
-  }, [panelOpen, manual, busy]);
+  }, [panelOpen, manual]);
 
   function openInquiry(value: string, trigger: HTMLButtonElement) {
     triggerRef.current=trigger;
@@ -46,7 +48,7 @@ export default function BookingForm({manual=false,onSaved}:{manual?:boolean;onSa
     setSaved(false);
     setPanelOpen(true);
   }
-  function trapFocus(event: KeyboardEvent<HTMLDivElement>) {
+  function trapFocus(event: ReactKeyboardEvent<HTMLDivElement>) {
     if (event.key !== 'Tab') return;
     const controls=Array.from(dialogRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href]')||[]).filter(el=>el.getClientRects().length>0);
     if(!controls.length) return;
