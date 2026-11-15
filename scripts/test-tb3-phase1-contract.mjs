@@ -11,23 +11,31 @@ const seo = read('app/tarris/layout.tsx');
 assert.equal(catalog.length, 14, 'Approved 14-product catalog must remain intact');
 assert.equal(new Set(catalog.map(item => item.id)).size, 14, 'Catalog item IDs must be unique');
 const approvedPrices = {
-  'merch-short-red': 35, 'merch-short-white': 35, 'merch-long-red': 45,
-  'merch-long-white': 45, 'merch-cap-white': 30, 'merch-cap-red': 30,
-  'merch-hoodie-red': 75, 'merch-hoodie-white': 75, 'merch-hoodie-premium': 85,
-  'merch-crewneck-red': 65, 'tb3-sig-collage-tee-black': 65,
-  'tb3-sig-collage-hoodie-black': 75, 'tb3-sig-collage-tee-white': 65,
-  'tb3-sig-collage-hoodie-white': 75,
+  'tb3-signature-tee-black': 50, 'tb3-signature-tee-white': 50,
+  'tb3-official-tee-black': 35, 'tb3-official-tee-white': 35,
+  'tb3-official-hoodie-black': 75, 'tb3-official-hoodie-white': 75,
+  'tb3-official-crewneck-black': 65, 'tb3-signature-collage-hoodie-black': 65,
+  'tb3-signature-collage-hoodie-white': 65, 'tb3-official-long-sleeve-black': 45,
+  'tb3-official-long-sleeve-white': 45, 'tb3-official-crewneck-white': 65,
+  'tb3-official-joggers-black': 60, 'tb3-official-duffel-black': 110,
 };
 for (const item of catalog) {
   assert.equal(item.price, approvedPrices[item.id], 'Unapproved price change for ' + item.id);
   assert.match(item.image, /^\//, 'Catalog image must be local for ' + item.id);
+  assert.equal(item.provider, 'printful', 'Only Printful may fulfill TB3 merchandise');
+  assert.equal(item.status, 'coming_soon', 'Merchandise remains closed');
+  assert.equal(item.fulfillmentMappingVerified, false, 'Unverified Printful mappings cannot be purchased');
+  assert.ok(item.variants.length > 0);
 }
+assert.equal(Object.keys(approvedPrices).length, 14);
+assert.equal(catalog.reduce((sum, item) => sum + item.variants.length, 0), 82);
+assert.equal(new Set(catalog.flatMap(item => item.variants.map(v => v.id))).size, 82);
 assert.match(publicSite, /merchCatalog\.map|merchProducts\.map/);
 assert.match(publicSite, /merchProducts = merchCatalog/);
 assert.match(publicSite, /data-product-id=\{product\.id\}/);
-assert.match(publicSite, /Ask about this item/);
-assert.match(publicSite, /type=merch&product=/);
-assert.match(publicSite, /Online orders will open after payment and fulfillment approval/);
+assert.doesNotMatch(publicSite, /Ask about this item|type=merch&product=/, 'Coming Soon storefront must not expose order inquiry CTAs');
+assert.match(publicSite, /COMING SOON\. Explore the TB3 collection/);
+assert.match(publicSite, /Online checkout is not open yet/);
 assert.doesNotMatch(publicSite, /Add to Cart|Secure checkout|checkout\.stripe\.com/);
 assert.match(booking, /merchCatalog\.find\(/);
 assert.match(booking, /requestedProduct/);
@@ -40,4 +48,4 @@ assert.match(auth, /portal\/login\?next=%2Ftarris%2Ffuture/);
 assert.match(auth, /redirect\('\/tarris\?hq=private'\)/);
 assert.match(seo, /14-piece lineup/);
 assert.doesNotMatch(seo, /Bonfire/);
-console.log('PASS: TB3 phase 1 catalog, prices, public links, inquiry tracking, HQ login, private access and payment-disabled safety');
+console.log('PASS: TB3 Phase 1 catalog, prices, Coming Soon storefront, HQ login, private access and payment-disabled safety');

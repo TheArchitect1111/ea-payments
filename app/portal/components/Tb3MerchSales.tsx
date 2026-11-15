@@ -1,45 +1,85 @@
 'use client';
-import { useEffect,useState } from 'react';
-type Sale={order_id:string;product:string;amount_cents:number;customer:string;customer_email:string;
- payment_reference:string;payment_status:string;tracking:string};
-export default function Tb3MerchSales({report=false}:{report?:boolean}){
- const [visible,setVisible]=useState(false),[sales,setSales]=useState<Sale[]>([]);
- const [error,setError]=useState(''),[loading,setLoading]=useState(false),[result,setResult]=useState('');
- useEffect(()=>{if(!visible)return;let active=true;setLoading(true);
- fetch('/api/tb3/bonfire/sales',{cache:'no-store'}).then(async r=>{
-  if(!r.ok)throw Error('Private merch sales unavailable');
-  const result=await r.json();if(active)setSales(result.sales||[]);
- }).catch(e=>{if(active)setError(e.message);}).finally(()=>{if(active)setLoading(false);});
- return()=>{active=false};},[visible]);
- const total=sales.reduce((sum,item)=>sum+item.amount_cents,0);
- return <section className="ep-panel" aria-label="TB3 merchandise sales">
-  <div className="ep-panel-head">
-   <h2 className="ep-panel-title">TB3 merch sales</h2>
-   <button type="button" className="ep-pulse-cta" onClick={()=>setVisible(x=>!x)}>
-    {visible?'Close sales':'Merch sales tab'}
-   </button>
-  </div>
-  {visible?<div>
-   {loading?<p>Loading private sales...</p>:null}
-   {error?<p role="alert">{error}</p>:null}
-   {!loading&&!error?<><form onSubmit={async e=>{e.preventDefault();setResult('Importing...');try{const form=new FormData(e.currentTarget);form.set('confirm','seller-attested-paid');const r=await fetch('/api/bricks/bonfire-csv-import',{method:'POST',body:form});const j=await r.json();if(!r.ok)throw Error(j.error||'Import failed');setResult(`Imported ${j.imported} orders; ${j.replayed} duplicates ignored`);const latest=await fetch('/api/tb3/bonfire/sales',{cache:'no-store'});if(latest.ok)setSales((await latest.json()).sales||[]);}catch(err){setResult(err instanceof Error?err.message:'Import failed');}}}>
-    <p>Import Bonfire seller order CSV (maximum 120 KB). This records sales only, not payouts.</p>
-    <input name="file" type="file" accept=".csv,text/csv,.txt,.md" required />
-    <label><input type="checkbox" required /> I confirm these rows represent paid orders from the seller export.</label>
-    <button type="submit" className="ep-pulse-cta">Import sales</button>
-    {result?<p role="status">{result}</p>:null}
-   </form><p>Recorded orders: {sales.length} · Gross recorded: {(total/100).toLocaleString('en-US',{style:'currency',currency:'USD'})}</p>
-    {report?<a href="/api/tb3/bonfire/sales?format=csv" className="ep-pulse-cta">Download protected Bonfire report</a>:null}
-    <table className="ep-data-table"><thead><tr>
-      <th>Order</th><th>Product</th><th>Customer</th><th>Status</th><th>Tracking</th><th>Amount</th>
-     </tr></thead><tbody>
-     {sales.map(x=><tr key={x.order_id}>
-      <td>{x.payment_reference}</td><td>{x.product}</td>
-      <td>{x.customer} ({x.customer_email})</td><td>{x.payment_status}</td>
-      <td>{x.tracking}</td><td>{(x.amount_cents/100).toFixed(2)} USD</td>
-     </tr>)}</tbody></table>
-    {sales.length===0?<p>No authenticated Bonfire orders have been imported.</p>:null}
-   </>:null}
-  </div>:null}
- </section>;
+import { useEffect, useState } from 'react';
+
+type CommerceOrder = {
+  orderReference: string;
+  paymentStatus: string;
+  capturedCents: number;
+  refundStatus: string;
+  refundedCents: number | null;
+  fulfillmentStatus: string;
+  fulfillmentSyncStatus: string;
+  tracking: { status: string; trackingNumber: string; trackingUrl: string }[];
+  items: { name: string; size: string; quantity: number; unitAmountCents: number }[];
+  createdAt: string;
+};
+type Report = {
+  orders: CommerceOrder[];
+  summary: {
+    orderCount: number;
+    capturedOrderCount: number;
+    grossCapturedCents: number;
+    refundedCents: number | null;
+    netAfterRefundsCents: number | null;
+    reconciliation: string;
+  };
+};
+const money = (cents: number | null) => cents == null
+  ? 'Review required'
+  : (cents / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+
+export default function Tb3MerchSales({ report = false }: { report?: boolean }) {
+  const [visible, setVisible] = useState(report);
+  const [data, setData] = useState<Report | null>(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (!visible) return;
+    let active = true;
+    fetch('/api/tb3/paypal/report', { cache: 'no-store' })
+      .then(async response => {
+        if (!response.ok) throw new Error('Private TB3 commerce report unavailable.');
+        return response.json() as Promise<Report>;
+      })
+      .then(result => { if (active) { setData(result); setError(''); } })
+      .catch(() => { if (active) setError('Private TB3 commerce report unavailable.'); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [visible]);
+  return <section className="ep-panel" aria-label="TB3 PayPal merchandise orders">
+    <div className="ep-panel-head">
+      <h2 className="ep-panel-title">TB3 merchandise orders</h2>
+      {!report ? <button type="button" className="ep-pulse-cta" onClick={() => setVisible(v => !v)}>
+        {visible ? 'Close orders' : 'Merchandise orders'}
+      </button> : null}
+    </div>
+    {visible ? <div>
+      {loading || (visible && !data && !error) ? <p>Loading private merchandise records…</p> : null}
+      {error ? <p role="alert">{error}</p> : null}
+      {data && !error ? <>
+        <dl aria-label="Commerce reconciliation summary" className="ep-module-list">
+          <div><dt>Orders</dt><dd>{data.summary.orderCount}</dd></div>
+          <div><dt>Captured orders</dt><dd>{data.summary.capturedOrderCount}</dd></div>
+          <div><dt>Gross captured</dt><dd>{money(data.summary.grossCapturedCents)}</dd></div>
+          <div><dt>Refunded</dt><dd>{money(data.summary.refundedCents)}</dd></div>
+          <div><dt>Net after refunds</dt><dd>{money(data.summary.netAfterRefundsCents)}</dd></div>
+        </dl>
+        {data.summary.reconciliation !== 'ledger totals reconciled' ? <p role="status">Refund amount requires review before net revenue can be reconciled.</p> : null}
+        {data.orders.length ? <div style={{ overflowX: 'auto' }}><table className="ep-data-table">
+          <thead><tr><th>PayPal order</th><th>Items</th><th>Payment</th><th>Refund</th><th>Fulfillment</th><th>Tracking</th><th>Captured</th></tr></thead>
+          <tbody>{data.orders.map(order => <tr key={order.orderReference}>
+            <td>{order.orderReference}<br /><small>{new Date(order.createdAt).toLocaleDateString()}</small></td>
+            <td>{order.items.map((item, index) => <div key={`${item.name}-${item.size}-${index}`}>{item.quantity} × {item.name} ({item.size})</div>)}</td>
+            <td>{order.paymentStatus}</td>
+            <td>{order.refundStatus}{order.refundedCents == null ? '' : ` · ${money(order.refundedCents)}`}</td>
+            <td>{order.fulfillmentStatus}{order.fulfillmentSyncStatus !== 'current' ? <small className="block">Printful sync: {order.fulfillmentSyncStatus.replaceAll('_', ' ')}</small> : null}</td>
+            <td>{order.tracking.length ? order.tracking.map((shipment, index) => <div key={`${shipment.trackingNumber}-${index}`}>
+              {shipment.trackingUrl ? <a href={shipment.trackingUrl} target="_blank" rel="noreferrer">{shipment.trackingNumber || 'Track shipment'}</a> : shipment.trackingNumber || 'Tracking available'} ({shipment.status})
+            </div>) : 'Not shipped'}</td>
+            <td>{money(order.capturedCents)}</td>
+          </tr>)}</tbody>
+        </table></div> : <p>No PayPal merchandise orders are recorded.</p>}
+      </> : null}
+    </div> : null}
+  </section>;
 }
