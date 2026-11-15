@@ -260,6 +260,34 @@ function isApprovedTb3SandboxOrderReadDiagnosticCleanupPreviewRevision() {
     JSON.stringify(changedFiles) === JSON.stringify(permittedCleanupFiles);
 }
 
+function isApprovedTb3SandboxRecoveryPreviewRevision() {
+  if (
+    branch !== 'work/tb3-commerce-hq-20261109' ||
+    target !== 'preview' ||
+    !/^[a-f0-9]{40}$/i.test(deploymentSha)
+  ) return false;
+
+  const headSha = gitText(['rev-parse', 'HEAD']);
+  const parentSha = gitText(['rev-parse', `${deploymentSha}^`]);
+  const changedFilesText = gitText(['diff-tree', '--no-commit-id', '--name-only', '-r', deploymentSha]);
+  if (!headSha || !parentSha || changedFilesText === null) return false;
+
+  const changedFiles = changedFilesText.split(/\r?\n/).filter(Boolean).sort();
+  const permittedRecoveryFiles = [
+    'app/api/tb3/paypal/sandbox-recovery/route.ts',
+    'lib/tb3/paypal-http.ts',
+    'lib/tb3/paypal-routes.ts',
+    'lib/tb3/paypal-service.ts',
+    'scripts/test-master-guard-contract.mjs',
+    'scripts/vercel-ignore-work-branches.mjs',
+    'tests/tb3-paypal-sandbox-recovery.test.mts',
+    'tests/tb3-paypal.test.mts',
+  ];
+  return headSha === deploymentSha &&
+    parentSha === 'd98c4452278c96e4dd572562372f1ed62ba29eff' &&
+    JSON.stringify(changedFiles) === JSON.stringify(permittedRecoveryFiles);
+}
+
 // Work branches remain ignored unless an exact, SHA-bound Preview exception
 // below matches its approved parent and complete changed-file set.
 if (branch.startsWith('work/') &&
@@ -272,7 +300,8 @@ if (branch.startsWith('work/') &&
     !isApprovedTb3SandboxCheckoutPreviewRevision() &&
     !isApprovedTb3NoPayeeDiagnosticPreviewRevision() &&
     !isApprovedTb3SandboxOrderReadDiagnosticPreviewRevision() &&
-    !isApprovedTb3SandboxOrderReadDiagnosticCleanupPreviewRevision()) {
+    !isApprovedTb3SandboxOrderReadDiagnosticCleanupPreviewRevision() &&
+    !isApprovedTb3SandboxRecoveryPreviewRevision()) {
   console.log(`[EA Build Space] Ignoring Vercel deployment for local-only branch: ${branch}`);
   process.exit(0);
 }

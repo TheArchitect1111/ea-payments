@@ -52,7 +52,7 @@ const input = {
     country_code: "US",
   },
 };
-function fixture(autoConfirm = false, mode: "live" | "sandbox" = "live", commerceEnabled = true) {
+function fixture(autoConfirm = false, mode: "live" | "sandbox" = "live", commerceEnabled = true, providerOrderId = "ORDER123") {
   let quotes = 0;
   const rows = new Map<string, PayPalIntent>();
   let queue = Promise.resolve();
@@ -103,7 +103,7 @@ function fixture(autoConfirm = false, mode: "live" | "sandbox" = "live", commerc
         "matching intent committed before provider call",
       );
       calls.create++;
-      order = { ...structuredClone(body), id: "ORDER123", status: "APPROVED" };
+      order = { ...structuredClone(body), id: providerOrderId, status: "APPROVED" };
       return { id: order.id, status: "CREATED" };
     }
     if (path.endsWith("/capture")) {
@@ -299,6 +299,57 @@ test("lost capture response reconciles provider truth without second charge", as
   assert.equal(f.calls.capture, 1);
   assert.equal(f.calls.draft, 1);
   assert.equal(f.calls.confirm, 0);
+});
+test("fixed Sandbox recovery validates ledger and provider before one locked capture", async () => {
+  const orderId = "7EJ853085V886142J";
+  const f = fixture(false, "sandbox", true, orderId);
+  await f.service.create(input);
+  const row = [...f.rows.values()][0]!;
+  row.subtotal = 1;
+  row.shipping = 500;
+  row.tax = 0;
+  row.total = 501;
+  row.refundStatus = "none";
+  row.refundTotalCents = 0;
+  row.refundEventIds = [];
+  f.rows.set(row.id, row);
+  f.order.purchase_units[0].amount = {
+    currency_code: "USD",
+    value: "5.01",
+    breakdown: {
+      item_total: { currency_code: "USD", value: "0.01" },
+      shipping: { currency_code: "USD", value: "5.00" },
+      tax_total: { currency_code: "USD", value: "0.00" },
+    },
+  };
+  const recovered = await f.service.recoverApprovedSandboxOrder(orderId);
+  assert.deepEqual(recovered, {
+    orderStatus: "COMPLETED",
+    captureCompleted: true,
+    durableCaptureRecorded: true,
+    fulfillment: "simulated",
+    printfulRequested: false,
+  });
+  assert.equal(f.calls.capture, 1);
+  assert.equal(f.reads.length, 0, "Sandbox recovery must not call Printful");
+  const saved = await f.ledger.find(orderId);
+  assert.equal(saved?.tenant, "tarris");
+  assert.equal(saved?.mode, "sandbox");
+  assert.equal(saved?.merchantId, config.merchantId);
+  assert.equal(saved?.total, 501);
+  assert.equal(saved?.state, "paid");
+  assert.equal(saved?.captureId, "CAPTURE123");
+  assert.equal(f.order.purchase_units[0].payments.captures.length, 1);
+});
+test("Sandbox recovery refuses a wrong amount before any provider capture", async () => {
+  const orderId = "7EJ853085V886142J";
+  const f = fixture(false, "sandbox", true, orderId);
+  await f.service.create(input);
+  const row = [...f.rows.values()][0]!;
+  row.total = 500;
+  f.rows.set(row.id, row);
+  await assert.rejects(() => f.service.recoverApprovedSandboxOrder(orderId));
+  assert.equal(f.calls.capture, 0);
 });
 test("declined and pending payments never reach fulfillment", async () => {
   for (const state of ["decline", "pending"] as const) {
