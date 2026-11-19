@@ -1,0 +1,13 @@
+{
+  "baseCommit": "4c4ef1418c3d395009f3b0a16812bba8a161fa3e",
+  "sourceDiagnosticCommit": "43824831c1d94bd21772e1987553b5db5ba76922",
+  "focusedTests": { "passed": 4, "failed": 0, "command": "node --import tsx --test tests/tb3-paypal-oauth-diagnostic.test.mts" },
+  "tenantSafety": "PASS",
+  "productionBuild": "PASS: Next production build compiled and generated 173 static pages",
+  "typescript": { "repositoryWideExitCode": 2, "diagnosticsInFivePortFiles": 0, "baselineComparison": "unchanged production commit has no versions of the five new files; filtered run reported no diagnostics in port files or admin-session-guard.ts" },
+  "security": { "adminAction": "admin:manage", "productionOnly": true, "disabledByDefault": true, "oauthRequests": 1, "liveEndpointOnly": true, "paymentOrFulfillmentOperations": 0, "responseRedaction": "status/httpStatus/fixed category only" },
+  "productionExecution": "NOT PERFORMED",
+  "deployment": "NOT PERFORMED",
+  "checkoutEnabled": false,
+  "transactions": "NONE"
+}
