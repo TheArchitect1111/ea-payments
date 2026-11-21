@@ -91,7 +91,7 @@ Admin visibility:
 Local admin credentials:
 
 - Email: `demo@efficiencyarchitects.online`
-- Password: `DemoPulse2026!`
+- Password: configure `DEMO_CLIENT_PASSWORD` privately before using the demo account.
 
 ## Definition Of Done For Discovery
 

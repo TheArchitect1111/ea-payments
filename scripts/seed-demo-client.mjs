@@ -34,11 +34,16 @@ const key = env.AIRTABLE_API_KEY;
 const baseId = env.AIRTABLE_PAYMENTS_BASE_ID || 'appv0YoLIMY45fmDA';
 const proposalsTable = env.AIRTABLE_PROPOSALS_TABLE_ID || 'Proposals';
 const clientTable = 'Client Records';
+const demoPassword = env.DEMO_CLIENT_PASSWORD?.trim();
+if (!demoPassword) {
+  console.error('BLOCKED: set DEMO_CLIENT_PASSWORD to a private value before seeding the demo client.');
+  process.exit(1);
+}
 
 const DEMO = {
   slug: 'demo-client',
   email: 'demo@efficiencyarchitects.online',
-  password: env.DEMO_CLIENT_PASSWORD || 'DemoPulse2026!',
+  password: demoPassword,
   clientName: 'Demo Client',
   organization: 'Efficiency Architects Demo',
   proposalId: 'PROP-DEMO-PULSE',

@@ -48,10 +48,8 @@ assert(demoId.includes('website_portal_starter'), 'demo uses Website + Portal of
 assert(demo.includes('ensureCtpWorkspaceForWebsitePortal'), 'demo seeds CTP submission');
 assert(!demoId.includes("Package Purchased': 'Simplifi'"), 'demo is not Simplifi');
 assert(
-  !demoId.includes("from 'next/headers'") &&
-    !demoId.includes('from "next/headers"') &&
-    !demoId.includes('@/lib/modules/portal-modules'),
-  'demo identity stays client-safe (no portal-modules / next/headers)',
+  demoId.includes("import 'server-only'") && !demoId.includes('DemoWebsite2026!'),
+  'demo credential identity stays server-only with no hardcoded fallback password',
 );
 
 const enter = read('app/api/auth/demo-website-enter/route.ts');

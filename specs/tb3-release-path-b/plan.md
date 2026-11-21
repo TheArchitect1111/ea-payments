@@ -11,17 +11,19 @@
 
 ## Architecture
 
-Keep the committed PayPal/Printful/catalog/cart/webhook/ledger/HQ graph intact. Port the recovery's fail-closed chassis adapter implementations. Correct TB3 host and storefront contracts for actual committed behavior. Replace a historical single-candidate-pinned master-guard test with deterministic temporary-repository fixtures that verify exact-source and manifest-only behavior. Adopt the recovery's production-gate workflow so Preview proof is source-bound and required before promotion.
+Keep the committed PayPal/Printful/catalog/cart/webhook/ledger/HQ graph intact. Port the recovery's fail-closed chassis adapter implementations. Correct TB3 host and storefront contracts for actual committed behavior. Replace a historical single-candidate-pinned master-guard test with deterministic temporary-repository fixtures that verify exact-source and manifest-only behavior. Adopt the recovery's production-gate workflow so Preview proof is source-bound and required before promotion. Keep demo credentials and data access server-only, scan built client assets, and make the chassis guard's path exceptions work on Windows without relaxing its rule set.
 
 ## Execution sequence
 
 1. Create an isolated local checkout at the exact commerce SHA; leave the original dirty ledger-diagnostic working file untouched.
 2. Compare tenant/auth, provider, checkout, HQ and production gate sources against recovery; retain the commerce versions where behavior already matches.
 3. Make each adapter/test/workflow correction individually and review its diff.
-4. Run focused tests and inspect any failures before changing implementation.
-5. Run relevant TypeScript/build checks offline; record pre-existing or environment failures accurately.
-6. Review the complete diff, parent SHA, catalog counts/prices/status, provider imports and disabled checkout before the local commit.
-7. Save certification evidence bound to the resulting commit SHA.
+4. Remove known fallback passwords from browser-reachable modules and enforce server-only data boundaries; scan production client assets for known credential literals and server-only credential reads.
+5. Normalize the chassis guard's repository paths and test both bypass detection and canonical Windows exclusions.
+6. Run focused tests and inspect any failures before changing implementation.
+7. Run relevant TypeScript/build checks offline; record pre-existing or unrelated failures accurately.
+8. Review the complete diff, parent SHA, catalog counts/prices/status, provider imports and disabled checkout before the local commit.
+9. Save SHA-bound certification evidence and the exact-source Preview package.
 
 ## Risk and rollback
 

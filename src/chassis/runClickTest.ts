@@ -1,6 +1,6 @@
 import { createStagingAdapters } from './adapters/staging.adapter';
 import { clickTest } from './clickTest';
-import type { Brick, BrickHealth } from './BrickInterface';
+import type { Brick, BrickId } from './BrickInterface';
 import type { CatalogSource } from './adapters/catalog.adapter';
 import { authAdapter } from './adapters/auth.adapter';
 import { lmsAdapter } from './adapters/lms.adapter';
@@ -24,17 +24,29 @@ export interface ClientConfig {
   janeUrl: string;
   janeApiKey?: string;
 }
+/**
+ * Provider adapters keep their legacy method-specific types. Attach the stable
+ * chassis identity at this boundary; clickTest performs runtime checks for
+ * health, pricing, checkout, delivery, and recorded integration evidence.
+ */
+function identifyAdapter(id: BrickId, adapter: object): Brick {
+  return { ...adapter, id } as unknown as Brick;
+}
 export async function runClickTest(clientConfig: ClientConfig, mode: 'live' | 'contract' = 'live') {
   if (!clientConfig.id || !/^[a-z0-9-]+$/.test(clientConfig.id)) throw Error('Valid client ID required');
   const courseId = Object.keys(clientConfig.prices)[0];
   if (!courseId || !Number.isSafeInteger(clientConfig.prices[courseId]) ||
       clientConfig.prices[courseId] <= 0) throw Error('Positive client price contract required');
   const bricks: Brick[] = [
-    authAdapter, lmsAdapter, createBillingAdapter(clientConfig.prices),
-    createCatalogAdapter(clientConfig.catalogSource), menuAdapter,
-    checkoutAdapter, welcomeAdapter, emailAdapter, entitlementAdapter,
-    createJaneAdapter(clientConfig), amazonAdapter, previewAdapter,
-    productionGateAdapter, chassisCertAdapter,
+    identifyAdapter('auth', authAdapter), identifyAdapter('lms', lmsAdapter),
+    createBillingAdapter(clientConfig.prices), createCatalogAdapter(clientConfig.catalogSource),
+    identifyAdapter('menu', menuAdapter), identifyAdapter('checkout', checkoutAdapter),
+    identifyAdapter('welcome', welcomeAdapter), identifyAdapter('email', emailAdapter),
+    identifyAdapter('entitlement', entitlementAdapter),
+    identifyAdapter('jane', createJaneAdapter(clientConfig)),
+    identifyAdapter('amazon', amazonAdapter), identifyAdapter('preview', previewAdapter),
+    identifyAdapter('production-gate', productionGateAdapter),
+    identifyAdapter('chassis-cert', chassisCertAdapter),
   ];
   const checkedBricks = mode === 'contract' ? await createStagingAdapters(clientConfig, bricks) : bricks;
   const result = await clickTest(checkedBricks, courseId, 'stripe-test');

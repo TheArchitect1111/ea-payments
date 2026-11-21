@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
-import { loadOrbWorkspaceSlice } from '@/lib/orb';
+import { loadOrbWorkspaceSlice } from '@/lib/orb/load-context';
 import SimplifiProductShell from '../components/SimplifiProductShell';
 import AskClient from './AskClient';
 import '../workspace/simplifi-workspace.css';

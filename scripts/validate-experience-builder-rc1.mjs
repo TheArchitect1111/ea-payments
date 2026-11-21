@@ -4,8 +4,12 @@
  */
 const BASE = process.argv[2] || 'http://localhost:3456';
 const EMAIL = process.env.DEMO_CLIENT_EMAIL || 'demo@efficiencyarchitects.online';
-const PASSWORD = process.env.DEMO_CLIENT_PASSWORD || 'DemoPulse2026!';
+const PASSWORD = process.env.DEMO_CLIENT_PASSWORD?.trim();
 const SLUG = 'demo-client';
+if (!PASSWORD) {
+  console.error('BLOCKED: set DEMO_CLIENT_PASSWORD privately before running the RC1 validation.');
+  process.exit(1);
+}
 
 function parseCookies(res) {
   const jar = new Map();

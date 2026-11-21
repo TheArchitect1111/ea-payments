@@ -47,6 +47,8 @@ Retain the existing PayPal, Printful, catalog, cart, checkout, webhook, ledger a
 5. Release contracts verify source SHA identity, required Preview evidence, manifest-only production promotion, and rejection of unrelated work-branch deployments without hard-coding one historical candidate commit.
 6. Relevant offline tests and type checks pass; no tests contact PayPal, Printful, or databases.
 7. Corrective commit is a direct descendant of the exact commerce source SHA and evidence records the exact final SHA and each gate result.
+8. Production browser assets contain neither known demo fallback passwords nor executable references to server-only credential environment variables; server data modules enforce the Next.js server-only boundary.
+9. The chassis source guard normalizes Windows paths before applying its existing canonical registrar and transport endpoint exclusions, while its self-test still rejects direct tracking bypasses.
 
 ## Verification plan
 

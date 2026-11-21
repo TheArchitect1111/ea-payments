@@ -53,6 +53,8 @@ jobs:
           echo 'Staging contracts passed; no live provider calls were made.'
       - name: Staging build
         run: npm run build
+      - name: Client secret literal gate
+        run: npm run check:client-secret-literals
       - uses: actions/upload-artifact@v4
         with:
           name: ea-staging-contract-evidence
@@ -117,6 +119,9 @@ jobs:
         env:
           VERCEL_ENV: preview
         run: npm run build
+
+      - name: Client secret literal gate
+        run: npm run check:client-secret-literals
 
       - name: TB3 host routing regression gate
         run: node scripts/test-tb3-host-routing.mjs

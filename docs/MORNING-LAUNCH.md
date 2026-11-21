@@ -1,7 +1,7 @@
 # Morning Launch Checklist
 
 **Canonical URL:** https://www.efficiencyarchitects.online  
-**Demo login:** demo@efficiencyarchitects.online / DemoPulse2026!
+**Demo login:** demo@efficiencyarchitects.online / configure `DEMO_CLIENT_PASSWORD` privately.
 
 Code is deployed. These steps need your hands in Airtable, Vercel, and DNS.
 

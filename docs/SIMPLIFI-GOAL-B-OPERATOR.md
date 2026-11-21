@@ -12,7 +12,7 @@ Product code for Pass 2–4 is on `master`.
 2. **Sign in (for history):**  
    - One-click: https://efficiencyarchitects.online/api/auth/demo-enter?next=/simplifi/workspace  
    - Or https://efficiencyarchitects.online/portal/login → **Sign in with password instead**  
-     Email: `demo@efficiencyarchitects.online` / Password: `DemoPulse2026!`  
+     Email: `demo@efficiencyarchitects.online` / Password: configure `DEMO_CLIENT_PASSWORD` privately
    - Or https://efficiencyarchitects.online/simplifi/login → magic link on the phone
 3. From Brief, tap **Capture** → paste a business URL (or upload a JPEG — not HEIC).
 4. **Install on phone:** Share → **Add to Home Screen**.  
@@ -79,5 +79,5 @@ node scripts/test-simplifi-goal-b-pass4.mjs
 
 ## Demo credentials
 
-`demo@efficiencyarchitects.online` / `DemoPulse2026!`  
+`demo@efficiencyarchitects.online` / configure `DEMO_CLIENT_PASSWORD` privately
 (Password works on **portal** login; Simplifi login is magic-link only.)

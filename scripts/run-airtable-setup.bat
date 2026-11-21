@@ -75,7 +75,7 @@ echo   DONE
 echo ============================================
 echo Demo login: https://ea-payments.vercel.app/portal/login
 echo Email: demo@efficiencyarchitects.online
-echo Password: DemoPulse2026!
+echo Configure DEMO_CLIENT_PASSWORD privately; do not put it in this script.
 echo Simplifi: https://ea-payments.vercel.app/portal/demo-client/simplifi
 echo.
 echo Magnifi demo URL was printed above by the seed script.

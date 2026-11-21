@@ -1,3 +1,5 @@
+import 'server-only';
+
 import crypto from 'crypto';
 import type { CtpAssetManifest } from '@/lib/ctp-asset-store';
 import type { CtpClientType, CtpClientTypeClassification } from '@/lib/ctp-client-type';

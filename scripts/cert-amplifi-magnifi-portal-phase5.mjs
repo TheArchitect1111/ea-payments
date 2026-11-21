@@ -16,6 +16,11 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
 const BASE = (process.argv[2] || 'https://efficiencyarchitects.online').replace(/\/$/, '');
 const OUT = join(root, 'docs/audits/AMPLIFI-MAGNIFI-PORTAL-PHASE5-CERT.json');
+const demoWebsitePassword = process.env.DEMO_WEBSITE_PORTAL_PASSWORD?.trim();
+if (!demoWebsitePassword) {
+  console.error('BLOCKED: set DEMO_WEBSITE_PORTAL_PASSWORD privately before running the production portal certification.');
+  process.exit(1);
+}
 
 const results = [];
 function record(id, step, ok, extra = {}) {
@@ -217,7 +222,7 @@ async function main() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       email: process.env.DEMO_WEBSITE_PORTAL_EMAIL || 'demo-website@efficiencyarchitects.online',
-      password: process.env.DEMO_WEBSITE_PORTAL_PASSWORD || 'DemoWebsite2026!',
+      password: demoWebsitePassword,
     }),
   });
   const webBody = await webLogin.json().catch(() => ({}));

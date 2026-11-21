@@ -5,7 +5,7 @@
  * Existing business-domain persistence is allowed; tracking persistence is not.
  */
 import { readFileSync,readdirSync,statSync } from 'node:fs';
-import { join,relative } from 'node:path';
+import { join } from 'node:path';
 const root=process.cwd();
 const inputs=['app/api','app/tarris','lib/tb3','lib/amanda-catherine','lib/bricks','lib/services','lib/clients'];
 const exclude=new Set(['lib/services/trackingPortal.ts','lib/services/brickRegistrar.ts']);
@@ -14,12 +14,18 @@ const exceptions=new Set([
   // It is not a brick; routing it back into the registrar causes a recursion loop.
   'app/api/v1/leads/ingest/route.ts',
 ]);
+function shouldScan(path){
+ const policyPath=path.replaceAll('\\','/');
+ return /\.(ts|tsx|js|mjs)$/.test(policyPath)&&!exclude.has(policyPath)&&!exceptions.has(policyPath);
+}
 function candidates(dir){
  let out=[];
  for(const entry of readdirSync(join(root,dir),{withFileTypes:true})){
   const path=join(dir,entry.name);
   if(entry.isDirectory())out.push(...candidates(path));
-  else if(/\.(ts|tsx|js|mjs)$/.test(path)&&!exclude.has(path)&&!exceptions.has(path))out.push(path);
+  else {
+    if(shouldScan(path))out.push(path);
+  }
  }
  return out;
 }
@@ -34,6 +40,8 @@ export function violations(path,source){
  return results.map(reason=>path+': '+reason);
 }
 if(process.argv.includes('--self-test')){
+ if(shouldScan('lib\\services\\trackingPortal.ts')||shouldScan('lib\\services\\brickRegistrar.ts')||shouldScan('app\\api\\v1\\leads\\ingest\\route.ts'))
+  throw Error('Windows path normalization bypassed a canonical implementation or transport exception');
  const sample='import { pushToTrackingPortal } from "@/lib/services/trackingPortal"; pushToTrackingPortal(x)';
  const bad=violations('client/new-brick.ts',sample);
  if(bad.length===0)throw Error('Guard failed to reject direct tracking');

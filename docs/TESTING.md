@@ -30,7 +30,7 @@ Send **one link:** https://ea-payments.vercel.app
 |-------|-------|
 | Login | https://ea-payments.vercel.app/portal/login |
 | Email | `demo@efficiencyarchitects.online` |
-| Password | `DemoPulse2026!` |
+| Password | Configure `DEMO_CLIENT_PASSWORD` privately |
 
 Friends can paste any public URL on **Simplifi** → get Magnifi + Guidance links to share back.
 
@@ -48,7 +48,7 @@ Friends can paste any public URL on **Simplifi** → get Magnifi + Guidance link
 
 | Email | `demo@efficiencyarchitects.online` |
 
-| Password | `DemoPulse2026!` |
+| Password | Configure `DEMO_CLIENT_PASSWORD` privately |
 
 **First-time setup (once):** double-click `scripts/run-airtable-setup.bat`, paste Airtable token. Creates Capture Records, demo client, and prints a **Magnifi demo URL**.
 

@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { getClientByPortalSlug } from '@/lib/airtable';
 import { loadSimplifiWorkspace } from '@/lib/simplifi-core';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';

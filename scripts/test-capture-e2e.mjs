@@ -4,7 +4,11 @@
  */
 const BASE = process.argv[2] || 'https://ea-payments.vercel.app';
 const EMAIL = 'demo@efficiencyarchitects.online';
-const PASSWORD = 'DemoPulse2026!';
+const PASSWORD = process.env.DEMO_CLIENT_PASSWORD?.trim();
+if (!PASSWORD) {
+  console.error('BLOCKED: set DEMO_CLIENT_PASSWORD privately before running the production E2E smoke test.');
+  process.exit(1);
+}
 
 function parseCookies(res) {
   const jar = new Map();

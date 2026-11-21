@@ -8,11 +8,15 @@
  */
 import { fetchLaunchHealthDiagnostic, loadDotEnvLocal } from './lib/admin-bearer.mjs';
 
-const BASE = (process.argv[2] || 'https://ea-payments.vercel.app').replace(/\/$/, '');
-const SIMPLIFI_APP = process.env.SIMPLIFI_APP_URL || 'https://app.efficiencyarchitects.online';
-const EMAIL = process.env.DEMO_CLIENT_EMAIL || 'demo@efficiencyarchitects.online';
-const PASSWORD = process.env.DEMO_CLIENT_PASSWORD || 'DemoPulse2026!';
 const env = loadDotEnvLocal();
+const BASE = (process.argv[2] || 'https://ea-payments.vercel.app').replace(/\/$/, '');
+const SIMPLIFI_APP = env.SIMPLIFI_APP_URL || 'https://app.efficiencyarchitects.online';
+const EMAIL = env.DEMO_CLIENT_EMAIL || 'demo@efficiencyarchitects.online';
+const PASSWORD = env.DEMO_CLIENT_PASSWORD?.trim();
+if (!PASSWORD) {
+  console.error('BLOCKED: set DEMO_CLIENT_PASSWORD privately before running launch readiness validation.');
+  process.exit(1);
+}
 
 const results = [];
 function record(step, ok, extra = {}) {

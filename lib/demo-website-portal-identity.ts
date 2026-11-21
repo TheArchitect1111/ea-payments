@@ -1,7 +1,6 @@
-/**
- * Website + Portal demo identity only — safe for import from shared libs.
- * Keep free of next/headers and portal-modules.
- */
+/** Website + Portal demo identity and login credentials; server-only data. */
+import 'server-only';
+
 import type { PortalClientRecord } from '@/lib/airtable';
 
 export const DEMO_WEBSITE_PORTAL = {
@@ -9,7 +8,8 @@ export const DEMO_WEBSITE_PORTAL = {
   email: (
     process.env.DEMO_WEBSITE_PORTAL_EMAIL ?? 'demo-website@efficiencyarchitects.online'
   ).toLowerCase(),
-  password: process.env.DEMO_WEBSITE_PORTAL_PASSWORD ?? 'DemoWebsite2026!',
+  // Do not expose a known fallback portal password in client bundles.
+  password: process.env.DEMO_WEBSITE_PORTAL_PASSWORD ?? '',
   clientName: 'Demo Website Client',
   organization: 'EA Website + Portal Demo',
   commerceOfferId: 'website_portal_starter',

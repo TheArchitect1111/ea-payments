@@ -1,10 +1,14 @@
+import 'server-only';
+
 const BASE_ID = process.env.AIRTABLE_PAYMENTS_BASE_ID ?? 'appv0YoLIMY45fmDA';
 const TABLE = 'Client Records';
 
 const DEMO = {
   slug: 'demo-client',
   email: (process.env.DEMO_CLIENT_EMAIL ?? 'demo@efficiencyarchitects.online').toLowerCase(),
-  password: process.env.DEMO_CLIENT_PASSWORD ?? 'DemoPulse2026!',
+  // Never bundle a known fallback password into browser code. Local/preview
+  // demo access must use an explicitly configured, environment-scoped value.
+  password: process.env.DEMO_CLIENT_PASSWORD ?? '',
   clientName: 'Demo Client',
   organization: 'Efficiency Architects Demo',
 };

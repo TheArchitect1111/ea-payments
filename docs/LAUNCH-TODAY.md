@@ -113,7 +113,7 @@ https://ea-payments.vercel.app/simplifi/capture
 | Field | Value |
 |-------|-------|
 | Email | `demo@efficiencyarchitects.online` |
-| Password | `DemoPulse2026!` |
+| Password | Configure `DEMO_CLIENT_PASSWORD` privately |
 
 ### Add to Home Screen (iPhone / Android)
 
@@ -178,7 +178,7 @@ Test Efficiency Architects (preview):
 
 Simplifi on phone (capture button):
 https://ea-payments.vercel.app/simplifi/capture
-Login: demo@efficiencyarchitects.online / DemoPulse2026!
+Login: demo@efficiencyarchitects.online / configure `DEMO_CLIENT_PASSWORD` privately.
 Add to Home Screen, tap Capture, paste any business URL.
 
 Magnifi demo (no login):

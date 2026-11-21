@@ -18,7 +18,7 @@ SESSION_SECRET=
 
 # Optional — override demo credentials
 DEMO_CLIENT_EMAIL=demo@efficiencyarchitects.online
-DEMO_CLIENT_PASSWORD=DemoPulse2026!
+DEMO_CLIENT_PASSWORD=<configure privately; do not commit>
 ```
 
 Start dev server:

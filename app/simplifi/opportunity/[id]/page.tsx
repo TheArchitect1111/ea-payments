@@ -9,7 +9,7 @@ import { parseBlueprintSummary } from '@/lib/blueprint-summary';
 import { parseOpportunityPayload } from '@/lib/opportunity-experience';
 import { formatDecisionPathLabel } from '@/lib/capture-success-flow';
 import { EA_PLATFORM_URL } from '@/lib/platform-urls';
-import { loadOrbWorkspaceSlice } from '@/lib/orb';
+import { loadOrbWorkspaceSlice } from '@/lib/orb/load-context';
 import { buildEvaluationSummary } from '@/lib/evaluation-summary';
 import SimplifiProductShell from '../../components/SimplifiProductShell';
 import OpportunityActions from './OpportunityActions';

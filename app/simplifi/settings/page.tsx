@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
-import { loadOrbWorkspaceSlice } from '@/lib/orb';
+import { loadOrbWorkspaceSlice } from '@/lib/orb/load-context';
 import { CHROME_FADE_COOKIE, isChromeFadeEnabled } from '@/lib/simplifi/chrome-fade';
 import SimplifiProductShell from '../components/SimplifiProductShell';
 import ChromeFadeToggle from './ChromeFadeToggle';

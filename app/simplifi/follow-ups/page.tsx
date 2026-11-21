@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { EA_PORTAL_COOKIE, verifySession } from '@/lib/ea-portal-auth';
-import { loadOrbWorkspaceSlice } from '@/lib/orb';
+import { loadOrbWorkspaceSlice } from '@/lib/orb/load-context';
 import { buildExpirationAlerts } from '@/lib/smart-expiration';
 import SimplifiProductShell from '../components/SimplifiProductShell';
 import EmptyStateGuide from '@/app/components/guided-first-success/EmptyStateGuide';

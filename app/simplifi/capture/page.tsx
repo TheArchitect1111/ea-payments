@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { verifySession, EA_PORTAL_COOKIE } from '@/lib/ea-portal-auth';
-import { loadOrbWorkspaceSlice } from '@/lib/orb';
+import { loadOrbWorkspaceSlice } from '@/lib/orb/load-context';
 import { parseShareTargetParams } from '@/lib/simplifi/share-intake';
 import SimplifiProductShell from '../components/SimplifiProductShell';
 import SimplifiCaptureApp from './SimplifiCaptureApp';

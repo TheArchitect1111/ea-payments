@@ -18,7 +18,7 @@ Simplifi captures opportunities, runs analysis, builds a Magnifi story (with Dow
 1. Open **https://efficiencyarchitects.online/simplifiorb** (Simplifi Orb → Today's Brief)
 2. Sign in — easiest is the **one-click demo** straight to the Brief:  
    **https://efficiencyarchitects.online/api/auth/demo-enter?next=/simplifi/workspace**  
-   (or `simplifi/login` magic link, or portal login → `demo@efficiencyarchitects.online` / `DemoPulse2026!`)
+   (or `simplifi/login` magic link, or portal login → `demo@efficiencyarchitects.online` / configure `DEMO_CLIENT_PASSWORD` privately)
 3. From Brief, tap **Capture** (or Ask Orb) to save a URL
 4. Share → **Add to Home Screen** — PWA opens Today's Brief
 
@@ -42,7 +42,7 @@ Simplifi is an EA product — use EA hosts only.
 | Portal login | https://efficiencyarchitects.online/portal/login |
 | Simplifi magic-link login | https://efficiencyarchitects.online/simplifi/login |
 | Start | https://efficiencyarchitects.online/start |
-| Demo | `demo@efficiencyarchitects.online` / `DemoPulse2026!` |
+| Demo | `demo@efficiencyarchitects.online` / configure `DEMO_CLIENT_PASSWORD` privately |
 
 ---
 
