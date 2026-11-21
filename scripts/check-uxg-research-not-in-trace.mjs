@@ -8,7 +8,10 @@ import path from 'node:path';
 const ROOT = process.cwd();
 const FORBIDDEN = [
   /services[\\/]+uxg-research-worker/i,
-  /crawl4ai/i,
+  // The crawl4ai-provider.ts file is a small authenticated HTTP client for the
+  // external worker, not the Python/Crawl4AI runtime. Match the actual bundled
+  // package path so this guard does not reject the safe API adapter itself.
+  /node_modules[\\/]+crawl4ai(?:[\\/]|$)/i,
   /playwright-core/i,
   /[\\/]chromium[\\/]/i,
   /puppeteer/i,

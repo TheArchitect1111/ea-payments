@@ -1,11 +1,16 @@
-import { readFileSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
-const workflow = readFileSync('.github/workflows/ea-master-guard.yml', 'utf8');
-const promotionVerifier = readFileSync('scripts/verify-master-promotion.mjs', 'utf8');
-const vercelIgnore = readFileSync('scripts/vercel-ignore-work-branches.mjs', 'utf8');
-const productionVerifier = readFileSync('scripts/verify-production-gate.mjs', 'utf8');
+const root = process.cwd();
+const read = file => readFileSync(path.join(root, file), 'utf8');
+const workflow = read('.github/workflows/ea-master-guard.yml');
+const productionWorkflow = read('.github/workflows/ea-production-gate.yml');
+const promotionVerifier = read('scripts/verify-master-promotion.mjs');
+const vercelIgnore = read('scripts/vercel-ignore-work-branches.mjs');
+const productionVerifier = read('scripts/verify-production-gate.mjs');
 
 for (const needle of [
   'branches: [master]',
@@ -15,88 +20,99 @@ for (const needle of [
   'git push origin HEAD:master',
   'commits/$SHA/pulls',
   'EA-GATED',
-]) {
-  assert(workflow.includes(needle), `master guard workflow missing: ${needle}`);
+]) assert(workflow.includes(needle), `master guard workflow missing: ${needle}`);
+
+assert(productionWorkflow.includes('node scripts/ea-preview-gate.mjs'), 'Production gate must certify the current-source Preview');
+assert(productionWorkflow.includes("preview.status !== 'PASS' || preview.sourceCommit !== sha"), 'Production gate must reject failed or stale Preview evidence');
+for (const gate of ['sourceIdentity', 'build', 'assets', 'functional', 'desktopVisual', 'mobileVisual', 'creativeCritic']) {
+  assert(productionWorkflow.includes(gate), `Production gate is missing required proof: ${gate}`);
+}
+assert(productionWorkflow.includes("test \"$CHANGED\" = '.ea/gates/latest.json'"), 'Production promotion must contain only the manifest');
+for (const verifier of [promotionVerifier, productionVerifier]) {
+  assert(verifier.includes('manifest.sourceCommit !== parentSha'), 'promotion must bind evidence to the exact source parent');
+  assert(verifier.includes("changedFiles[0] !== '.ea/gates/latest.json'") || verifier.includes('changedFiles.filter((file) => !allowed.has(file))'), 'promotion must reject unrelated changed files');
+  assert(verifier.includes("manifest.status !== 'PASS'"), 'promotion must fail closed on non-PASS evidence');
+}
+assert(productionVerifier.includes('currentSha !== execFileSync'), 'Vercel source SHA must match the checked-out promotion commit');
+assert(vercelIgnore.includes("branch === 'master' && target === 'production'"), 'Production branch must run the gate');
+assert(vercelIgnore.includes("branch.startsWith('work/')"), 'work branches must remain blocked without an exact approval exception');
+
+function run(command, args, cwd, env = {}) {
+  return spawnSync(command, args, { cwd, encoding: 'utf8', env: { ...process.env, ...env }, shell: false });
+}
+function git(cwd, args) {
+  const result = run('git', args, cwd);
+  assert.equal(result.status, 0, `git ${args.join(' ')} failed: ${result.stderr || result.stdout}`);
+  return result.stdout.trim();
+}
+function makeGateFixture(extraPromotionFile = false) {
+  const cwd = mkdtempSync(path.join(os.tmpdir(), 'tb3-release-gate-'));
+  mkdirSync(path.join(cwd, 'scripts'), { recursive: true });
+  copyFileSync(path.join(root, 'scripts/verify-production-gate.mjs'), path.join(cwd, 'scripts/verify-production-gate.mjs'));
+  copyFileSync(path.join(root, 'scripts/verify-master-promotion.mjs'), path.join(cwd, 'scripts/verify-master-promotion.mjs'));
+  copyFileSync(path.join(root, 'scripts/vercel-ignore-work-branches.mjs'), path.join(cwd, 'scripts/vercel-ignore-work-branches.mjs'));
+  git(cwd, ['-c', 'init.defaultBranch=main', 'init']);
+  git(cwd, ['config', 'user.name', 'TB3 local gate test']);
+  git(cwd, ['config', 'user.email', 'tb3-gate-test@example.invalid']);
+  writeFileSync(path.join(cwd, 'source.txt'), 'source fixture\n');
+  git(cwd, ['add', 'source.txt']);
+  git(cwd, ['commit', '-m', 'source fixture']);
+  const sourceSha = git(cwd, ['rev-parse', 'HEAD']);
+  const gates = Object.fromEntries(['sourceIdentity', 'build', 'assets', 'functional', 'desktopVisual', 'mobileVisual', 'creativeCritic'].map(name => [name, { status: 'PASS', proof: `fixture:${name}` }]));
+  const manifest = { sourceCommit: sourceSha, previewUrl: 'https://preview.example.invalid', status: 'PASS', completedAt: '2026-11-20T00:00:00.000Z', gates };
+  mkdirSync(path.join(cwd, '.ea', 'gates'), { recursive: true });
+  writeFileSync(path.join(cwd, '.ea', 'gates/latest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+  if (extraPromotionFile) writeFileSync(path.join(cwd, 'unrelated.txt'), 'must block promotion\n');
+  git(cwd, ['add', '.ea/gates/latest.json', ...(extraPromotionFile ? ['unrelated.txt'] : [])]);
+  git(cwd, ['commit', '-m', 'manifest-only promotion fixture']);
+  return { cwd, sourceSha, promotionSha: git(cwd, ['rev-parse', 'HEAD']), manifest };
 }
 
-for (const needle of [
-  "manifest.sourceCommit !== parentSha",
-  ".ea/gates/latest.json",
-  "manifest.status !== 'PASS'",
-]) {
-  assert(promotionVerifier.includes(needle), `promotion verifier missing: ${needle}`);
-}
+const fixture = makeGateFixture();
+const env = { VERCEL_GIT_COMMIT_SHA: fixture.promotionSha };
+try {
+  for (const script of ['scripts/verify-production-gate.mjs', 'scripts/verify-master-promotion.mjs']) {
+    const pass = run(process.execPath, [path.join(fixture.cwd, script)], fixture.cwd, env);
+    assert.equal(pass.status, 0, `${script} should accept an exact-source manifest-only promotion: ${pass.stderr || pass.stdout}`);
+    const sourceShaDrift = run(process.execPath, [path.join(fixture.cwd, script)], fixture.cwd, { ...env, VERCEL_GIT_COMMIT_SHA: '0'.repeat(40) });
+    if (script.endsWith('verify-production-gate.mjs')) {
+      assert.notEqual(sourceShaDrift.status, 0, 'Production gate must reject a Vercel/source SHA mismatch');
+      assert.match(sourceShaDrift.stderr, /does not match checked-out HEAD/);
+    }
+    const badManifest = { ...fixture.manifest, sourceCommit: 'f'.repeat(40) };
+    writeFileSync(path.join(fixture.cwd, '.ea/gates/latest.json'), `${JSON.stringify(badManifest, null, 2)}\n`);
+    const stale = run(process.execPath, [path.join(fixture.cwd, script)], fixture.cwd, env);
+    assert.notEqual(stale.status, 0, `${script} must reject a stale source manifest`);
+    assert.match(stale.stderr, /does not match (?:production )?parent/);
+    writeFileSync(path.join(fixture.cwd, '.ea/gates/latest.json'), `${JSON.stringify(fixture.manifest, null, 2)}\n`);
+  }
 
-assert(vercelIgnore.includes("branch === 'master' && target === 'production'"), 'Vercel production master gate missing');
-assert(vercelIgnore.includes('verify-production-gate.mjs'), 'Vercel production gate verifier missing');
-assert(vercelIgnore.includes('isApprovedTb3SandboxCheckoutPreviewRevision'), 'TB3 Sandbox checkout Preview exception missing');
-assert(vercelIgnore.includes('isApprovedTb3NoPayeeDiagnosticPreviewRevision'), 'TB3 no-payee diagnostic Preview exception missing');
-assert(productionVerifier.includes("changedFiles.filter((file) => !allowed.has(file))"), 'production gate must reject non-manifest files');
+  const releasePreview = run(process.execPath, ['scripts/vercel-ignore-work-branches.mjs'], fixture.cwd, {
+    VERCEL_GIT_COMMIT_REF: 'release/tb3-path-b-candidate', VERCEL_GIT_COMMIT_SHA: fixture.promotionSha, VERCEL_TARGET_ENV: 'preview', VERCEL_ENV: 'preview',
+  });
+  assert.equal(releasePreview.status, 1, 'release Preview remains available for certification');
+  const unauthorizedWorkPreview = run(process.execPath, ['scripts/vercel-ignore-work-branches.mjs'], fixture.cwd, {
+    VERCEL_GIT_COMMIT_REF: 'work/unapproved-tb3-candidate', VERCEL_GIT_COMMIT_SHA: fixture.promotionSha, VERCEL_TARGET_ENV: 'preview', VERCEL_ENV: 'preview',
+  });
+  assert.equal(unauthorizedWorkPreview.status, 0, 'unapproved work Preview stays blocked');
+  const productionPass = run(process.execPath, ['scripts/vercel-ignore-work-branches.mjs'], fixture.cwd, {
+    VERCEL_GIT_COMMIT_REF: 'master', VERCEL_GIT_COMMIT_SHA: fixture.promotionSha, VERCEL_TARGET_ENV: 'production', VERCEL_ENV: 'production',
+  });
+  assert.equal(productionPass.status, 1, 'master Production is allowed only with passing exact-source evidence');
 
-const runIgnoreGuard = (branch, commit, target, vercelEnv = '') => spawnSync(
-  process.execPath,
-  ['scripts/vercel-ignore-work-branches.mjs'],
-  {
-    cwd: process.cwd(),
-    encoding: 'utf8',
-    env: {
-      ...process.env,
-      VERCEL_GIT_COMMIT_REF: branch,
-      VERCEL_GIT_COMMIT_SHA: commit,
-      VERCEL_TARGET_ENV: target,
-      VERCEL_ENV: vercelEnv,
-    },
-  },
-);
+  const bad = makeGateFixture(true);
+  try {
+    const result = run(process.execPath, [path.join(bad.cwd, 'scripts/verify-production-gate.mjs')], bad.cwd, { VERCEL_GIT_COMMIT_SHA: bad.promotionSha });
+    assert.notEqual(result.status, 0, 'Production gate must reject promotion commits containing unrelated files');
+    assert.match(result.stderr, /changed non-gate files|promotion commit must change only/);
+  } finally { rmSync(bad.cwd, { recursive: true, force: true }); }
 
-const finalShaResult = spawnSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' });
-assert.equal(finalShaResult.status, 0, 'final candidate commit must be available locally');
-const finalSha = finalShaResult.stdout.trim();
-const parentShaResult = spawnSync('git', ['rev-parse', `${finalSha}^`], { encoding: 'utf8' });
-assert.equal(parentShaResult.status, 0, 'final candidate must have a parent');
-assert.equal(parentShaResult.stdout.trim(), 'f6573d85dccc6668f2be138f14a5f449d5effaf9', 'No-payee diagnostic deployment guard must be the direct child of its verified Preview deployment');
-const changedFilesResult = spawnSync('git', ['diff-tree', '--no-commit-id', '--name-only', '-r', finalSha], { encoding: 'utf8' });
-assert.equal(changedFilesResult.status, 0, 'final candidate change list must be available');
-assert.deepEqual(
-  changedFilesResult.stdout.trim().split(/\r?\n/).filter(Boolean).sort(),
-  [
-    'app/api/tb3/paypal/sandbox-payee-diagnostic/route.ts',
-    'lib/tb3/paypal-http.ts',
-    'lib/tb3/paypal-routes.ts',
-    'lib/tb3/paypal-runtime.ts',
-    'lib/tb3/paypal-sandbox-payee-diagnostic.ts',
-    'scripts/tb3-paypal-typecheck.mjs',
-    'scripts/test-master-guard-contract.mjs',
-    'scripts/vercel-ignore-work-branches.mjs',
-    'specs/tb3-commerce-hq/spec.md',
-    'tests/tb3-paypal-sandbox-certification.test.mts',
-  ],
-  'final candidate may contain only the exact TB3 no-payee Preview diagnostic, regression tests, specification, and guard exception',
-);
+  writeFileSync(path.join(fixture.cwd, '.ea/gates/latest.json'), `${JSON.stringify({ ...fixture.manifest, sourceCommit: 'f'.repeat(40) }, null, 2)}\n`);
+  const productionBlocked = run(process.execPath, ['scripts/vercel-ignore-work-branches.mjs'], fixture.cwd, {
+    VERCEL_GIT_COMMIT_REF: 'master', VERCEL_GIT_COMMIT_SHA: fixture.promotionSha, VERCEL_TARGET_ENV: 'production', VERCEL_ENV: 'production',
+  });
+  assert.equal(productionBlocked.status, 0, 'master Production must be skipped when source proof is stale');
+  assert.match(productionBlocked.stdout, /blocked by mandatory gate/);
+} finally { rmSync(fixture.cwd, { recursive: true, force: true }); }
 
-const tb3Preview = runIgnoreGuard('work/tb3-commerce-hq-20261109', finalSha, 'preview');
-assert.equal(tb3Preview.status, 1, 'the exact final TB3 policy revision must continue to Preview build');
-assert.match(tb3Preview.stdout, /Vercel deployment allowed for branch: work\/tb3-commerce-hq-20261109 target: preview/);
-
-const tb3PreviewFallback = runIgnoreGuard('work/tb3-commerce-hq-20261109', finalSha, '', 'preview');
-assert.equal(tb3PreviewFallback.status, 1, 'standard VERCEL_ENV preview fallback must allow this branch');
-
-for (const [branch, commit, target, vercelEnv] of [
-  ['work/another-branch', finalSha, 'preview', ''],
-  ['work/tb3-commerce-hq-20261107', finalSha, 'preview', ''],
-  ['work/tb3-commerce-hq-20261109', finalSha, 'production', ''],
-  ['work/tb3-commerce-hq-20261109', finalSha, 'production', 'preview'],
-  ['work/tb3-commerce-hq-20261109', finalSha, '', 'development'],
-  ['work/tb3-commerce-hq-20261109', '5720a3f1c8cf722d50a7d174e4976424db03118a', 'preview', ''],
-  ['work/tb3-commerce-hq-20261109', finalSha, 'production', ''],
-  ['work/tb3-commerce-hq-20261109', '1111111111111111111111111111111111111111', 'preview', ''],
-]) {
-  const blocked = runIgnoreGuard(branch, commit, target, vercelEnv);
-  assert.equal(blocked.status, 0, `work branch must remain ignored: ${branch} (${target || vercelEnv})`);
-  assert.match(blocked.stdout, /Ignoring Vercel deployment for local-only branch/);
-}
-
-const otherBranch = runIgnoreGuard('feature/ordinary-preview', '1111111111111111111111111111111111111111', 'preview');
-assert.equal(otherBranch.status, 1, 'non-work preview branch behavior must remain unchanged');
-
-console.log('EA compensating master guard contract passed.');
+console.log('PASS: master protection, exact-source Preview proof, manifest-only promotion, and fail-closed work/Production routing contracts');

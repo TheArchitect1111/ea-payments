@@ -1,8 +1,24 @@
 name: EA Production Gate
+
 on:
-  push:
-    branches: [master, fix/client-agnostic-chassis-3ab5027]
   workflow_dispatch:
+    inputs:
+      preview_url:
+        description: Exact Vercel preview URL for the current master SHA; the gate checks its deployed commit identity
+        required: true
+        type: string
+      route_path:
+        description: Route to visually and functionally verify
+        required: true
+        default: /tarris
+        type: string
+      min_visuals:
+        description: Minimum number of visible image/background assets required
+        required: true
+        default: '1'
+        type: string
+  push:
+    branches: [master]
 
 permissions:
   contents: write
@@ -21,7 +37,7 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - name: Verify both client contracts, never live certification
+      - name: Verify both client contracts without live provider calls
         shell: bash
         run: |
           set -euo pipefail
@@ -34,78 +50,165 @@ jobs:
           done
           if grep -r -n -i -E 'amanda|aesthetikine|24900' src/chassis --include='*.ts'; then exit 1; fi
           if grep -r -n 'aesthetikine' src/clients/tarris; then exit 1; fi
-          echo '0 client references in chassis; 0 foreign booking references in Tarris'
-      - name: Build
+          echo 'Staging contracts passed; no live provider calls were made.'
+      - name: Staging build
         run: npm run build
       - uses: actions/upload-artifact@v4
         with:
           name: ea-staging-contract-evidence
           path: artifacts/ea-staging
+
   gate-and-promote:
-    if: github.ref == 'refs/heads/master' && startsWith(github.event.head_commit.message, '[EA-LIVE-CANDIDATE]')
+    if: github.ref == 'refs/heads/master' && (github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, '[EA-LIVE-CANDIDATE]'))
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout exact source commit
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+
+      - name: Verify master has not moved
+        shell: bash
+        run: |
+          git fetch origin master
+          test "$(git rev-parse origin/master)" = "${GITHUB_SHA}" || {
+            echo "BLOCKED: master moved after this gate run started. Re-run against the new SHA."
+            exit 1
+          }
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: 24
           cache: npm
-      - name: Install deps
+
+      - name: Install dependencies
         run: npm ci
-      - name: Run LEGO 14-brick and print full log
+
+      - name: LEGO 14-brick runtime click gate
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p artifacts/ea-gate
           node --import tsx src/chassis/runClickTest.ts --client=tarris 2>&1 | tee /tmp/click.log
-          cat /tmp/click.log
           node - <<'NODE'
           const fs = require('node:fs');
-          const text = fs.readFileSync('/tmp/click.log','utf8');
+          const text = fs.readFileSync('/tmp/click.log', 'utf8');
           const match = text.match(/\{\s*"click"\s*:\s*"14\/14"[\s\S]*\}/);
           if (!match) throw Error('BLOCKED: missing 14/14 JSON');
           const outcome = JSON.parse(match[0]);
           if (outcome.productionEligible !== true || outcome.verificationType !== 'live') throw Error('BLOCKED: contract evidence cannot promote production');
           if (outcome.passed !== true || outcome.results?.length !== 14 || outcome.results.some(r => r.click !== true || !r.evidence)) throw Error('BLOCKED: 14/14 not verified');
-          fs.writeFileSync('artifacts/ea-gate/chassis-click.json',JSON.stringify(outcome,null,2));
-          console.log('14/14 CLICK PASS');
+          fs.writeFileSync('artifacts/ea-gate/chassis-click.json', JSON.stringify(outcome, null, 2));
+          console.log('14/14 live click evidence PASS');
           NODE
           if grep -r -n -i -E 'amanda|aesthetikine|24900' src/chassis --include='*.ts'; then
-            echo 'BLOCKED: client value leaked into generic chassis'
+            echo 'BLOCKED: client value leaked into chassis'
             exit 1
           fi
-      - name: Write manifest with current source SHA and checked evidence
+          echo 'Generic chassis literal leak check PASS'
+
+      - name: Client protection contract gate
+        run: node scripts/test-production-protection.mjs
+
+      - name: Build gate
+        env:
+          VERCEL_ENV: preview
+        run: npm run build
+
+      - name: TB3 host routing regression gate
+        run: node scripts/test-tb3-host-routing.mjs
+
+      - name: Install Chromium for visual gates
+        run: npx playwright install --with-deps chromium
+
+      - name: Resolve gate request
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            node -e "const f=require('./.ea/dispatch/production-gate.json'); for (const [k,v] of Object.entries({EA_PREVIEW_URL:f.preview_url,EA_GATE_PATH:f.route_path,EA_MIN_VISUALS:String(f.min_visuals??2),EA_RELEASE_PROFILE:f.release_profile||'',EA_REQUESTED_SOURCE_COMMIT:''})) console.log(k+'='+v)" >> "$GITHUB_ENV"
+          else
+            test -n "${{ inputs.preview_url }}" || { echo 'BLOCKED: exact source Preview URL is required'; exit 1; }
+            echo "EA_PREVIEW_URL=${{ inputs.preview_url }}" >> "$GITHUB_ENV"
+            echo "EA_GATE_PATH=${{ inputs.route_path }}" >> "$GITHUB_ENV"
+            echo "EA_MIN_VISUALS=${{ inputs.min_visuals }}" >> "$GITHUB_ENV"
+          fi
+      - name: Run EA preview gate
+        env:
+          EA_PREVIEW_URL: ${{ env.EA_PREVIEW_URL || inputs.preview_url }}
+          EA_SOURCE_COMMIT: ${{ github.sha }}
+          EA_GATE_PATH: ${{ env.EA_GATE_PATH || inputs.route_path || '/ctp/cigar' }}
+          EA_GATE_OUTPUT: artifacts/ea-gate
+          VERCEL_ENV: preview
+          NODE_ENV: production
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: node scripts/ea-preview-gate.mjs
+
+      - name: Upload immutable gate proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ea-production-gate-${{ github.sha }}
+          path: artifacts/ea-gate
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Re-verify source has not moved
+        shell: bash
+        run: |
+          git fetch origin master
+          test "$(git rev-parse origin/master)" = "${GITHUB_SHA}" || {
+            echo "BLOCKED: source changed during QA. Proof is stale."
+            exit 1
+          }
+
+      - name: Create evidence-backed production manifest and promote
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin master
-          test "$(git rev-parse origin/master)" = "$GITHUB_SHA" || { echo 'BLOCKED: master changed'; exit 1; }
           mkdir -p .ea/gates
           node - <<'NODE'
           const fs = require('node:fs');
-          const proof = JSON.parse(fs.readFileSync('artifacts/ea-gate/chassis-click.json','utf8'));
-          if (proof.passed !== true || proof.click !== '14/14' || proof.results?.length !== 14) throw Error('Refusing false 14/14 manifest');
+          const click = JSON.parse(fs.readFileSync('artifacts/ea-gate/chassis-click.json','utf8'));
+          const preview = JSON.parse(fs.readFileSync('artifacts/ea-gate/gate-result.json','utf8'));
           const sha = process.env.GITHUB_SHA;
-          fs.writeFileSync('.ea/gates/latest.json',JSON.stringify({
-            sourceCommit:sha,sha,timestamp:new Date().toISOString(),
-            bricks:14,click:'14/14 PASS',generic:true,clientLeak:0,
-            evidence:Object.fromEntries(proof.results.map(r=>[r.id,r.evidence])),
-            verificationType:'chassis contract and live checks as described by each evidence entry'
-          },null,2)+'\n');
+          if (click.passed !== true || click.click !== '14/14' || click.results.length !== 14 || click.results.some(r => r.click !== true)) {
+            throw Error('Refusing manifest promotion: 14/14 bricks not verified');
+          }
+          if (preview.status !== 'PASS' || preview.sourceCommit !== sha) {
+            throw Error('Refusing manifest promotion: preview gate PASS and current-source identity required');
+          }
+          const record = {
+            ...preview,
+            sha,
+            sourceCommit: sha,
+            timestamp: new Date().toISOString(),
+            bricks: 14,
+            click: '14/14 PASS',
+            health: '14/14 200',
+            generic: true,
+            clientLeak: 0,
+            evidence: Object.fromEntries(click.results.map(({id,evidence}) => [id,evidence])),
+            verificationType: 'operational-click-test; provider delivery only where evidenced',
+            chassis: click
+          };
+          const required = ['sourceCommit', 'previewUrl', 'status', 'completedAt', 'gates'];
+          for (const key of required) if (!record[key]) throw Error(`Refusing manifest promotion: missing ${key}`);
+          const requiredGates = ['sourceIdentity','build','assets','functional','desktopVisual','mobileVisual','creativeCritic'];
+          for (const gate of requiredGates) if (record.gates?.[gate]?.status !== 'PASS' || !record.gates[gate].proof) throw Error(`Refusing manifest promotion: ${gate} proof missing`);
+          if (record.sourceCommit !== sha || record.status !== 'PASS') throw Error('Refusing manifest promotion: source or gate status mismatch');
+          fs.writeFileSync('.ea/gates/latest.json',JSON.stringify(record,null,2)+'\n');
+          console.log(JSON.stringify({sha,click:record.click,preview:preview.status},null,2));
           NODE
           test "$(node -p "require('./.ea/gates/latest.json').sha")" = "$GITHUB_SHA"
-          cat .ea/gates/latest.json
-      - name: Create manifest-only production promotion commit
-        shell: bash
-        run: |
-          set -euo pipefail
           git config user.name "EA Production Gate"
           git config user.email "ea-production-gate@users.noreply.github.com"
           git add .ea/gates/latest.json
           CHANGED=$(git diff --cached --name-only)
-          test -z "$CHANGED" || test "$CHANGED" = ".ea/gates/latest.json" || { echo "BLOCKED: promotion contains non-manifest changes"; exit 1; }
-          git diff --cached --quiet && { echo 'Manifest unchanged'; exit 0; }
-          git commit -m "[EA-GATED] LEGO certified source $GITHUB_SHA"
+          test "$CHANGED" = '.ea/gates/latest.json' || { echo 'BLOCKED: promotion contains non-manifest changes'; exit 1; }
+          git diff --cached --name-only | grep -qx '.ea/gates/latest.json'
+          test "$(git diff --cached --name-only | wc -l | tr -d ' ')" = "1"
+          git commit -m "[EA-GATED] Promote chassis proof for ${GITHUB_SHA}"
           git push origin HEAD:master

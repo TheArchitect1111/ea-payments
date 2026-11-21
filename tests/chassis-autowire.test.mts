@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { build } from 'esbuild';
 import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { readFileSync } from 'node:fs';
 import { NextRequest } from 'next/server.js';
 const root = process.cwd();
@@ -15,7 +16,7 @@ const compiled = await build({ stdin: { contents: `export * from './lib/tenant-f
 const { writeFile, unlink } = await import('node:fs/promises');
 const artifact = resolve(root, 'tests/.chassis-autowire-bundle.mjs');
 await writeFile(artifact, compiled.outputFiles[0].text);
-const api = await import(artifact);
+const api = await import(pathToFileURL(artifact).href);
 await unlink(artifact);
 function reset(){db.records.clear();db.entitlements=[];db.writes=[];db.durable=true;db.dropped=false;db.confirmations=0;db.session=null;db.member=true;db.payment=null;}
 const base={portalSlug:'new-academy',clientName:'New Academy',packagePurchased:'Launch Verification',assemblyMode:'certified' as const};

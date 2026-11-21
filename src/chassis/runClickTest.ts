@@ -14,8 +14,8 @@ import { entitlementAdapter } from './adapters/entitlement.adapter';
 import { createJaneAdapter } from './adapters/jane.adapter';
 import { amazonAdapter } from './adapters/amazon.adapter';
 import { previewAdapter } from './adapters/preview.adapter';
-import { productionGateAdapter } from './adapters/production-gate.adapter';
-import { chassisCertAdapter } from './adapters/chassis-cert.adapter';
+import productionGateAdapter from './adapters/production-gate.adapter';
+import chassisCertAdapter from './adapters/chassis-cert.adapter';
 
 export interface ClientConfig {
   id: string;

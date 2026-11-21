@@ -34,31 +34,17 @@ try {
       console.log('Checking ' + host + path);
       const response = await getPage(host, path);
       const html = response.html;
-      if (path === '/hq' && response.status === 307) {
-        assert.ok(response.location, host + path + ' missing redirect location');
-        const target = new URL(response.location, 'https://' + host);
-        assert.equal(target.pathname.replace(/\/$/, ''), '/tarris', host + path + ' redirect target');
-        const redirected = await getPage(host, target.pathname + target.search);
-        assert.equal(redirected.status, 200, host + path + ' redirected page');
-        for (const marker of ['id="public-tarris"', 'MORE THAN', 'ENTER TB3 HQ']) {
-          assert.ok(redirected.html.includes(marker), host + path + ' redirected page missing ' + marker);
-        }
-        continue;
-      }
-      if (path.startsWith('/tarris/future') && response.status === 307) {
+      if ((path === '/hq' || path.startsWith('/tarris/future')) && response.status === 307) {
         assert.ok(response.location, host + path + ' missing private-route redirect');
         const target = new URL(response.location, 'https://' + host);
-        assert.equal(target.pathname.replace(/\/$/, ''), '/tarris', host + path + ' private-route redirect target');
-        assert.equal(target.searchParams.get('hq'), 'private', host + path + ' private-route redirect reason');
+        assert.equal(target.pathname, '/portal/login', host + path + ' login redirect target');
+        assert.equal(target.searchParams.get('next'), '/tarris/future', host + path + ' private-route return path');
+        assert.doesNotMatch(html, /LET&#x27;S GET TO WORK|ACADEMICS/, host + path + ' exposed private content');
         continue;
       }
       assert.equal(response.status, 200, host + path);
       if (path === '/' || path === '/tarris') {
         for (const marker of ['id="public-tarris"', 'MORE THAN', 'ENTER TB3 HQ']) {
-          assert.ok(html.includes(marker), host + path + ' missing ' + marker);
-        }
-      } else if (path === '/hq' || path === '/tarris/future') {
-        for (const marker of ['TB3 HQ', 'LET&#x27;S GET TO WORK', 'ACADEMICS']) {
           assert.ok(html.includes(marker), host + path + ' missing ' + marker);
         }
       }
