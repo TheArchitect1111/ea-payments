@@ -189,6 +189,30 @@ test('a valid endpoint-scoped test credential bypasses HQ login only on the auth
   assert.equal(probeCalls, 1);
 });
 
+test('the isolated TB3 Preview branch retains the same endpoint-scoped authorization', async () => {
+  let providerCalls = 0;
+  const handler = createTb3PrintfulDiagnosticHandler({
+    environment: () => ({ vercel: 'preview', branch: 'codex/tb3-preview-33dd372' }),
+    authorize: async () => { throw new Error('valid diagnostic token should not require HQ login'); },
+    diagnosticTokenSha256: () => testTokenHash,
+    keyAvailable: () => true,
+    readCatalogProduct: async (storeId, productId) => {
+      providerCalls++;
+      assert.equal(storeId, 18945233);
+      return { sync_product: { id: productId } };
+    },
+  });
+  const response = await handler(new Request(request, {
+    headers: { 'x-tb3-printful-diagnostic-token': testToken },
+  }));
+  assert.deepEqual(await responseBody(response), {
+    keyAvailable: true,
+    authentication: 'PASS',
+    storeIdentity: 'VERIFIED',
+  });
+  assert.equal(providerCalls, 1);
+});
+
 test('invalid or unconfigured diagnostic credentials fail closed before key checks and provider access', async (t) => {
   for (const [label, supplied, configured] of [
     ['wrong token', 'b'.repeat(43), testTokenHash],

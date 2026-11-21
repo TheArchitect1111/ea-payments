@@ -1,6 +1,10 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 
 export const TB3_LEDGER_DIAGNOSTIC_BRANCH = "work/tb3-commerce-hq-20261109";
+const TB3_LEDGER_DIAGNOSTIC_BRANCHES = new Set([
+  TB3_LEDGER_DIAGNOSTIC_BRANCH,
+  "codex/tb3-preview-33dd372",
+]);
 export const TB3_LEDGER_DIAGNOSTIC_SANDBOX_PROJECT = "jkoasrnjlehjziynxfrn";
 export const TB3_LEDGER_DIAGNOSTIC_PRODUCTION_PROJECT = "dwygvwnjjaennksddniu";
 
@@ -153,7 +157,7 @@ export function createTb3PayPalLedgerDiagnosticHandler(deps: {
 
   return async function GET(request: Request): Promise<Response> {
     const env = deps.environment();
-    if (env.vercel !== "preview" || env.branch !== TB3_LEDGER_DIAGNOSTIC_BRANCH) {
+    if (env.vercel !== "preview" || !TB3_LEDGER_DIAGNOSTIC_BRANCHES.has(env.branch ?? "")) {
       return json({ status: "FAIL" }, 404);
     }
     const checkoutDisabled = env.checkoutEnabled !== "true";

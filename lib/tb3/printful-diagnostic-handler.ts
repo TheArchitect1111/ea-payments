@@ -1,7 +1,10 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { PrintfulError } from './printful-transport';
 
-const PREVIEW_BRANCH = 'work/tb3-commerce-hq-20261109';
+const PREVIEW_BRANCHES = new Set([
+  'work/tb3-commerce-hq-20261109',
+  'codex/tb3-preview-33dd372',
+]);
 const STORE_ID = 18945233;
 const PROBE_SYNC_PRODUCT_ID = 485112609;
 const DIAGNOSTIC_TOKEN_HEADER = 'x-tb3-printful-diagnostic-token';
@@ -31,7 +34,7 @@ export function createTb3PrintfulDiagnosticHandler(deps: {
 
   return async function GET(request: Request): Promise<Response> {
     const environment = deps.environment();
-    if (environment.vercel !== 'preview' || environment.branch !== PREVIEW_BRANCH) {
+    if (environment.vercel !== 'preview' || !PREVIEW_BRANCHES.has(environment.branch ?? '')) {
       return json({ ok: false, error: 'Not found.' }, 404);
     }
 

@@ -91,6 +91,25 @@ test("production and other branches are rejected before secrets or database acce
   }
 });
 
+test("the isolated TB3 Preview branch retains token and read-only ledger checks", async () => {
+  const f = fixture({ branch: "codex/tb3-preview-33dd372" });
+  const response = await f.handler(request());
+  const result = await response.json();
+  assert.equal(response.status, 200, JSON.stringify(result));
+  assert.equal(result.status, "PASS");
+  assert.equal(result.checks.previewBranch, true);
+  assert.equal(result.checks.sandboxProject, true);
+  assert.equal(result.checks.rlsEnabled, true);
+  assert.equal(result.checks.rlsForced, true);
+  assert.equal(result.checks.tenantPolicy, true);
+  assert.equal(result.checks.restrictedRoleAccess, true);
+  assert.equal(result.checks.checkoutDisabled, true);
+  assert.equal(result.checks.printfulSubmissionDisabled, true);
+  assert.equal(f.calls[1], "BEGIN READ ONLY");
+  assert.equal(f.calls.at(-1), "ROLLBACK");
+  assert.ok(!f.calls.some((sql) => /^\s*(?:INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b/i.test(sql)));
+});
+
 test("unauthorized, checkout-enabled, or Printful-approved calls fail before connecting", async () => {
   let connects = 0;
   const base = {
